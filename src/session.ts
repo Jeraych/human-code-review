@@ -88,7 +88,7 @@ export function createSession(
   const now = new Date().toISOString();
   return {
     schemaVersion: 1,
-    appVersion: '1.0.0',
+    appVersion: '1.1.0',
     mode: 'study',
     sessionId,
     evaluatorId: evaluatorId.trim(),
@@ -132,7 +132,7 @@ export function validateSession(
     object(value) &&
       value.schemaVersion === 1 &&
       value.mode === 'study' &&
-      value.appVersion === '1.0.0',
+      ['1.0.0', '1.1.0'].includes(value.appVersion),
     'Unsupported saved session. Export a backup before making changes.',
   );
   assert(

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
 import VoteForm from './components/VoteForm';
 import {
@@ -12,11 +12,16 @@ import {
 } from './session';
 import { decodeStore, persist, STORAGE_KEY } from './storage';
 import { download, toCSV, toJSON } from './export';
-import type { Assignment, Pair, Pool, Session, Store, Vote } from './types';
-import { poolConfig } from './poolConfig';
-
-const POOL_URL = poolConfig.poolUrl;
-const PLAY_URL = poolConfig.playRevealUrl;
+import type { Choice, Session, Store } from './types';
+import { poolConfigs } from './poolConfig';
+import {
+  countChoice,
+  emptyPlayCounts,
+  sampleRound,
+  type LoadedPool,
+  type PlayCounts,
+  type PlayRound,
+} from './play';
 function initialStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,36 +36,34 @@ function initialStorage() {
 }
 export default function App() {
   const [loaded, setLoaded] = useState(initialStorage);
-  const [pool, setPool] = useState<Pool | null>(null),
-    [poolHash, setPoolHash] = useState('');
+  const [pools, setPools] = useState<Record<string, LoadedPool>>({});
+  const [selectedStudy, setSelectedStudy] = useState(poolConfigs[0].poolId);
   const [view, setView] = useState<'setup' | 'study' | 'play'>(
     loaded.store?.activeSessionId ? 'study' : 'setup',
   );
   const [error, setError] = useState(loaded.error),
     [notice, setNotice] = useState('');
   const [evaluator, setEvaluator] = useState('');
-  const [play, setPlay] = useState<{
-    pair: Pair;
-    assignment: Assignment;
-    vote?: Vote;
-    labels?: Record<string, string>;
-  } | null>(null);
-  const [playCounts, setPlayCounts] = useState({ A: 0, B: 0, tie: 0, both_poor: 0 });
+  const [play, setPlay] = useState<PlayRound | null>(null);
+  const [playFilter, setPlayFilter] = useState('random');
+  const [playCounts, setPlayCounts] = useState<Record<string, PlayCounts>>({});
+  const playLock = useRef<string | null>(null);
   const [revealing, setRevealing] = useState(false);
   useEffect(() => {
     let alive = true;
-    fetch(POOL_URL)
-      .then((r) => {
-        if (!r.ok) throw new Error('Frozen pool could not be loaded.');
-        return r.json();
-      })
-      .then(async (data) => {
+    Promise.all(
+      poolConfigs.map(async (config) => {
+        const response = await fetch(config.poolUrl);
+        if (!response.ok) throw new Error('A frozen pool could not be loaded.');
+        const data = await response.json();
         validatePool(data);
-        const hash = await hashPool(data);
-        if (alive) {
-          setPool(data);
-          setPoolHash(hash);
-        }
+        if (data.poolId !== config.poolId)
+          throw new Error('Pool configuration does not match its asset.');
+        return { config, pool: data, hash: await hashPool(data) };
+      }),
+    )
+      .then((data) => {
+        if (alive) setPools(Object.fromEntries(data.map((p) => [p.pool.poolId, p])));
       })
       .catch((e) => setError(String(e)));
     const changed = (event: StorageEvent) => {
@@ -77,10 +80,22 @@ export default function App() {
   }, []);
   const store = loaded.store;
   const session = store?.sessions.find((s) => s.sessionId === store.activeSessionId);
+  const studyPool = session ? pools[session.poolId] : undefined;
+  const selected = pools[selectedStudy];
+  const displayed =
+    view === 'setup'
+      ? selected
+      : view === 'play' && play
+        ? pools[play.poolId]
+        : (studyPool ?? selected);
+  const pool = displayed?.pool;
+  const poolHash = displayed?.hash ?? '';
   let sessionError = '';
-  if (session && pool) {
+  if (session && Object.keys(pools).length) {
     try {
-      validateSession(session, pool, poolHash);
+      if (!studyPool)
+        throw new Error('Saved study requires a missing frozen pool. Progress is preserved.');
+      validateSession(session, studyPool.pool, studyPool.hash);
     } catch (e) {
       sessionError = String(e);
     }
@@ -101,7 +116,7 @@ export default function App() {
     });
   }
   function startStudy() {
-    if (!pool || !store) return;
+    if (!selected || !store) return;
     if (
       incomplete &&
       !confirm(
@@ -118,7 +133,7 @@ export default function App() {
       )
         return;
       const seed = crypto.getRandomValues(new Uint32Array(1))[0];
-      const next = createSession(pool, poolHash, evaluator, seed);
+      const next = createSession(selected.pool, selected.hash, evaluator, seed);
       next.priorPlayExposure =
         localStorage.getItem('human-code-evaluation.play-exposure') === 'yes';
       save({ ...store, activeSessionId: next.sessionId, sessions: [...store.sessions, next] });
@@ -148,11 +163,13 @@ export default function App() {
     }
   }
   async function importBackup(file: File) {
-    if (!pool || !store) return;
+    if (!store) return;
     try {
       const data = JSON.parse(await file.text());
       const incoming = data.session;
-      validateSession(incoming, pool, poolHash);
+      const assigned = pools[incoming?.poolId];
+      if (!assigned) throw new Error('Backup requires a missing frozen pool.');
+      validateSession(incoming, assigned.pool, assigned.hash);
       const existing = store.sessions.find((s) => s.sessionId === incoming.sessionId);
       if (existing && JSON.stringify(existing) !== JSON.stringify(incoming))
         throw new Error(
@@ -171,8 +188,8 @@ export default function App() {
       setError(String(e));
     }
   }
-  function nextPlay() {
-    if (!pool) return;
+  function nextPlay(filter = playFilter) {
+    if (!Object.keys(pools).length || revealing) return;
     try {
       localStorage.setItem('human-code-evaluation.play-exposure', 'yes');
     } catch (e) {
@@ -180,24 +197,20 @@ export default function App() {
       return;
     }
     const random = rng(crypto.getRandomValues(new Uint32Array(1))[0]);
-    const pair = pool.pairs[Math.floor(random() * pool.pairs.length)],
-      flip = random() < 0.5;
-    setPlay({
-      pair,
-      assignment: {
-        pairId: pair.pairId,
-        aCandidateId: pair.candidates[flip ? 1 : 0].candidateId,
-        bCandidateId: pair.candidates[flip ? 0 : 1].candidateId,
-      },
-    });
+    setPlay(sampleRound(Object.values(pools), filter, random, crypto.randomUUID()));
+    playLock.current = null;
     setNotice('');
   }
-  async function revealVote(vote: Vote) {
-    if (!play || revealing) return;
+  async function revealVote(choice: Choice) {
+    if (!play || playLock.current === play.roundId || (play.choice && play.choice !== choice))
+      return;
+    playLock.current = play.roundId;
+    setPlay({ ...play, choice });
     setRevealing(true);
     setError('');
     try {
-      const response = await fetch(PLAY_URL);
+      const assigned = pools[play.poolId];
+      const response = await fetch(assigned.config.playRevealUrl);
       if (!response.ok) throw new Error('Demo identities are unavailable.');
       const data = await response.json();
       const labels = [
@@ -205,14 +218,24 @@ export default function App() {
         data.labels?.[play.assignment.bCandidateId],
       ];
       if (
-        data.poolHash !== poolHash ||
+        data.poolHash !== assigned.hash ||
         labels.some((label) => typeof label !== 'string' || !label.trim() || label.length > 80)
       )
         throw new Error('Demo identity file does not match the frozen pool.');
-      setPlay({ ...play, vote, labels: data.labels });
-      setPlayCounts((counts) => ({ ...counts, [vote.choice]: counts[vote.choice] + 1 }));
+      setPlay({ ...play, choice, labels: data.labels });
+      setPlayCounts((counts) => ({
+        ...counts,
+        [play.poolId]: countChoice(
+          counts[play.poolId] ?? emptyPlayCounts(),
+          choice,
+          play.assignment,
+          data.labels,
+          assigned.config.referenceLabel,
+        ),
+      }));
     } catch (e) {
       setError(String(e));
+      playLock.current = null;
     } finally {
       setRevealing(false);
     }
@@ -225,7 +248,7 @@ export default function App() {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            setView('setup');
+            if (!revealing) setView('setup');
           }}
         >
           <span className="brand-mark" aria-hidden="true">
@@ -238,12 +261,13 @@ export default function App() {
         <nav aria-label="Application mode">
           <button
             className={view !== 'play' ? 'active' : ''}
+            disabled={revealing}
             onClick={() => setView(session ? 'study' : 'setup')}
           >
             Study
           </button>
           <button
-            disabled={incomplete}
+            disabled={incomplete || revealing || !Object.keys(pools).length}
             title={incomplete ? 'Finish the active study before using Play mode.' : undefined}
             className={view === 'play' ? 'active' : ''}
             onClick={() => {
@@ -296,6 +320,20 @@ export default function App() {
                     startStudy();
                   }}
                 >
+                  <label>
+                    Study condition
+                    <select
+                      aria-label="Study condition"
+                      value={selectedStudy}
+                      onChange={(e) => setSelectedStudy(e.target.value)}
+                    >
+                      {poolConfigs.map((config) => (
+                        <option key={config.poolId} value={config.poolId}>
+                          {config.researcherLabel} Study
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <label>
                     Evaluator ID
                     <input
@@ -369,14 +407,20 @@ export default function App() {
                       <strong>{s.evaluatorId}</strong>
                       <small>
                         {new Date(s.createdAt).toLocaleString()} · {Object.keys(s.responses).length}{' '}
-                        / {s.assignments.length} responses
+                        / {s.assignments.length} responses ·{' '}
+                        {poolConfigs.find((config) => config.poolId === s.poolId)
+                          ?.researcherLabel ?? 'Unavailable pool'}{' '}
+                        Study
                       </small>
                     </div>
                     <div className="actions">
                       <button
                         onClick={() => {
                           try {
-                            validateSession(s, pool, poolHash);
+                            const assigned = pools[s.poolId];
+                            if (!assigned)
+                              throw new Error('Saved study requires a missing frozen pool.');
+                            validateSession(s, assigned.pool, assigned.hash);
                             save({ ...store, activeSessionId: s.sessionId });
                             setView('study');
                           } catch (e) {
@@ -487,51 +531,113 @@ export default function App() {
             <div className="study-top">
               <div>
                 <div className="section-label">PLAY MODE</div>
-                <h1>Make a choice. See the reveal.</h1>
-                <p>Random examples, with identities revealed after voting. Repeats are possible.</p>
+                <h1>Which implementation would you rather work with?</h1>
+                <p>Click a code card to choose. Then compare the reveal at your own pace.</p>
               </div>
               <div className="play-stat">
-                <strong>{Object.values(playCounts).reduce((a, b) => a + b, 0)}</strong>
+                <strong>
+                  {Object.values(playCounts).reduce(
+                    (sum, counts) => sum + Object.values(counts).reduce((a, b) => a + b, 0),
+                    0,
+                  )}
+                </strong>
                 <span>votes this visit</span>
               </div>
             </div>
+            <div className="play-pool-bar">
+              <div className="pool-switch" role="group" aria-label="Play pool">
+                {[{ poolId: 'random', researcherLabel: 'Random' }, ...poolConfigs].map((config) => (
+                  <button
+                    key={config.poolId}
+                    className={playFilter === config.poolId ? 'active' : ''}
+                    disabled={revealing}
+                    onClick={() => {
+                      setPlayFilter(config.poolId);
+                      nextPlay(config.poolId);
+                    }}
+                  >
+                    {config.researcherLabel}
+                  </button>
+                ))}
+              </div>
+              <span className="hint">Random gives each available comparison an equal chance.</span>
+            </div>
             <Comparison
-              key={play.assignment.aCandidateId + play.assignment.bCandidateId}
+              key={play.roundId}
               pair={play.pair}
               assignment={play.assignment}
+              onVote={(choice) => void revealVote(choice)}
+              locked={!!play.choice}
+              choice={play.choice}
+              labels={play.labels}
             />
-            {play.vote && play.labels ? (
+            {play.choice && play.labels ? (
               <section className="reveal">
                 <div className="section-label">THE REVEAL</div>
                 <h2>
-                  A: {play.labels[play.assignment.aCandidateId]} <span> / </span> B:{' '}
-                  {play.labels[play.assignment.bCandidateId]}
+                  {play.choice === 'tie'
+                    ? 'You found them about equal.'
+                    : play.choice === 'both_poor'
+                      ? 'Neither implementation suited you.'
+                      : `You preferred ${play.labels[play.choice === 'A' ? play.assignment.aCandidateId : play.assignment.bCandidateId]} this round.`}
                 </h2>
                 <p>
-                  You chose{' '}
-                  {play.vote.choice === 'tie'
-                    ? 'About equal'
-                    : play.vote.choice === 'both_poor'
-                      ? 'Both poor'
-                      : `Implementation ${play.vote.choice}`}
-                  .
+                  A — {play.labels[play.assignment.aCandidateId]}{' '}
+                  <span className="reveal-divider">/</span> B —{' '}
+                  {play.labels[play.assignment.bCandidateId]}
                 </p>
-                <p className="hint">
-                  Your votes this visit: A {playCounts.A} · B {playCounts.B} · About equal{' '}
-                  {playCounts.tie} · Both poor {playCounts.both_poor}
-                </p>
-                <button className="primary" onClick={nextPlay}>
-                  Next random pair →
+                <button className="primary" onClick={() => nextPlay()}>
+                  Next round →
                 </button>
               </section>
             ) : revealing ? (
               <p role="status">Loading the reveal…</p>
+            ) : play.choice ? (
+              <button onClick={() => void revealVote(play.choice!)}>Retry reveal</button>
             ) : (
-              <VoteForm
-                key={`play-${play.assignment.aCandidateId + play.assignment.bCandidateId}`}
-                play
-                onSubmit={(vote) => void revealVote(vote)}
-              />
+              <div className="play-alternatives">
+                <span>No clear favourite?</span>
+                <button onClick={() => void revealVote('tie')}>About equal</button>
+                <button onClick={() => void revealVote('both_poor')}>Both poor</button>
+                <small>
+                  Scroll or select code without voting. A short click, Enter or Space on a card
+                  selects it.
+                </small>
+              </div>
+            )}
+            {!!Object.keys(playCounts).length && (
+              <section className="play-preferences">
+                <h2>Your preferences this visit</h2>
+                <div className="stats-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Comparison</th>
+                        <th>Base preferred</th>
+                        <th>Trained preferred</th>
+                        <th>Equal</th>
+                        <th>Both poor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {poolConfigs
+                        .filter((config) => playCounts[config.poolId])
+                        .map((config) => {
+                          const counts = playCounts[config.poolId];
+                          return (
+                            <tr key={config.poolId}>
+                              <th>{config.researcherLabel}</th>
+                              <td>{counts.reference}</td>
+                              <td>{counts.trained}</td>
+                              <td>{counts.tie}</td>
+                              <td>{counts.both_poor}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             )}
           </>
         )}

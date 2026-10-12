@@ -133,13 +133,15 @@ async function mapping(page, s) {
       JSON.stringify(exported.session.responses) === JSON.stringify(s.responses),
   );
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await page.getByRole('radio', { name: /Prefer A/ }).waitFor();
+  await page.getByRole('button', { name: 'Style', exact: true }).click();
+  await page.getByRole('button', { name: 'Choose implementation A', exact: true }).waitFor();
   check(
     'Play has no reveal before voting',
     !(await page.getByText('THE REVEAL', { exact: true }).count()),
   );
-  await page.getByRole('radio', { name: /Prefer A/ }).check();
-  await page.getByRole('button', { name: /Vote & reveal/ }).click();
+  await page
+    .getByRole('button', { name: 'Choose implementation A', exact: true })
+    .click({ position: { x: 60, y: 25 } });
   await page.getByText('THE REVEAL', { exact: true }).waitFor();
   check(
     'Play reveals both condition labels after voting',
@@ -147,8 +149,8 @@ async function mapping(page, s) {
       /Style-trained/.test(await page.locator('.reveal').innerText()),
   );
   await page.screenshot({ path: path.join(qa, 'play-reveal.png'), fullPage: true });
-  await page.getByRole('button', { name: /Next random pair/ }).click();
-  await page.getByRole('radio', { name: /Prefer A/ }).waitFor();
+  await page.getByRole('button', { name: /Next round/ }).click();
+  await page.getByRole('button', { name: 'Choose implementation A', exact: true }).waitFor();
   check(
     'Next Play round hides identities again',
     !(await page.getByText('THE REVEAL', { exact: true }).count()),

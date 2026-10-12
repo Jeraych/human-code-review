@@ -47,7 +47,7 @@ export interface Response extends Assignment, Vote {
 }
 export interface Session {
   schemaVersion: 1;
-  appVersion: '1.0.0';
+  appVersion: '1.0.0' | '1.1.0';
   mode: 'study';
   sessionId: string;
   evaluatorId: string;

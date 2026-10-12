@@ -72,6 +72,33 @@ class MergeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.merge(other)
 
+    @unittest.skipUnless((APP / 'qa/judge-pilot-result.json').exists(), 'Run Judge browser pilot to create actual download')
+    def test_judge_merge_has_distinct_source_runs_and_conditions(self):
+        self.pool = json.loads((APP / 'public/pools/evaluation-02-v1.json').read_text(encoding='utf-8'))
+        self.provenance = json.loads((APP / 'researcher/judge-provenance-v1.json').read_text(encoding='utf-8'))
+        data = json.loads((APP / 'qa/judge-pilot-result.json').read_text(encoding='utf-8'))
+        sessions, rows = self.merge(data, data)
+        self.assertEqual((len(sessions), len(rows)), (1, 30))
+        for row in rows:
+            self.assertEqual({row['aCondition'], row['bCondition']}, {'base', 'judge-trained'})
+            self.assertEqual(abs(row['aRun'] - row['bRun']), 3)
+            self.assertEqual(row['poolId'], 'evaluation-02')
+
+    @unittest.skipUnless((APP / 'qa/judge-pilot-result.csv').exists(), 'Run Judge browser pilot to create actual downloads')
+    def test_judge_csv_matches_actual_json_download(self):
+        import csv
+        pilot = json.loads((APP / 'qa/judge-pilot-result.json').read_text(encoding='utf-8'))
+        with (APP / 'qa/judge-pilot-result.csv').open(newline='', encoding='utf-8') as f:
+            rows = list(csv.DictReader(f))
+        self.assertEqual(len(rows), 30)
+        for row in rows:
+            response = pilot['session']['responses'][row['pairId']]
+            self.assertEqual(row['poolId'], 'evaluation-02')
+            self.assertEqual(row['aCandidateId'], response['aCandidateId'])
+            self.assertEqual(row['bCandidateId'], response['bCandidateId'])
+            self.assertEqual(row['choice'], response['choice'])
+            self.assertEqual(json.loads(row['reasons']), response['reasons'])
+
     @unittest.skipUnless((APP / 'qa/pilot-result.csv').exists(), 'Run browser pilot to create actual downloads')
     def test_browser_csv_matches_actual_json_download(self):
         import csv

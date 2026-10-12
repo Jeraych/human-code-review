@@ -62,7 +62,7 @@ def merge(paths, pool, provenance):
             preferred = ca['condition'] if r['choice'] == 'A' else cb['condition'] if r['choice'] == 'B' else r['choice']
             rows.append({
                 'sessionId': s['sessionId'], 'evaluatorId': s['evaluatorId'], 'poolId': s['poolId'], 'poolVersion': s['poolVersion'], 'poolHash': pool_hash,
-                'pairId': a['pairId'], 'promptId': r['promptId'], 'taskId': ca['taskId'], 'run': ca['run'],
+                'pairId': a['pairId'], 'promptId': r['promptId'], 'taskId': ca['taskId'], 'aRun': ca['run'], 'bRun': cb['run'],
                 'aCandidateId': r['aCandidateId'], 'bCandidateId': r['bCandidateId'], 'aCondition': ca['condition'], 'bCondition': cb['condition'],
                 'choice': r['choice'], 'preferredCondition': preferred, 'reasons': json.dumps(r['reasons']), 'otherText': r['otherText'], 'submittedAt': r['submittedAt'],
                 'priorPlayExposure': s.get('priorPlayExposure', False),
@@ -77,9 +77,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('exports', nargs='+', type=Path)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--pool', type=Path, default=APP / 'public/pools/evaluation-01-v1.json')
-    parser.add_argument('--provenance', type=Path, default=APP / 'researcher/provenance-v1.json')
+    parser.add_argument('--condition', choices=['style', 'judge'], default='style')
+    parser.add_argument('--pool', type=Path)
+    parser.add_argument('--provenance', type=Path)
     args = parser.parse_args()
+    if args.pool is None:
+        args.pool = APP / f'public/pools/evaluation-0{1 if args.condition == "style" else 2}-v1.json'
+    if args.provenance is None:
+        args.provenance = APP / ('researcher/provenance-v1.json' if args.condition == 'style' else 'researcher/judge-provenance-v1.json')
     pool, provenance = (json.loads(p.read_text(encoding='utf-8')) for p in [args.pool, args.provenance])
     sessions, rows = merge(args.exports, pool, provenance)
     args.out.mkdir(parents=True, exist_ok=True)

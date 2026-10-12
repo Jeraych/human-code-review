@@ -1,0 +1,2016 @@
+{
+  "poolHash": "b6918be4a841b8bb06c158314508a3bdbcb752b0ec80a9a5e967dec0205c0935",
+  "matchedStylePoolHash": "3bd17a5a0a0810b3e7c9ef3ad48ffe8775ceb5ebfea4b534e6e4afe4451c1d70",
+  "selectionRule": "Exactly the frozen Style task/seed assignment and generation 0; shared archived Base candidates.",
+  "inputsSha256": {
+    "UnSloth-RL-heplus-fix\\results\\36\\metadata.json": "0e2ec2c51cd4f80fc366cfb428b408d4374f63e1e86b27bff9dc326e1eaa3fa5",
+    "UnSloth-RL-heplus-fix\\results\\36\\health.json": "6cc9d0581d93ee762b5d130c164acdda4aafac55aaeb9a4d3b381999c7a41d67",
+    "UnSloth-RL-heplus-fix\\results\\36\\judge-summary.json": "dd36c4dcdcde7ab943fd43c88120b98bb2399fe8e1235160ea76ea3e42464a58",
+    "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv": "abfe7cdca94f90e9da9242fbbb27e8fd7dab99dcd76b4aecb019c0025e39d6b5",
+    "UnSloth-RL-heplus-fix\\results\\33\\eval_base_holdout_tasks.csv": "1b3aab33a1cc549b0388d52be1ca4d122b2000f31f4856cd4f7a2ebf62bc5e81",
+    "UnSloth-RL-heplus-fix\\results\\37\\metadata.json": "ee8e897694ea55550213dba184a76ac38b30924f219e69c671bcec7137f85a40",
+    "UnSloth-RL-heplus-fix\\results\\37\\health.json": "a5869e63eef63b15c708605b98ba0cb748cf9ba36ff88b472133dd8ac4b91323",
+    "UnSloth-RL-heplus-fix\\results\\37\\judge-summary.json": "4920175a9931663e0e71384b3c91e0d8feddcdcf05b00289fef12e844a998aa7",
+    "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv": "c4bcfe8f41cf402824979d4407cb1a973aa33501bb9dfa4e91afb83a3eb6d2b4",
+    "UnSloth-RL-heplus-fix\\results\\34\\eval_base_holdout_tasks.csv": "18e0d248439132b46f17be3d64787538550aafdecbd38b58155dadf468c063bf",
+    "UnSloth-RL-heplus-fix\\results\\38\\metadata.json": "73188b4914dda78b9435bfeb796a3c2a1d22dd33882c8e8980e21b889abbe8fc",
+    "UnSloth-RL-heplus-fix\\results\\38\\health.json": "878a4978865ad2673fb12cf91b20d69b220c14de10ff2e61d019a1ce73c255e7",
+    "UnSloth-RL-heplus-fix\\results\\38\\judge-summary.json": "2dfd95884e53dc95d5b7bcaef3ef0ab9e3c38d131217e60adb8b672f991467f6",
+    "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv": "86b8b2a8f5c2773a79d4c434e179663be8524f434c58109ea5c1f74a6565462c",
+    "UnSloth-RL-heplus-fix\\results\\35\\eval_base_holdout_tasks.csv": "7a8c4c613ec81d4a747203f55e598c28517300c7e2c6cfcc96fc0f50ecdd7134"
+  },
+  "validation": [
+    {
+      "run": 36,
+      "seed": 3407,
+      "healthPassed": true,
+      "sourceRows": 200,
+      "selectedTasks": [
+        "HumanEval/57",
+        "HumanEval/59",
+        "HumanEval/62",
+        "HumanEval/63",
+        "HumanEval/72",
+        "HumanEval/77",
+        "HumanEval/82",
+        "HumanEval/84",
+        "HumanEval/94",
+        "HumanEval/95"
+      ],
+      "nonemptyExtractedCode": 200,
+      "syntaxErrorsRetained": 0,
+      "baseReferenceRun": 33
+    },
+    {
+      "run": 37,
+      "seed": 3408,
+      "healthPassed": true,
+      "sourceRows": 200,
+      "selectedTasks": [
+        "HumanEval/51",
+        "HumanEval/55",
+        "HumanEval/69",
+        "HumanEval/75",
+        "HumanEval/78",
+        "HumanEval/79",
+        "HumanEval/81",
+        "HumanEval/88",
+        "HumanEval/96",
+        "HumanEval/98"
+      ],
+      "nonemptyExtractedCode": 200,
+      "syntaxErrorsRetained": 1,
+      "baseReferenceRun": 34
+    },
+    {
+      "run": 38,
+      "seed": 3409,
+      "healthPassed": true,
+      "sourceRows": 200,
+      "selectedTasks": [
+        "HumanEval/56",
+        "HumanEval/65",
+        "HumanEval/66",
+        "HumanEval/67",
+        "HumanEval/70",
+        "HumanEval/74",
+        "HumanEval/76",
+        "HumanEval/87",
+        "HumanEval/91",
+        "HumanEval/99"
+      ],
+      "nonemptyExtractedCode": 200,
+      "syntaxErrorsRetained": 0,
+      "baseReferenceRun": 35
+    }
+  ],
+  "candidates": {
+    "c_8e33030d4a7351e19b87": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/57",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def monotonic(l: list):\n    \"\"\"Return True is list elements are monotonically increasing or decreasing.\n    >>> monotonic([1, 2, 4, 20])\n    True\n    >>> monotonic([1, 20, 4, 10])\n    False\n    >>> monotonic([4, 1, 0, -10])\n    True\n    \"\"\"\n    if len(l) <= 1:\n        return True\n    \n    increasing = True\n    decreasing = True\n    \n    for i in range(1, len(l)):\n        if l[i] > l[i-1]:\n            decreasing = False\n        if l[i] < l[i-1]:\n            increasing = False\n            \n    return increasing or decreasing\n</code>",
+      "rawSha256": "1e81a5f92be6ce9501fedf76d6201483362259461e311bc348ff74fee1f630b2",
+      "displayedSha256": "9664dcced0aaeea5bef9cb0655bc4f22d05c609e81b67148e1e40794ca56c0a3",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_c659e5c563f772f50b34": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/57",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def monotonic(l: list):\n    increasing = all(l[i] <= l[i+1] for i in range(len(l)-1))\n    decreasing = all(l[i] >= l[i+1] for i in range(len(l)-1))\n    return increasing or decreasing\n</code>",
+      "rawSha256": "4eabbaeeea952fa5ab9afb27cbf1f6cb02ed52f0b3a4338ed32ddb419f634e9f",
+      "displayedSha256": "2e8eff6698c96a89be96d2ec9c5d91cf2dbced0f8822481418c260ceb803c711",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 63
+    },
+    "c_1019f58c1736c6fa06f3": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/72",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w\n</code>",
+      "rawSha256": "8270ee762f9bdcb94d884b32e599159fb6ee1ee9a025282bda11cbfb77123aab",
+      "displayedSha256": "9f93e0cb9a57c38bff477a91c50ba75a32a3b8c7867172779a7c14d880d76411",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_275c8f54e6d247477914": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/72",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w\n</code>",
+      "rawSha256": "8270ee762f9bdcb94d884b32e599159fb6ee1ee9a025282bda11cbfb77123aab",
+      "displayedSha256": "9f93e0cb9a57c38bff477a91c50ba75a32a3b8c7867172779a7c14d880d76411",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 28
+    },
+    "c_5b97531ad9a9dd34bb36": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/77",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def iscube(a):\n    if a >= 0:\n        root = round(a ** (1/3))\n        return root ** 3 == a\n    else:\n        root = round((-a) ** (1/3))\n        return (-root) ** 3 == a\n</code>",
+      "rawSha256": "9e5b64fd7d20018a3a464dc991f5d308813fbf130e41e1cd81054fbdbecdc87e",
+      "displayedSha256": "b5c185642f5d060170296016c257cb127c7f902c37a32442c8e10932c41e54fc",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_1112514dae51055dc828": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/77",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def iscube(a):\n    if a >= 0:\n        cube_root = a ** (1/3)\n    else:\n        cube_root = -(-a) ** (1/3)\n    rounded = round(cube_root)\n    return rounded ** 3 == a\n</code>",
+      "rawSha256": "12b18ab034a2bd4a6fb452479e35ad79c3e18c6d4763174a5a5d857707b05cdd",
+      "displayedSha256": "811e6375c1d29b3de84c0e2fb9cb1343fba6cbfdbbb2659759e67e3d6d26a036",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 65
+    },
+    "c_e5a94347ec698a5f49b1": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/94",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(digit) for digit in str(largest_prime))\n</code>",
+      "rawSha256": "43ee7d87a390b62f2ca1b59fe6fac1bcc9c8b7f6bbea8be299d716836a23b3c5",
+      "displayedSha256": "b9ef9e3a7cf31700c36c74b1337ed2fa52d8b9220717c7c55c82fe01feb42002",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_4c73dffcfd45e4d6eac6": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/94",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(digit) for digit in str(largest_prime))\n</code>",
+      "rawSha256": "43ee7d87a390b62f2ca1b59fe6fac1bcc9c8b7f6bbea8be299d716836a23b3c5",
+      "displayedSha256": "b9ef9e3a7cf31700c36c74b1337ed2fa52d8b9220717c7c55c82fe01feb42002",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 150
+    },
+    "c_9cfe73796db229575ff5": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/59",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def largest_prime_factor(n: int):\n    \"\"\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\n    >>> largest_prime_factor(13195)\n    29\n    >>> largest_prime_factor(2048)\n    2\n    \"\"\"\n    largest = -1\n    while n % 2 == 0:\n        largest = 2\n        n //= 2\n    i = 3\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 2\n    if n > 2:\n        largest = n\n    return largest\n</code>",
+      "rawSha256": "b0eaff7b8339d0e806414391ad201647f04485bbd19e3d64dfb69049558e927b",
+      "displayedSha256": "8b810720671492ab0f105bbec664913a015cb317f2aab05a6c19bbb1afdfe238",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_8933b99f46b595a27690": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/59",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def largest_prime_factor(n: int):\n    \"\"\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\n    >>> largest_prime_factor(13195)\n    29\n    >>> largest_prime_factor(2048)\n    2\n    \"\"\"\n    largest = -1\n    # Divide by 2 to make n odd\n    while n % 2 == 0:\n        largest = 2\n        n //= 2\n    \n    # Now n must be odd\n    i = 3\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 2\n    \n    # If n is a prime number greater than 2\n    if n > 2:\n        largest = n\n    \n    return largest\n</code>",
+      "rawSha256": "e4414bb592ea6cc85078b9f8013ee64e0f42df5695276ea7a81c54838c1fc2b6",
+      "displayedSha256": "58278b52204adac18c61956c050ea19e87fa4dc08e01ee3a1ab50910381aaf88",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 190
+    },
+    "c_718715adcfac8606f4f0": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/62",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def derivative(xs: list):\n    if len(xs) <= 1:\n        return []\n    return [xs[i] * i for i in range(1, len(xs))]\n</code>",
+      "rawSha256": "8c5146f772e3a01771e97c58caccfbe49872024da2ea24f90232dd57b9061acf",
+      "displayedSha256": "b2d1a6635eb4371740e94cc69775972eba3595cf0f1ab4e9b04114fa1c8f6f33",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_0cab05375929b3d97016": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/62",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def derivative(xs: list):\n    if not xs or len(xs) == 1:\n        return []\n    return [xs[i] * i for i in range(1, len(xs))]\n</code>",
+      "rawSha256": "b287d48742df659d6e8e1f8e92c7049c045e067793145d6994a45d5f7b61a750",
+      "displayedSha256": "5087d395644d3117574d8bb9265165b44e496f3e8f8c486397ef7077b7f0b653",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 46
+    },
+    "c_a0175391b52307948cfb": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/82",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n</code>",
+      "rawSha256": "e6f976a754d5a382782d5880442dea1f170c7b2b822500bb1d214ce5e7215c41",
+      "displayedSha256": "1896d85cb2ac44b9db006744eb8953588bdf47f50ea54e79d574fc272af68b74",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_4ba9eff97c3cca8cdef1": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/82",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n</code>",
+      "rawSha256": "e6f976a754d5a382782d5880442dea1f170c7b2b822500bb1d214ce5e7215c41",
+      "displayedSha256": "1896d85cb2ac44b9db006744eb8953588bdf47f50ea54e79d574fc272af68b74",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 67
+    },
+    "c_7e287cc5d9ccef318a23": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/84",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]\n</code>",
+      "rawSha256": "41741400fbe3610fbc2bb98541e6b04fb5141eaf61cfd9ef553b5a5ea4deefa5",
+      "displayedSha256": "49f53cb38f9741e2f5eb847e6adb37fe396ad4b9b5dff0284ec8dc300179cb3d",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_7866aa5f4d2a37a49fe5": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/84",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]\n</code>",
+      "rawSha256": "41741400fbe3610fbc2bb98541e6b04fb5141eaf61cfd9ef553b5a5ea4deefa5",
+      "displayedSha256": "49f53cb38f9741e2f5eb847e6adb37fe396ad4b9b5dff0284ec8dc300179cb3d",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 33
+    },
+    "c_d35b43fa6f2c234e5fe7": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/63",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    \n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    \n    return c\n</code>",
+      "rawSha256": "4e26d1420ce110b8ffe9ca63cf405b739ed242e7c6877c4b1f82f7c5e66a0cda",
+      "displayedSha256": "f313ea0781a5a079b4681d4d38efe771c2c5e0942936f38ed0c3987b9cc74ca4",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_054267035aae9696ce97": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/63",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    \n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    return c\n</code>",
+      "rawSha256": "8864c3ed1798949de9602e618aaba2dd2c85f4b01326a7c2038fee8f115c0083",
+      "displayedSha256": "d0bf42a03bce7acb639c7ee5e6c87f463ecd03eb0922400ede9bcbb51490d118",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 93
+    },
+    "c_e25fa848e26b5b3b532a": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/95",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def check_dict_case(dict):\n    if not dict:\n        return False\n    \n    # Check if all keys are strings\n    if not all(isinstance(k, str) for k in dict.keys()):\n        return False\n    \n    # Check if all keys are lower case\n    all_lower = all(k.islower() for k in dict.keys())\n    # Check if all keys are upper case\n    all_upper = all(k.isupper() for k in dict.keys())\n    \n    return all_lower or all_upper\n</code>",
+      "rawSha256": "b24fc6b6f5194e0a7fc331cfd0e2d23dad3f88a6badd48ef3140f28a95dada54",
+      "displayedSha256": "7953b6c55595c3163ad4d2cbd88cbc91d4b1949df8577c0a8debb6dcd1ce894e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_a8411afa45920cf3fe0e": {
+      "condition": "judge-trained",
+      "run": 36,
+      "taskId": "HumanEval/95",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\36\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3407,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def check_dict_case(dict):\n    if not dict:\n        return False\n    \n    keys = list(dict.keys())\n    \n    # Check if all keys are strings\n    if not all(isinstance(key, str) for key in keys):\n        return False\n    \n    # Check if all keys are lowercase or all keys are uppercase\n    all_lower = all(key.islower() for key in keys)\n    all_upper = all(key.isupper() for key in keys)\n    \n    return all_lower or all_upper\n</code>",
+      "rawSha256": "b1be37f1d35bbdb20e9fd201ab02532bdb6abf1b0cd4b007c2d536e5e075d4b8",
+      "displayedSha256": "7e5aaabacab6627b75949bef42fab5ce37c2be168cb5a1c83d06da49acdf070f",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 110
+    },
+    "c_93f02158236a26ef5740": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/78",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def hex_key(num):\n    \"\"\"You have been tasked to write a function that receives \n    a hexadecimal number as a string and counts the number of hexadecimal \n    digits that are primes (prime number, or a prime, is a natural number \n    greater than 1 that is not a product of two smaller natural numbers).\n    Hexadecimal digits are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F.\n    Prime numbers are 2, 3, 5, 7, 11, 13, 17,...\n    So you have to determine a number of the following digits: 2, 3, 5, 7, \n    B (=decimal 11), D (=decimal 13).\n    Note: you may assume the input is always correct or empty string, \n    and symbols A,B,C,D,E,F are always uppercase.\n    Examples:\n    For num = \"AB\" the output should be 1.\n    For num = \"1077E\" the output should be 2.\n    For num = \"ABED1A33\" the output should be 4.\n    For num = \"123456789ABCDEF0\" the output should be 6.\n    For num = \"2020\" the output should be 2.\n    \"\"\"\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    count = 0\n    for digit in num:\n        if digit in prime_digits:\n            count += 1\n    return count\n</code>",
+      "rawSha256": "cc637b793723a956f866555e1e2f3cc7aae33eaba7c558d4c2e86f709de42532",
+      "displayedSha256": "301993db7565ba09a4836e95b9faa6afc916df4b14a4fe4d8ba3b51b511d6d3e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_3681a25aeba8907c7a3e": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/78",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def hex_key(num):\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    return sum(1 for digit in num if digit in prime_digits)\n</code>",
+      "rawSha256": "c2151d63eea2dd5803f757de5259f0a31dfca6b3451872181fe5e9a1f4681176",
+      "displayedSha256": "71725dfd4e137c33d80d16d5ae9880087fcc25ba16cc5f30421a1eefc030d745",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 48
+    },
+    "c_c7932c0b82989e33c829": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/79",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def decimal_to_binary(decimal):\n    if decimal == 0:\n        return \"db0db\"\n    binary = bin(decimal)[2:]\n    return f\"db{binary}db\"\n</code>",
+      "rawSha256": "de9249cdf019f4b114ae9017d42fb17a5f4e24713ac29588631be466615b08da",
+      "displayedSha256": "0e39da7009ce54f92d6706a97c1eceeb52afe01c1ac70628fb34bf4f9c63d296",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_2fa03c3c8cc56be65919": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/79",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def decimal_to_binary(decimal):\n    return \"db\" + bin(decimal)[2:] + \"db\"\n</code>",
+      "rawSha256": "cf50d028aeb9edfd5ab550d0972224a3fe583d34135f422b86872fc60e530290",
+      "displayedSha256": "e2e795bc5637a2f7d1b1f7fd9c41661266845cb7a3e3d595ce707ce098c64954",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 26
+    },
+    "c_e2353e6359ca0ce07159": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/55",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"n must be a positive integer\")\n    if n == 1:\n        return 1\n    if n == 2:\n        return 1\n    a, b = 1, 1\n    for _ in range(2, n):\n        a, b = b, a + b\n    return b\n</code>",
+      "rawSha256": "c570e0cd510fa07a5cd48cc49bc6b7a0a562ef808f3b8ed8a5d86865bb831b61",
+      "displayedSha256": "e5c9b9ea54b541dc5d19652bdccf9a1e1196b8459d8130e462ebacd3663897da",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_189d71204664f5ed15b7": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/55",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def fib(n: int):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n</code>",
+      "rawSha256": "3fd42019eb8788ae4fac67a39f70f40a574e292f5e751d53107b3cd9a382d2f1",
+      "displayedSha256": "c8fa78240d2f10276b03c2d1ecd1c34d1a722f9b116156bf43f386545190d5d7",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 76
+    },
+    "c_a0f3225282d4ea50754a": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/81",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def numerical_letter_grade(grades):\n    result = []\n    for gpa in grades:\n        if gpa == 4.0:\n            result.append('A+')\n        elif gpa > 3.7:\n            result.append('A')\n        elif gpa > 3.3:\n            result.append('A-')\n        elif gpa > 3.0:\n            result.append('B+')\n        elif gpa > 2.7:\n            result.append('B')\n        elif gpa > 2.3:\n            result.append('B-')\n        elif gpa > 2.0:\n            result.append('C+')\n        elif gpa > 1.7:\n            result.append('C')\n        elif gpa > 1.3:\n            result.append('C-')\n        elif gpa > 1.0:\n            result.append('D+')\n        elif gpa > 0.7:\n            result.append('D')\n        elif gpa > 0.0:\n            result.append('D-')\n        else:\n            result.append('E')\n    return result\n</code>",
+      "rawSha256": "62f0ec2df9989d128c310971a6cf2b6395274e0b53ab0479147ef4bfef84b900",
+      "displayedSha256": "b2a0edb5336d787feb5f636e45657933a57e1632174213d6c7bb558b81772105",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_9fd8cc03a5d7d8943a6d": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/81",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def numerical_letter_grade(grades):\n    letter_grades = []\n    for gpa in grades:\n        if gpa == 4.0:\n            letter_grades.append('A+')\n        elif gpa > 3.7:\n            letter_grades.append('A')\n        elif gpa > 3.3:\n            letter_grades.append('A-')\n        elif gpa > 3.0:\n            letter_grades.append('B+')\n        elif gpa > 2.7:\n            letter_grades.append('B')\n        elif gpa > 2.3:\n            letter_grades.append('B-')\n        elif gpa > 2.0:\n            letter_grades.append('C+')\n        elif gpa > 1.7:\n            letter_grades.append('C')\n        elif gpa > 1.3:\n            letter_grades.append('C-')\n        elif gpa > 1.0:\n            letter_grades.append('D+')\n        elif gpa > 0.7:\n            letter_grades.append('D')\n        elif gpa > 0.0:\n            letter_grades.append('D-')\n        else:\n            letter_grades.append('E')\n    return letter_grades\n</code>",
+      "rawSha256": "e4a7b266de7e67fc67181f95ce444d297a355d3dc8a56e45044e130bb0d44844",
+      "displayedSha256": "34bb4df33af5cb583789071faa0ba40c200fec5b84ad70072c047ef3edbda647",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 289
+    },
+    "c_c007ea33b7138f68941c": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/51",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n    vowels = set('aeiouAEIOU')\n    return ''.join(char for char in text if char not in vowels)\n</code>",
+      "rawSha256": "3d88a92454e0a0e2571c4b9a22e5b206ec8809b619da01d5da4f76dbf73e9686",
+      "displayedSha256": "552eb4a3ef373be1646d01e73cccd23ad6a5bed6b4ab87b30e23282d90bdb91b",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_03cbf54f3ac6640b83a5": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/51",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def remove_vowels(text):\n    vowels = 'aeiouAEIOU'\n    return ''.join(char for char in text if char not in vowels)\n</code>",
+      "rawSha256": "c469d0b7707db3ee1023a915c8d4e7a12654523ef33cfa125ba66267ae8b6638",
+      "displayedSha256": "12e24098572c0370da5b4ecd4e1e5980254158915e692513f4e3c1360af38ca4",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 38
+    },
+    "c_d1d6efbd8209102026c4": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/96",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_up_to(n):\n    \"\"\"Implement a function that takes an non-negative integer and returns an array of the first n\n    integers that are prime numbers and less than n.\n    for example:\n    count_up_to(5) => [2,3]\n    count_up_to(11) => [2,3,5,7]\n    count_up_to(0) => []\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\n    count_up_to(1) => []\n    count_up_to(18) => [2,3,5,7,11,13,17]\n    \"\"\"\n    if n <= 1:\n        return []\n    \n    primes = []\n    is_prime = [True] * n\n    is_prime[0] = False\n    is_prime[1] = False\n    \n    for i in range(2, n):\n        if is_prime[i]:\n            primes.append(i)\n            for j in range(i * i, n, i):\n                is_prime[j] = False\n                \n    return primes\n</code>",
+      "rawSha256": "8cb20216aeee655d5187e370d7f45f671bb0a1114148dff474555f570e86829e",
+      "displayedSha256": "44d1802ba9573518f33f597886b3efc8ed0657c8752b7ad67bb4bff412b6cdc0",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_52b68b97b496e2027476": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/96",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def count_up_to(n):\n    def is_prime(num):\n        if num < 2:\n            return False\n        for i in range(2, int(num ** 0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n\n    return [i for i in range(2, n) if is_prime(i)]\n</code>",
+      "rawSha256": "a1fdd3799013a5f1387a7eb33da3663a116e1780ffb5f83a36185560d0252efd",
+      "displayedSha256": "2f88609813b12e5c4f4318874778d2383b81d4963976848f8428a821c7fb1f32",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 87
+    },
+    "c_106ca3752f38cb367a32": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/75",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_multiply_prime(a):\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n**0.5) + 1):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [i for i in range(2, a) if is_prime(i)]\n    \n    for i in range(len(primes)):\n        for j in range(i, len(primes)):\n            for k in range(j, len(primes)):\n                if primes[i] * primes[j] * primes[k] == a:\n                    return True\n    return False\n</code>",
+      "rawSha256": "195157e12f9d35297903ddbf7a610b84df62e5aa9966e668330db715fad0a0e6",
+      "displayedSha256": "522a83f78da6abeb9953c3f7bcbe5055a89ca99746ff1dabcf51f540365f6313",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_1732ffe757a9273210c8": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/75",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def is_multiply_prime(a):\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n ** 0.5) + 1):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [i for i in range(2, a) if is_prime(i)]\n    \n    for i in range(len(primes)):\n        for j in range(i, len(primes)):\n            for k in range(j, len(primes)):\n                if primes[i] * primes[j] * primes[k] == a:\n                    return True\n    return False\n</code>",
+      "rawSha256": "6c0e40043cf66afbcb19dcd0b8baf73f84396ba231da684691fe330571a9caac",
+      "displayedSha256": "740d1030a5d98cbdfb0b9ec8c3209edf0e0a93405685b6df884d4374794c4483",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 148
+    },
+    "c_40b6897d493a63a9d0ae": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/69",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def search(lst):\n    from collections import Counter\n    freq = Counter(lst)\n    candidates = [num for num, count in freq.items() if num > 0 and count >= num]\n    return max(candidates) if candidates else -1\n</code>",
+      "rawSha256": "db20e367aab313b2bb98758dcd56dad2acd4dafa3a5adbd183715c7f996d3b00",
+      "displayedSha256": "0cf2c55b24f2f837dbcc9a7dc8cf45cb1cb253ff4870db3d0fb43bd770dd0430",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_c8b34e9fd673cd612a90": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/69",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def search(lst):\n    from collections import Counter\n    counts = Counter(lst)\n    result = -1\n    for num, freq in counts.items():\n        if num > 0 and freq >= num:\n            if num > result:\n                result = num\n    return result\n</code>",
+      "rawSha256": "84bfa7bd9e122cb168941713f364b64a9e45e71e4af6560424d04f39499002be",
+      "displayedSha256": "a3b1792960c467993c4abbaa1b6756730956d4dec1b026752ae800ca716766c6",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 65
+    },
+    "c_2d35ad6875964170c44c": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/98",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_upper(s):\n    \"\"\"\n    Given a string s, count the number of uppercase vowels in even indices.\n    \n    For example:\n    count_upper('aBCdEf') returns 1\n    count_upper('abcdefg') returns 0\n    count_upper('dBBE') returns 0\n    \"\"\"\n    uppercase_vowels = set('AEIOU')\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in uppercase_vowels:\n            count += 1\n    return count\n</code>",
+      "rawSha256": "13f2cf3887004fe89600ab3aba65156d5f28292e235f451d40956d27b3d90a53",
+      "displayedSha256": "9c8ecb7850e0850c97ac7a3e012b2c6ae8374c94d9b6e002bb9f90c86e84e441",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_2ad06c64b9b28cf3fbc1": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/98",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def count_upper(s):\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in 'AEIOU':\n            count += 1\n    return count\n</code>",
+      "rawSha256": "6d98f9c4f72307b05ab7657ce2da1c7e29d4e03a749b47dcd6772add01cffee3",
+      "displayedSha256": "578b55aebc41bdb3cb97cc5c29757bcb1f606ea7ba052ff0db489021cf535610",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 52
+    },
+    "c_d4178d02917c7bf5b6b9": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/88",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def sort_array(array):\n    if not array:\n        return []\n    \n    first = array[0]\n    last = array[-1]\n    total = first + last\n    \n    sorted_arr = sorted(array)\n    \n    if total % 2 == 1:\n        return sorted_arr\n    else:\n        return sorted_arr[::-1]\n</code>",
+      "rawSha256": "9f516bbe7d444895ac936fd0d62e6206a195a898040d9663083a6cb68fa634c7",
+      "displayedSha256": "8a41b7daf3441006c298b77c126469733c68e228aff23ff1b8fec5d8e6fba538",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_929ab6dc9fe587dababd": {
+      "condition": "judge-trained",
+      "run": 37,
+      "taskId": "HumanEval/88",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\37\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3408,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def sort_array(array):\n    if not array:\n        return []\n    if len(array) == 1:\n        return array[:]\n    \n    first = array[0]\n    last = array[-1]\n    total = first + last\n    \n    sorted_array = sorted(array)\n    \n    if total % 2 == 0:\n        sorted_array.reverse()\n    \n    return sorted_array\n</code>",
+      "rawSha256": "92f6bdab5a654f535e9a7ffe57a09e37fd75d985a57da7a12db307923af17231",
+      "displayedSha256": "ac8c92a98268bc965e91604a2ddbe78687e5c656c67aa692c4a9be53a391cdf6",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 90
+    },
+    "c_f5406c7d8fdbd0b5a683": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/65",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]\n</code>",
+      "rawSha256": "ffaa7447513e236868ced377b84a78feffb19ddf6013e5a6270e3955ed53fac0",
+      "displayedSha256": "ffbdfe6916a6847f0c7a0e626cf8aad4aab02d957e1835f267d60372c3fe819f",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_fe2fbd9991a9b455a05b": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/65",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]\n</code>",
+      "rawSha256": "ffaa7447513e236868ced377b84a78feffb19ddf6013e5a6270e3955ed53fac0",
+      "displayedSha256": "ffbdfe6916a6847f0c7a0e626cf8aad4aab02d957e1835f267d60372c3fe819f",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 58
+    },
+    "c_5cb2627ebd01806f75be": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/74",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        return sum(len(s) for s in lst)\n    \n    chars1 = count_chars(lst1)\n    chars2 = count_chars(lst2)\n    \n    if chars1 <= chars2:\n        return lst1\n    else:\n        return lst2\n</code>",
+      "rawSha256": "cd28de93c8d2a4e5c93b403e75add6cf094d22b76cf854976c12b95c4dff82a2",
+      "displayedSha256": "e889191e852ad88b528d3af7c974b57b739bb4e03905ac330e6ef76cb3254d38",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_49ad1c8fd682d597d771": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/74",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        return sum(len(s) for s in lst)\n    \n    count1 = count_chars(lst1)\n    count2 = count_chars(lst2)\n    \n    if count1 <= count2:\n        return lst1\n    else:\n        return lst2\n</code>",
+      "rawSha256": "6a19e15d3717d1d755e3fe07ad6448a6db5b666e0248937925f65202958156e5",
+      "displayedSha256": "fd65fb8ebfdbd564525f2fa32254b4388970b1ee2e70ffd74b68a752cf52762e",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 77
+    },
+    "c_20d79787c93a7e92546e": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/76",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_simple_power(x, n):\n    if n == 1:\n        return x == 1\n    if n == 0:\n        return x == 1\n    import math\n    if x <= 0:\n        return False\n    log_x = math.log(x)\n    log_n = math.n\n    if log_n == 0:\n        return False\n    power = log_x / log_n\n    if abs(power - round(power)) > 1e-10:\n        return False\n    return n ** int(round(power)) == x\n</code>",
+      "rawSha256": "4812ccdb42cf4137bf51f1b002893e0cd545d59f4c8a2fed504de343209bc6fa",
+      "displayedSha256": "ef05e3d9498902a01800510e1ec6c756a98cf2d6e24def34e986489c5c8d6b6a",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_e9bddaf6a8a28cd4362e": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/76",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def is_simple_power(x, n):\n    if n == 0:\n        return x == 1\n    if n == 1:\n        return x == 1\n    if n == -1:\n        return x == 1 or x == -1\n    \n    import math\n    \n    if n > 0:\n        if x <= 0:\n            return False\n        try:\n            exponent = math.log(x) / math.log(n)\n        except ValueError:\n            return False\n    else:\n        if x == 0:\n            return False\n        try:\n            exponent = math.log(abs(x)) / math.log(abs(n))\n        except ValueError:\n            return False\n        if x < 0 and exponent % 2 != 0:\n            return False\n        elif x > 0 and exponent % 2 != 0:\n            # If x is positive and n is negative, exponent must be even\n            # But we already checked x < 0 case above\n            pass\n    \n    if abs(exponent - round(exponent)) > 1e-10:\n        return False\n    \n    return True\n</code>",
+      "rawSha256": "5a99d2ff389ab3eb87ee8363be24026d60a262372b389d483a02855f3eaac8b6",
+      "displayedSha256": "7a17c16200f845e6d3061d3ab0e09b92559f973e4e5fa378f2bcd02dde201df8",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 251
+    },
+    "c_ec6eb93028938c315e88": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/66",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())\n</code>",
+      "rawSha256": "31415d5882331e2d3642bf0527ee3bdfcac8b0328dc047d51679203e7b60309f",
+      "displayedSha256": "a481862b2c8ac565451bb622d546415908cf5d86c75787b5c27423cac59d009e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_25df32921132941b37d5": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/66",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())\n</code>",
+      "rawSha256": "31415d5882331e2d3642bf0527ee3bdfcac8b0328dc047d51679203e7b60309f",
+      "displayedSha256": "a481862b2c8ac565451bb622d546415908cf5d86c75787b5c27423cac59d009e",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 25
+    },
+    "c_512c32d30599e7a4f448": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/99",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def closest_integer(value):\n    '''\n    Create a function that takes a value (string) representing a number\n    and returns the closest integer to it. If the number is equidistant\n    from two integers, round it away from zero.\n\n    Examples\n    >>> closest_integer(\"10\")\n    10\n    >>> closest_integer(\"15.3\")\n    15\n\n    Note:\n    Rounding away from zero means that if the given number is equidistant\n    from two integers, the one you should return is the one that is the\n    farthest from zero. For example closest_integer(\"14.5\") should\n    return 15 and closest_integer(\"-14.5\") should return -15.\n    '''\n    import math\n    num = float(value)\n    if num >= 0:\n        return math.floor(num + 0.5)\n    else:\n        return math.ceil(num - 0.5)\n</code>",
+      "rawSha256": "19bef3e19cc624248d7c8f1cb799829f7be2ec1740273fe4b2e714686753cc4b",
+      "displayedSha256": "0e07b82735ca147556688e5672d3a0a57730bebf452ca4c8a2693259b985bb6f",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_e6834c1aa98cdb6e24a9": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/99",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def closest_integer(value):\n    num = float(value)\n    if num >= 0:\n        return int(num + 0.5)\n    else:\n        return int(num - 0.5)\n</code>",
+      "rawSha256": "62e9652ff4db07b2ede10054b4c75310c4773f0c798a5f762e71d3258bb94bbb",
+      "displayedSha256": "f576bb755aa65aab00b736d654b299cec44996295000922496e0abdcb726a4f3",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 50
+    },
+    "c_af6cd4c26ef094f8f762": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/56",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def correct_bracketing(brackets: str):\n    count = 0\n    for bracket in brackets:\n        if bracket == '<':\n            count += 1\n        elif bracket == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0\n</code>",
+      "rawSha256": "6e0a1b2a1485b9a3d079029bdfd825a12db92beb54bb2354c63c1ea351f08450",
+      "displayedSha256": "b3fdd55d0d2d496626b6177e95e970fea4ffcd52eaf49f64b861d6f2097f6d04",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_65c61e6f441ee4b34f9f": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/56",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def correct_bracketing(brackets: str):\n    count = 0\n    for bracket in brackets:\n        if bracket == '<':\n            count += 1\n        elif bracket == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0\n</code>",
+      "rawSha256": "6e0a1b2a1485b9a3d079029bdfd825a12db92beb54bb2354c63c1ea351f08450",
+      "displayedSha256": "b3fdd55d0d2d496626b6177e95e970fea4ffcd52eaf49f64b861d6f2097f6d04",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 72
+    },
+    "c_bea29c5cc150cb7794b0": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/67",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fruit_distribution(s, n):\n    import re\n    numbers = re.findall(r'\\d+', s)\n    apples = int(numbers[0])\n    oranges = int(numbers[1])\n    return n - apples - oranges\n</code>",
+      "rawSha256": "9bd6acc0850db4f03ca1bb9241d0481d83fd89662d7f478296a8fa740c2508e8",
+      "displayedSha256": "09eb0969035afaa640fb82929e2554a2f77bfa0d11d2c0e5ac3d8ef3c7eced9a",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_f99a5a939a69aef04642": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/67",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def fruit_distribution(s, n):\n    import re\n    numbers = re.findall(r'\\d+', s)\n    apples = int(numbers[0])\n    oranges = int(numbers[1])\n    return n - apples - oranges\n</code>",
+      "rawSha256": "9bd6acc0850db4f03ca1bb9241d0481d83fd89662d7f478296a8fa740c2508e8",
+      "displayedSha256": "09eb0969035afaa640fb82929e2554a2f77bfa0d11d2c0e5ac3d8ef3c7eced9a",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 53
+    },
+    "c_0aa6e73549401fdb8f97": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/87",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        for j, val in enumerate(row):\n            if val == x:\n                result.append((i, j))\n    # Sort by row ascending, then by column descending\n    result.sort(key=lambda coord: (coord[0], -coord[1]))\n    return result\n</code>",
+      "rawSha256": "e4d15e0c4b6ffa509412fa11a0d52d2e44012c18e90b5fc21f937e6eb9645c23",
+      "displayedSha256": "164bafca06b8dd77244d9f6b3af83783e1f3fd0e20a225d600b9837d45b4955a",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_1c9b9b4440d85b9bd632": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/87",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        for j, val in enumerate(row):\n            if val == x:\n                result.append((i, j))\n    \n    # Sort by row ascending, then by column descending\n    result.sort(key=lambda coord: (coord[0], -coord[1]))\n    \n    return result\n</code>",
+      "rawSha256": "d42d49ed4b8d821a323920a5040221f67e68b01205c2a4f00841638065b4f875",
+      "displayedSha256": "d61345a68390c084b151f7c7a90d917ebf85b6e11f5c02346e9fc1680d445ba4",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 88
+    },
+    "c_ef647539ad1ee733d7f7": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/91",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_bored(S):\n    \"\"\"\n    You'll be given a string of words, and your task is to count the number\n    of boredoms. A boredom is a sentence that starts with the word \"I\".\n    Sentences are delimited by '.', '?' or '!'.\n   \n    For example:\n    >>> is_bored(\"Hello world\")\n    0\n    >>> is_bored(\"The sky is blue. The sun is shining. I love this weather\")\n    1\n    \"\"\"\n    if not S:\n        return 0\n    \n    # Split the string into sentences based on '.', '?', or '!'\n    import re\n    sentences = re.split(r'[.?!]', S)\n    \n    boredom_count = 0\n    for sentence in sentences:\n        # Strip leading/trailing whitespace and check if it starts with \"I\"\n        stripped = sentence.strip()\n        if not stripped:\n            continue\n        # Check if the sentence starts with \"I\" followed by a space or end of string\n        # We need to make sure it's the word \"I\", not just \"I\" as part of another word\n        if stripped.startswith(\"I \") or stripped == \"I\":\n            boredom_count += 1\n            \n    return boredom_count\n</code>",
+      "rawSha256": "abfb3b4fcbebaa538e3ddbe25bf43fcb7793f14ff5331ffff86381bb672e78b2",
+      "displayedSha256": "96877cce9627772b4693159157537f4c8e15816c329b1b795444cba473432369",
+      "automatedTestStatus": "failed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_9ed64d5e9a204ae774cb": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/91",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def is_bored(S):\n    import re\n    sentences = re.split(r'[.?!]', S)\n    count = 0\n    for sentence in sentences:\n        if sentence.strip().startswith(\"I\"):\n            count += 1\n    return count\n</code>",
+      "rawSha256": "b673c06c9a231e789ccb6493049077988a43a8eac2b357d99c7e0d40df16e552",
+      "displayedSha256": "a7b8a365419350ca9e6c4a96c6337fee725d6eafeccede6b504cfdafbe619e31",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 60
+    },
+    "c_091db27baf456bea8a17": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/70",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    \n    sorted_lst = sorted(lst)\n    result = []\n    left = 0\n    right = len(sorted_lst) - 1\n    pick_min = True\n    \n    while left <= right:\n        if pick_min:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        pick_min = not pick_min\n        \n    return result\n</code>",
+      "rawSha256": "5b9700a7f72d5735085f546837cf4f6ea1bc5d925563f74016ccf4490572ef06",
+      "displayedSha256": "e769207a97475eeb0be745e5e1983a604d607b416fff1768eb67386c80d31509",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations",
+      "referenceRole": "unchanged archived common Base from Style pool; not generated in Judge run"
+    },
+    "c_6ead3b15d09bd7da14ad": {
+      "condition": "judge-trained",
+      "run": 38,
+      "taskId": "HumanEval/70",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix\\results\\38\\logs\\eval_lora_holdout\\eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "seed": 3409,
+        "model": "unsloth/Qwen3.6-27B",
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "generationSettingsEvidence": "same archived generation function defaults; formal metadata confirms model, token limit, seed, four generations and chat settings",
+        "checkpointHash": null
+      },
+      "sourceCommit": "6db72159491210cf81e1b7dee3940f1634525572",
+      "recordedRuntimeHashes": {
+        "train.py": "edb8384bc6812850e623edba14a8ae18272e3f804458abbc0f67108775ceddcc",
+        "judge_reliability.py": "2c1940049a7965a0dd221c2e0c6d5e5dbcffa98956dbb8a9f03b291cfdb3829a",
+        "scripts/formal_judge_run.py": "4204f2bc6c3dbb362ae8787c1ff66d002c3f4e07bb07f782e7f35fe488116854",
+        "run_correctness_judge.sh": "ae4cb457f5288c92eee507a52aa51bba77f594eb0d8cddabacfe1064dfdbba80",
+        "configs/correctness_judge_3seeds.sh": "1ef5bc357255a51350e24e2de9ac76c179c612f17daf5517008c396ba5967578",
+        "configs/correctness_judge_smoke.sh": "8003c3a71f856695a73b7ab4f51b790e75c0ee7d5325e76ce1072b39b5243e8c"
+      },
+      "judgeInstrument": {
+        "version": "taxonomy_readability_maintainability_v3",
+        "historical_hash": "50d083c5e7100d2e",
+        "sha256": "50d083c5e7100d2e2bf5d5d94e04e18eb1222d851473b8a51b994fd1bd65c660"
+      },
+      "recordedBackend": "Qwen2.5-32B-Instruct-AWQ",
+      "rawCompletion": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    \n    sorted_lst = sorted(lst)\n    result = []\n    left, right = 0, len(sorted_lst) - 1\n    turn = 0  # 0 for min (left), 1 for max (right)\n    \n    while left <= right:\n        if turn == 0:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        turn = 1 - turn\n    \n    return result\n</code>",
+      "rawSha256": "56dab1dc4caad0fe50cb7ee108d239321fdbcc2ad7e10548485b0c97a117ffdf",
+      "displayedSha256": "879a2c707d65af5ae374232f5180183520140d47ee0057fbea1143f966446aa2",
+      "syntaxStatus": "ok",
+      "completionTokenLength": 132
+    }
+  },
+  "limitations": [
+    "Judge runs contain no eval_base or eval_base_holdout stages; archival same-seed Base from runs 33-35 is reused without regeneration.",
+    "Executed remote runtime hashes are recorded, but the corresponding exact remote source snapshot is not locally available; local formal generation/prompt/extraction function ASTs agree with the archived common source.",
+    "Historical dataset revision and checkpoint binary hashes remain unavailable.",
+    "Same tasks/prompt text and common Base make comparisons directly matched at display level, not a simultaneous regenerated Base control.",
+    "Poor/truncated/syntax-invalid generations are retained; preference is not verified correctness."
+  ]
+}
