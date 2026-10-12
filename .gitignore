@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+.runtime/
+dist/
+qa/
+__pycache__/
+*.local
+participant-results/

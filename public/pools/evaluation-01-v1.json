@@ -1,0 +1,488 @@
+{
+  "schemaVersion": 1,
+  "poolId": "evaluation-01",
+  "version": "1",
+  "protocolVersion": "1",
+  "pairs": [
+    {
+      "pairId": "p_1a5d2efda850c41c",
+      "promptId": "t_838f11b59257e250",
+      "promptText": "\n\ndef monotonic(l: list):\n    \"\"\"Return True is list elements are monotonically increasing or decreasing.\n    >>> monotonic([1, 2, 4, 20])\n    True\n    >>> monotonic([1, 20, 4, 10])\n    False\n    >>> monotonic([4, 1, 0, -10])\n    True\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_0250547a26b0964ce5c1",
+          "code": "def monotonic(l: list):\n    inc = all(l[i] <= l[i + 1] for i in range(len(l) - 1))\n    dec = all(l[i] >= l[i + 1] for i in range(len(l) - 1))\n    return inc or dec"
+        },
+        {
+          "candidateId": "c_8e33030d4a7351e19b87",
+          "code": "def monotonic(l: list):\n    \"\"\"Return True is list elements are monotonically increasing or decreasing.\n    >>> monotonic([1, 2, 4, 20])\n    True\n    >>> monotonic([1, 20, 4, 10])\n    False\n    >>> monotonic([4, 1, 0, -10])\n    True\n    \"\"\"\n    if len(l) <= 1:\n        return True\n    \n    increasing = True\n    decreasing = True\n    \n    for i in range(1, len(l)):\n        if l[i] > l[i-1]:\n            decreasing = False\n        if l[i] < l[i-1]:\n            increasing = False\n            \n    return increasing or decreasing"
+        }
+      ]
+    },
+    {
+      "pairId": "p_1b514c9c570d58ff",
+      "promptId": "t_f5cb1c7b19189999",
+      "promptText": "\ndef will_it_fly(q,w):\n    '''\n    Write a function that returns True if the object q will fly, and False otherwise.\n    The object q will fly if it's balanced (it is a palindromic list) and the sum of its elements is less than or equal the maximum possible weight w.\n\n    Example:\n    will_it_fly([1, 2], 5) ➞ False \n    # 1+2 is less than the maximum possible weight, but it's unbalanced.\n\n    will_it_fly([3, 2, 3], 1) ➞ False\n    # it's balanced, but 3+2+3 is more than the maximum possible weight.\n\n    will_it_fly([3, 2, 3], 9) ➞ True\n    # 3+2+3 is less than the maximum possible weight, and it's balanced.\n\n    will_it_fly([3], 5) ➞ True\n    # 3 is less than the maximum possible weight, and it's balanced.\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_1019f58c1736c6fa06f3",
+          "code": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w"
+        },
+        {
+          "candidateId": "c_efc1991a89b6df4b0baf",
+          "code": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w"
+        }
+      ]
+    },
+    {
+      "pairId": "p_2f664ecb543e78b3",
+      "promptId": "t_9a5c4ea2c95951f5",
+      "promptText": "\ndef circular_shift(x, shift):\n    \"\"\"Circular shift the digits of the integer x, shift the digits right by shift\n    and return the result as a string.\n    If shift > number of digits, return digits reversed.\n    >>> circular_shift(12, 1)\n    \"21\"\n    >>> circular_shift(12, 2)\n    \"12\"\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_9c8556b6b9e0b612563b",
+          "code": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]"
+        },
+        {
+          "candidateId": "c_f5406c7d8fdbd0b5a683",
+          "code": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]"
+        }
+      ]
+    },
+    {
+      "pairId": "p_367916e427a4091c",
+      "promptId": "t_eb8e56493070f0ed",
+      "promptText": "\ndef iscube(a):\n    '''\n    Write a function that takes an integer a and returns True \n    if this ingeger is a cube of some integer number.\n    Note: you may assume the input is always valid.\n    Examples:\n    iscube(1) ==> True\n    iscube(2) ==> False\n    iscube(-1) ==> True\n    iscube(64) ==> True\n    iscube(0) ==> True\n    iscube(180) ==> False\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_5b97531ad9a9dd34bb36",
+          "code": "def iscube(a):\n    if a >= 0:\n        root = round(a ** (1/3))\n        return root ** 3 == a\n    else:\n        root = round((-a) ** (1/3))\n        return (-root) ** 3 == a"
+        },
+        {
+          "candidateId": "c_75e396e331d8c4477086",
+          "code": "def iscube(a):\n    if a >= 0:\n        root = round(a ** (1/3))\n        return root ** 3 == a\n    else:\n        root = round((-a) ** (1/3))\n        return -root ** 3 == a"
+        }
+      ]
+    },
+    {
+      "pairId": "p_3d20b685e768a1bf",
+      "promptId": "t_36327d591bd95858",
+      "promptText": "\ndef total_match(lst1, lst2):\n    '''\n    Write a function that accepts two lists of strings and returns the list that has \n    total number of chars in the all strings of the list less than the other list.\n\n    if the two lists have the same number of chars, return the first list.\n\n    Examples\n    total_match([], []) ➞ []\n    total_match(['hi', 'admin'], ['hI', 'Hi']) ➞ ['hI', 'Hi']\n    total_match(['hi', 'admin'], ['hi', 'hi', 'admin', 'project']) ➞ ['hi', 'admin']\n    total_match(['hi', 'admin'], ['hI', 'hi', 'hi']) ➞ ['hI', 'hi', 'hi']\n    total_match(['4'], ['1', '2', '3', '4', '5']) ➞ ['4']\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_4ca230278cfd37a1844a",
+          "code": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        total = 0\n        for s in lst:\n            total += len(s)\n        return total\n\n    chars1 = count_chars(lst1)\n    chars2 = count_chars(lst2)\n\n    if chars1 <= chars2:\n        return lst1\n    else:\n        return lst2"
+        },
+        {
+          "candidateId": "c_5cb2627ebd01806f75be",
+          "code": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        return sum(len(s) for s in lst)\n    \n    chars1 = count_chars(lst1)\n    chars2 = count_chars(lst2)\n    \n    if chars1 <= chars2:\n        return lst1\n    else:\n        return lst2"
+        }
+      ]
+    },
+    {
+      "pairId": "p_41ac42769c1960c5",
+      "promptId": "t_f13a2ce9fe8cc20c",
+      "promptText": "\ndef hex_key(num):\n    \"\"\"You have been tasked to write a function that receives \n    a hexadecimal number as a string and counts the number of hexadecimal \n    digits that are primes (prime number, or a prime, is a natural number \n    greater than 1 that is not a product of two smaller natural numbers).\n    Hexadecimal digits are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F.\n    Prime numbers are 2, 3, 5, 7, 11, 13, 17,...\n    So you have to determine a number of the following digits: 2, 3, 5, 7, \n    B (=decimal 11), D (=decimal 13).\n    Note: you may assume the input is always correct or empty string, \n    and symbols A,B,C,D,E,F are always uppercase.\n    Examples:\n    For num = \"AB\" the output should be 1.\n    For num = \"1077E\" the output should be 2.\n    For num = \"ABED1A33\" the output should be 4.\n    For num = \"123456789ABCDEF0\" the output should be 6.\n    For num = \"2020\" the output should be 2.\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_1f562e0a48f2dfdf499b",
+          "code": "def hex_key(num):\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    return sum(1 for c in num if c in prime_digits)"
+        },
+        {
+          "candidateId": "c_93f02158236a26ef5740",
+          "code": "def hex_key(num):\n    \"\"\"You have been tasked to write a function that receives \n    a hexadecimal number as a string and counts the number of hexadecimal \n    digits that are primes (prime number, or a prime, is a natural number \n    greater than 1 that is not a product of two smaller natural numbers).\n    Hexadecimal digits are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F.\n    Prime numbers are 2, 3, 5, 7, 11, 13, 17,...\n    So you have to determine a number of the following digits: 2, 3, 5, 7, \n    B (=decimal 11), D (=decimal 13).\n    Note: you may assume the input is always correct or empty string, \n    and symbols A,B,C,D,E,F are always uppercase.\n    Examples:\n    For num = \"AB\" the output should be 1.\n    For num = \"1077E\" the output should be 2.\n    For num = \"ABED1A33\" the output should be 4.\n    For num = \"123456789ABCDEF0\" the output should be 6.\n    For num = \"2020\" the output should be 2.\n    \"\"\"\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    count = 0\n    for digit in num:\n        if digit in prime_digits:\n            count += 1\n    return count"
+        }
+      ]
+    },
+    {
+      "pairId": "p_4e32e16bfe94c2b3",
+      "promptId": "t_ac4555e07d0a71c3",
+      "promptText": "\n\ndef skjkasdkd(lst):\n    \"\"\"You are given a list of integers.\n    You need to find the largest prime value and return the sum of its digits.\n\n    Examples:\n    For lst = [0,3,2,1,3,5,7,4,5,5,5,2,181,32,4,32,3,2,32,324,4,3] the output should be 10\n    For lst = [1,0,1,8,2,4597,2,1,3,40,1,2,1,2,4,2,5,1] the output should be 25\n    For lst = [1,3,1,32,5107,34,83278,109,163,23,2323,32,30,1,9,3] the output should be 13\n    For lst = [0,724,32,71,99,32,6,0,5,91,83,0,5,6] the output should be 11\n    For lst = [0,81,12,3,1,21] the output should be 3\n    For lst = [0,8,1,2,1,7] the output should be 7\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_ae4d333b09120223e783",
+          "code": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(d) for d in str(largest_prime))"
+        },
+        {
+          "candidateId": "c_e5a94347ec698a5f49b1",
+          "code": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(digit) for digit in str(largest_prime))"
+        }
+      ]
+    },
+    {
+      "pairId": "p_4f25e15557b4f01b",
+      "promptId": "t_afb05c037613a73d",
+      "promptText": "\n\ndef largest_prime_factor(n: int):\n    \"\"\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\n    >>> largest_prime_factor(13195)\n    29\n    >>> largest_prime_factor(2048)\n    2\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_9cfe73796db229575ff5",
+          "code": "def largest_prime_factor(n: int):\n    \"\"\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\n    >>> largest_prime_factor(13195)\n    29\n    >>> largest_prime_factor(2048)\n    2\n    \"\"\"\n    largest = -1\n    while n % 2 == 0:\n        largest = 2\n        n //= 2\n    i = 3\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 2\n    if n > 2:\n        largest = n\n    return largest"
+        },
+        {
+          "candidateId": "c_f92899a5ba99903ed228",
+          "code": "def largest_prime_factor(n: int):\n    i = 2\n    largest = -1\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 1\n    if n > 1:\n        largest = n\n    return largest"
+        }
+      ]
+    },
+    {
+      "pairId": "p_71912ecbc2b682e2",
+      "promptId": "t_85631acc557f05cb",
+      "promptText": "\ndef decimal_to_binary(decimal):\n    \"\"\"You will be given a number in decimal form and your task is to convert it to\n    binary format. The function should return a string, with each character representing a binary\n    number. Each character in the string will be '0' or '1'.\n\n    There will be an extra couple of characters 'db' at the beginning and at the end of the string.\n    The extra characters are there to help with the format.\n\n    Examples:\n    decimal_to_binary(15)   # returns \"db1111db\"\n    decimal_to_binary(32)   # returns \"db100000db\"\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_01cfb526c368af104c9e",
+          "code": "def decimal_to_binary(decimal):\n    return f\"db{bin(decimal)[2:]}db\""
+        },
+        {
+          "candidateId": "c_c7932c0b82989e33c829",
+          "code": "def decimal_to_binary(decimal):\n    if decimal == 0:\n        return \"db0db\"\n    binary = bin(decimal)[2:]\n    return f\"db{binary}db\""
+        }
+      ]
+    },
+    {
+      "pairId": "p_8618236e677953d4",
+      "promptId": "t_58ff48a93e326c3f",
+      "promptText": "\n\ndef fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_65bdef42b77723aaf4d0",
+          "code": "def fib(n: int):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b"
+        },
+        {
+          "candidateId": "c_e2353e6359ca0ce07159",
+          "code": "def fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"n must be a positive integer\")\n    if n == 1:\n        return 1\n    if n == 2:\n        return 1\n    a, b = 1, 1\n    for _ in range(2, n):\n        a, b = b, a + b\n    return b"
+        }
+      ]
+    },
+    {
+      "pairId": "p_8dad4fe64a9b5bde",
+      "promptId": "t_e0db63f723dbf699",
+      "promptText": "\ndef numerical_letter_grade(grades):\n    \"\"\"It is the last week of the semester and the teacher has to give the grades\n    to students. The teacher has been making her own algorithm for grading.\n    The only problem is, she has lost the code she used for grading.\n    She has given you a list of GPAs for some students and you have to write \n    a function that can output a list of letter grades using the following table:\n             GPA       |    Letter grade\n              4.0                A+\n            > 3.7                A \n            > 3.3                A- \n            > 3.0                B+\n            > 2.7                B \n            > 2.3                B-\n            > 2.0                C+\n            > 1.7                C\n            > 1.3                C-\n            > 1.0                D+ \n            > 0.7                D \n            > 0.0                D-\n              0.0                E\n    \n\n    Example:\n    grade_equation([4.0, 3, 1.7, 2, 3.5]) ==> ['A+', 'B', 'C-', 'C', 'A-']\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_a0f3225282d4ea50754a",
+          "code": "def numerical_letter_grade(grades):\n    result = []\n    for gpa in grades:\n        if gpa == 4.0:\n            result.append('A+')\n        elif gpa > 3.7:\n            result.append('A')\n        elif gpa > 3.3:\n            result.append('A-')\n        elif gpa > 3.0:\n            result.append('B+')\n        elif gpa > 2.7:\n            result.append('B')\n        elif gpa > 2.3:\n            result.append('B-')\n        elif gpa > 2.0:\n            result.append('C+')\n        elif gpa > 1.7:\n            result.append('C')\n        elif gpa > 1.3:\n            result.append('C-')\n        elif gpa > 1.0:\n            result.append('D+')\n        elif gpa > 0.7:\n            result.append('D')\n        elif gpa > 0.0:\n            result.append('D-')\n        else:\n            result.append('E')\n    return result"
+        },
+        {
+          "candidateId": "c_e31659c73467399dda51",
+          "code": "def numerical_letter_grade(grades):\n    result = []\n    for g in grades:\n        if g == 4.0:\n            result.append('A+')\n        elif g > 3.7:\n            result.append('A')\n        elif g > 3.3:\n            result.append('A-')\n        elif g > 3.0:\n            result.append('B+')\n        elif g > 2.7:\n            result.append('B')\n        elif g > 2.3:\n            result.append('B-')\n        elif g > 2.0:\n            result.append('C+')\n        elif g > 1.7:\n            result.append('C')\n        elif g > 1.3:\n            result.append('C-')\n        elif g > 1.0:\n            result.append('D+')\n        elif g > 0.7:\n            result.append('D')\n        elif g > 0.0:\n            result.append('D-')\n        else:\n            result.append('E')\n    return result"
+        }
+      ]
+    },
+    {
+      "pairId": "p_8f581c5f08ceebe5",
+      "promptId": "t_be1ee02ddbb8064c",
+      "promptText": "\n\ndef remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_149dabf4d4f4dec288a8",
+          "code": "def remove_vowels(text):\n    vowels = 'aeiouAEIOU'\n    return ''.join(char for char in text if char not in vowels)"
+        },
+        {
+          "candidateId": "c_c007ea33b7138f68941c",
+          "code": "def remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n    vowels = set('aeiouAEIOU')\n    return ''.join(char for char in text if char not in vowels)"
+        }
+      ]
+    },
+    {
+      "pairId": "p_94209d2a08249397",
+      "promptId": "t_69dd8d045385471d",
+      "promptText": "\ndef count_up_to(n):\n    \"\"\"Implement a function that takes an non-negative integer and returns an array of the first n\n    integers that are prime numbers and less than n.\n    for example:\n    count_up_to(5) => [2,3]\n    count_up_to(11) => [2,3,5,7]\n    count_up_to(0) => []\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\n    count_up_to(1) => []\n    count_up_to(18) => [2,3,5,7,11,13,17]\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_4f88d7ab99b85a0b6f3f",
+          "code": "def count_up_to(n):\n    def is_prime(num):\n        if num < 2:\n            return False\n        for i in range(2, int(num ** 0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n\n    return [i for i in range(2, n) if is_prime(i)]"
+        },
+        {
+          "candidateId": "c_d1d6efbd8209102026c4",
+          "code": "def count_up_to(n):\n    \"\"\"Implement a function that takes an non-negative integer and returns an array of the first n\n    integers that are prime numbers and less than n.\n    for example:\n    count_up_to(5) => [2,3]\n    count_up_to(11) => [2,3,5,7]\n    count_up_to(0) => []\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\n    count_up_to(1) => []\n    count_up_to(18) => [2,3,5,7,11,13,17]\n    \"\"\"\n    if n <= 1:\n        return []\n    \n    primes = []\n    is_prime = [True] * n\n    is_prime[0] = False\n    is_prime[1] = False\n    \n    for i in range(2, n):\n        if is_prime[i]:\n            primes.append(i)\n            for j in range(i * i, n, i):\n                is_prime[j] = False\n                \n    return primes"
+        }
+      ]
+    },
+    {
+      "pairId": "p_b5b74c6460bfe0a5",
+      "promptId": "t_eb7e81a5bec9e5e1",
+      "promptText": "\n\ndef derivative(xs: list):\n    \"\"\" xs represent coefficients of a polynomial.\n    xs[0] + xs[1] * x + xs[2] * x^2 + ....\n     Return derivative of this polynomial in the same form.\n    >>> derivative([3, 1, 2, 4, 5])\n    [1, 4, 12, 20]\n    >>> derivative([1, 2, 3])\n    [2, 6]\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_053d7bcbb708cf75555f",
+          "code": "def derivative(xs: list):\n    if not xs:\n        return []\n    return [coeff * i for i, coeff in enumerate(xs[1:], start=1)]"
+        },
+        {
+          "candidateId": "c_718715adcfac8606f4f0",
+          "code": "def derivative(xs: list):\n    if len(xs) <= 1:\n        return []\n    return [xs[i] * i for i in range(1, len(xs))]"
+        }
+      ]
+    },
+    {
+      "pairId": "p_b87a8f48ff79e669",
+      "promptId": "t_501e882077cae401",
+      "promptText": "\ndef is_simple_power(x, n):\n    \"\"\"Your task is to write a function that returns true if a number x is a simple\n    power of n and false in other cases.\n    x is a simple power of n if n**int=x\n    For example:\n    is_simple_power(1, 4) => true\n    is_simple_power(2, 2) => true\n    is_simple_power(8, 2) => true\n    is_simple_power(3, 2) => false\n    is_simple_power(3, 1) => false\n    is_simple_power(5, 3) => false\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_0f6e280d4aaf65b047a3",
+          "code": "def is_simple_power(x, n):\n    if n == 1:\n        return x == 1\n    if n == 0:\n        return x == 1 or x == 0\n    import math\n    if x <= 0:\n        return False\n    log_val = math.log(x) / math.log(n)\n    rounded = round(log_val)\n    return n ** rounded == x"
+        },
+        {
+          "candidateId": "c_20d79787c93a7e92546e",
+          "code": "def is_simple_power(x, n):\n    if n == 1:\n        return x == 1\n    if n == 0:\n        return x == 1\n    import math\n    if x <= 0:\n        return False\n    log_x = math.log(x)\n    log_n = math.n\n    if log_n == 0:\n        return False\n    power = log_x / log_n\n    if abs(power - round(power)) > 1e-10:\n        return False\n    return n ** int(round(power)) == x"
+        }
+      ]
+    },
+    {
+      "pairId": "p_ba2396e425764140",
+      "promptId": "t_6cf1eaca1934a15b",
+      "promptText": "\ndef digitSum(s):\n    \"\"\"Task\n    Write a function that takes a string as input and returns the sum of the upper characters only'\n    ASCII codes.\n\n    Examples:\n        digitSum(\"\") => 0\n        digitSum(\"abAB\") => 131\n        digitSum(\"abcCd\") => 67\n        digitSum(\"helloE\") => 69\n        digitSum(\"woArBld\") => 131\n        digitSum(\"aAaaaXa\") => 153\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_4fe6b885d484967e6c55",
+          "code": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())"
+        },
+        {
+          "candidateId": "c_ec6eb93028938c315e88",
+          "code": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())"
+        }
+      ]
+    },
+    {
+      "pairId": "p_caff191101e42a71",
+      "promptId": "t_ac211ab8ad53e1d3",
+      "promptText": "\ndef closest_integer(value):\n    '''\n    Create a function that takes a value (string) representing a number\n    and returns the closest integer to it. If the number is equidistant\n    from two integers, round it away from zero.\n\n    Examples\n    >>> closest_integer(\"10\")\n    10\n    >>> closest_integer(\"15.3\")\n    15\n\n    Note:\n    Rounding away from zero means that if the given number is equidistant\n    from two integers, the one you should return is the one that is the\n    farthest from zero. For example closest_integer(\"14.5\") should\n    return 15 and closest_integer(\"-14.5\") should return -15.\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_512c32d30599e7a4f448",
+          "code": "def closest_integer(value):\n    '''\n    Create a function that takes a value (string) representing a number\n    and returns the closest integer to it. If the number is equidistant\n    from two integers, round it away from zero.\n\n    Examples\n    >>> closest_integer(\"10\")\n    10\n    >>> closest_integer(\"15.3\")\n    15\n\n    Note:\n    Rounding away from zero means that if the given number is equidistant\n    from two integers, the one you should return is the one that is the\n    farthest from zero. For example closest_integer(\"14.5\") should\n    return 15 and closest_integer(\"-14.5\") should return -15.\n    '''\n    import math\n    num = float(value)\n    if num >= 0:\n        return math.floor(num + 0.5)\n    else:\n        return math.ceil(num - 0.5)"
+        },
+        {
+          "candidateId": "c_d479fab29ef6df38b3ab",
+          "code": "def closest_integer(value):\n    num = float(value)\n    if num >= 0:\n        return int(num + 0.5)\n    else:\n        return int(num - 0.5)"
+        }
+      ]
+    },
+    {
+      "pairId": "p_d445d3c9c9404c04",
+      "promptId": "t_d1f91125b3350ab6",
+      "promptText": "\n\ndef correct_bracketing(brackets: str):\n    \"\"\" brackets is a string of \"<\" and \">\".\n    return True if every opening bracket has a corresponding closing bracket.\n\n    >>> correct_bracketing(\"<\")\n    False\n    >>> correct_bracketing(\"<>\")\n    True\n    >>> correct_bracketing(\"<<><>>\")\n    True\n    >>> correct_bracketing(\"><<>\")\n    False\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_af6cd4c26ef094f8f762",
+          "code": "def correct_bracketing(brackets: str):\n    count = 0\n    for bracket in brackets:\n        if bracket == '<':\n            count += 1\n        elif bracket == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0"
+        },
+        {
+          "candidateId": "c_f768a327e2ecebb22fa9",
+          "code": "def correct_bracketing(brackets: str):\n    count = 0\n    for b in brackets:\n        if b == '<':\n            count += 1\n        elif b == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0"
+        }
+      ]
+    },
+    {
+      "pairId": "p_d5060baa55190969",
+      "promptId": "t_2a3fd79f09430b34",
+      "promptText": "\ndef is_multiply_prime(a):\n    \"\"\"Write a function that returns true if the given number is the multiplication of 3 prime numbers\n    and false otherwise.\n    Knowing that (a) is less then 100. \n    Example:\n    is_multiply_prime(30) == True\n    30 = 2 * 3 * 5\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_106ca3752f38cb367a32",
+          "code": "def is_multiply_prime(a):\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n**0.5) + 1):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [i for i in range(2, a) if is_prime(i)]\n    \n    for i in range(len(primes)):\n        for j in range(i, len(primes)):\n            for k in range(j, len(primes)):\n                if primes[i] * primes[j] * primes[k] == a:\n                    return True\n    return False"
+        },
+        {
+          "candidateId": "c_6cb774a030f49c842fc0",
+          "code": "def is_multiply_prime(a):\n    primes = [p for p in range(2, 100) if all(p % d != 0 for d in range(2, int(p**0.5) + 1))]\n    count = 0\n    for p in primes:\n        while a % p == 0:\n            a //= p\n            count += 1\n    return count == 3 and a == 1"
+        }
+      ]
+    },
+    {
+      "pairId": "p_d61ebc387fc6a512",
+      "promptId": "t_38f458158d34b7fb",
+      "promptText": "\ndef fruit_distribution(s,n):\n    \"\"\"\n    In this task, you will be given a string that represents a number of apples and oranges \n    that are distributed in a basket of fruit this basket contains \n    apples, oranges, and mango fruits. Given the string that represents the total number of \n    the oranges and apples and an integer that represent the total number of the fruits \n    in the basket return the number of the mango fruits in the basket.\n    for examble:\n    fruit_distribution(\"5 apples and 6 oranges\", 19) ->19 - 5 - 6 = 8\n    fruit_distribution(\"0 apples and 1 oranges\",3) -> 3 - 0 - 1 = 2\n    fruit_distribution(\"2 apples and 3 oranges\", 100) -> 100 - 2 - 3 = 95\n    fruit_distribution(\"100 apples and 1 oranges\",120) -> 120 - 100 - 1 = 19\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_8d183ba29743780ea19b",
+          "code": "def fruit_distribution(s, n):\n    parts = s.split()\n    apples = int(parts[0])\n    oranges = int(parts[2])\n    return n - apples - oranges"
+        },
+        {
+          "candidateId": "c_bea29c5cc150cb7794b0",
+          "code": "def fruit_distribution(s, n):\n    import re\n    numbers = re.findall(r'\\d+', s)\n    apples = int(numbers[0])\n    oranges = int(numbers[1])\n    return n - apples - oranges"
+        }
+      ]
+    },
+    {
+      "pairId": "p_d7fc5f2bf7812fba",
+      "promptId": "t_49bd100cd1fe4828",
+      "promptText": "\ndef prime_length(string):\n    \"\"\"Write a function that takes a string and returns True if the string\n    length is a prime number or False otherwise\n    Examples\n    prime_length('Hello') == True\n    prime_length('abcdcba') == True\n    prime_length('kittens') == True\n    prime_length('orange') == False\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_a0175391b52307948cfb",
+          "code": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True"
+        },
+        {
+          "candidateId": "c_bf7614b49e28e23ea72d",
+          "code": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True"
+        }
+      ]
+    },
+    {
+      "pairId": "p_da535326bd0d56c1",
+      "promptId": "t_05ac11bcee956da2",
+      "promptText": "\ndef solve(N):\n    \"\"\"Given a positive integer N, return the total sum of its digits in binary.\n    \n    Example\n        For N = 1000, the sum of digits will be 1 the output should be \"1\".\n        For N = 150, the sum of digits will be 6 the output should be \"110\".\n        For N = 147, the sum of digits will be 12 the output should be \"1100\".\n    \n    Variables:\n        @N integer\n             Constraints: 0 ≤ N ≤ 10000.\n    Output:\n         a string of binary number\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_311dc1b4b0f0ac96c81a",
+          "code": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]"
+        },
+        {
+          "candidateId": "c_7e287cc5d9ccef318a23",
+          "code": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]"
+        }
+      ]
+    },
+    {
+      "pairId": "p_dc8cc1a7922f5a2d",
+      "promptId": "t_80503f9aec51b035",
+      "promptText": "\ndef search(lst):\n    '''\n    You are given a non-empty list of positive integers. Return the greatest integer that is greater than \n    zero, and has a frequency greater than or equal to the value of the integer itself. \n    The frequency of an integer is the number of times it appears in the list.\n    If no such a value exist, return -1.\n    Examples:\n        search([4, 1, 2, 2, 3, 1]) == 2\n        search([1, 2, 2, 3, 3, 3, 4, 4, 4]) == 3\n        search([5, 5, 4, 4, 4]) == -1\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_29a049a93388955b0487",
+          "code": "def search(lst):\n    from collections import Counter\n    counts = Counter(lst)\n    result = -1\n    for num, freq in counts.items():\n        if num > 0 and freq >= num:\n            if num > result:\n                result = num\n    return result"
+        },
+        {
+          "candidateId": "c_40b6897d493a63a9d0ae",
+          "code": "def search(lst):\n    from collections import Counter\n    freq = Counter(lst)\n    candidates = [num for num, count in freq.items() if num > 0 and count >= num]\n    return max(candidates) if candidates else -1"
+        }
+      ]
+    },
+    {
+      "pairId": "p_e4a72286cb154787",
+      "promptId": "t_5122472887b985fd",
+      "promptText": "\ndef get_row(lst, x):\n    \"\"\"\n    You are given a 2 dimensional data, as a nested lists,\n    which is similar to matrix, however, unlike matrices,\n    each row may contain a different number of columns.\n    Given lst, and integer x, find integers x in the list,\n    and return list of tuples, [(x1, y1), (x2, y2) ...] such that\n    each tuple is a coordinate - (row, columns), starting with 0.\n    Sort coordinates initially by rows in ascending order.\n    Also, sort coordinates of the row by columns in descending order.\n    \n    Examples:\n    get_row([\n      [1,2,3,4,5,6],\n      [1,2,3,4,1,6],\n      [1,2,3,4,5,1]\n    ], 1) == [(0, 0), (1, 4), (1, 0), (2, 5), (2, 0)]\n    get_row([], 1) == []\n    get_row([[], [1], [1, 2, 3]], 3) == [(2, 2)]\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_0aa6e73549401fdb8f97",
+          "code": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        for j, val in enumerate(row):\n            if val == x:\n                result.append((i, j))\n    # Sort by row ascending, then by column descending\n    result.sort(key=lambda coord: (coord[0], -coord[1]))\n    return result"
+        },
+        {
+          "candidateId": "c_d4f4f658d3a709ba02e6",
+          "code": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        row_coords = [j for j, val in enumerate(row) if val == x]\n        row_coords.reverse()\n        for j in row_coords:\n            result.append((i, j))\n    return result"
+        }
+      ]
+    },
+    {
+      "pairId": "p_e68b475e7980a856",
+      "promptId": "t_a4314dada4015958",
+      "promptText": "\n\ndef fibfib(n: int):\n    \"\"\"The FibFib number sequence is a sequence similar to the Fibbonacci sequnece that's defined as follows:\n    fibfib(0) == 0\n    fibfib(1) == 0\n    fibfib(2) == 1\n    fibfib(n) == fibfib(n-1) + fibfib(n-2) + fibfib(n-3).\n    Please write a function to efficiently compute the n-th element of the fibfib number sequence.\n    >>> fibfib(1)\n    0\n    >>> fibfib(5)\n    4\n    >>> fibfib(8)\n    24\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_9b265a2612a0d0ce1467",
+          "code": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    return c"
+        },
+        {
+          "candidateId": "c_d35b43fa6f2c234e5fe7",
+          "code": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    \n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    \n    return c"
+        }
+      ]
+    },
+    {
+      "pairId": "p_f577ff1a22456906",
+      "promptId": "t_6cba8b3d0605817f",
+      "promptText": "\ndef count_upper(s):\n    \"\"\"\n    Given a string s, count the number of uppercase vowels in even indices.\n    \n    For example:\n    count_upper('aBCdEf') returns 1\n    count_upper('abcdefg') returns 0\n    count_upper('dBBE') returns 0\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_2d35ad6875964170c44c",
+          "code": "def count_upper(s):\n    \"\"\"\n    Given a string s, count the number of uppercase vowels in even indices.\n    \n    For example:\n    count_upper('aBCdEf') returns 1\n    count_upper('abcdefg') returns 0\n    count_upper('dBBE') returns 0\n    \"\"\"\n    uppercase_vowels = set('AEIOU')\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in uppercase_vowels:\n            count += 1\n    return count"
+        },
+        {
+          "candidateId": "c_721c4c268092371033c5",
+          "code": "def count_upper(s):\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in 'AEIOU':\n            count += 1\n    return count"
+        }
+      ]
+    },
+    {
+      "pairId": "p_f82d6f9e09aa1f70",
+      "promptId": "t_16630b3cfa38242c",
+      "promptText": "\ndef sort_array(array):\n    \"\"\"\n    Given an array of non-negative integers, return a copy of the given array after sorting,\n    you will sort the given array in ascending order if the sum( first index value, last index value) is odd,\n    or sort it in descending order if the sum( first index value, last index value) is even.\n\n    Note:\n    * don't change the given array.\n\n    Examples:\n    * sort_array([]) => []\n    * sort_array([5]) => [5]\n    * sort_array([2, 4, 3, 0, 1, 5]) => [0, 1, 2, 3, 4, 5]\n    * sort_array([2, 4, 3, 0, 1, 5, 6]) => [6, 5, 4, 3, 2, 1, 0]\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_9028ebbdf7e4ab990a3f",
+          "code": "def sort_array(array):\n    if not array:\n        return []\n    if (array[0] + array[-1]) % 2 == 1:\n        return sorted(array)\n    else:\n        return sorted(array, reverse=True)"
+        },
+        {
+          "candidateId": "c_d4178d02917c7bf5b6b9",
+          "code": "def sort_array(array):\n    if not array:\n        return []\n    \n    first = array[0]\n    last = array[-1]\n    total = first + last\n    \n    sorted_arr = sorted(array)\n    \n    if total % 2 == 1:\n        return sorted_arr\n    else:\n        return sorted_arr[::-1]"
+        }
+      ]
+    },
+    {
+      "pairId": "p_fd07b39d5f5c37ec",
+      "promptId": "t_018086361691188d",
+      "promptText": "\ndef is_bored(S):\n    \"\"\"\n    You'll be given a string of words, and your task is to count the number\n    of boredoms. A boredom is a sentence that starts with the word \"I\".\n    Sentences are delimited by '.', '?' or '!'.\n   \n    For example:\n    >>> is_bored(\"Hello world\")\n    0\n    >>> is_bored(\"The sky is blue. The sun is shining. I love this weather\")\n    1\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_027131686e192967df72",
+          "code": "def is_bored(S):\n    import re\n    sentences = re.split(r'[.?!]', S)\n    count = 0\n    for sentence in sentences:\n        if sentence.strip().startswith(\"I\"):\n            count += 1\n    return count"
+        },
+        {
+          "candidateId": "c_ef647539ad1ee733d7f7",
+          "code": "def is_bored(S):\n    \"\"\"\n    You'll be given a string of words, and your task is to count the number\n    of boredoms. A boredom is a sentence that starts with the word \"I\".\n    Sentences are delimited by '.', '?' or '!'.\n   \n    For example:\n    >>> is_bored(\"Hello world\")\n    0\n    >>> is_bored(\"The sky is blue. The sun is shining. I love this weather\")\n    1\n    \"\"\"\n    if not S:\n        return 0\n    \n    # Split the string into sentences based on '.', '?', or '!'\n    import re\n    sentences = re.split(r'[.?!]', S)\n    \n    boredom_count = 0\n    for sentence in sentences:\n        # Strip leading/trailing whitespace and check if it starts with \"I\"\n        stripped = sentence.strip()\n        if not stripped:\n            continue\n        # Check if the sentence starts with \"I\" followed by a space or end of string\n        # We need to make sure it's the word \"I\", not just \"I\" as part of another word\n        if stripped.startswith(\"I \") or stripped == \"I\":\n            boredom_count += 1\n            \n    return boredom_count"
+        }
+      ]
+    },
+    {
+      "pairId": "p_fd5f0db556af17f3",
+      "promptId": "t_db3eff1bec83b7ad",
+      "promptText": "\ndef strange_sort_list(lst):\n    '''\n    Given list of integers, return list in strange order.\n    Strange sorting, is when you start with the minimum value,\n    then maximum of the remaining integers, then minimum and so on.\n\n    Examples:\n    strange_sort_list([1, 2, 3, 4]) == [1, 4, 2, 3]\n    strange_sort_list([5, 5, 5, 5]) == [5, 5, 5, 5]\n    strange_sort_list([]) == []\n    '''\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_091db27baf456bea8a17",
+          "code": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    \n    sorted_lst = sorted(lst)\n    result = []\n    left = 0\n    right = len(sorted_lst) - 1\n    pick_min = True\n    \n    while left <= right:\n        if pick_min:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        pick_min = not pick_min\n        \n    return result"
+        },
+        {
+          "candidateId": "c_488e1dc903af990bab36",
+          "code": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    sorted_lst = sorted(lst)\n    result = []\n    left, right = 0, len(sorted_lst) - 1\n    turn_min = True\n    while left <= right:\n        if turn_min:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        turn_min = not turn_min\n    return result"
+        }
+      ]
+    },
+    {
+      "pairId": "p_fe7330eaff43b09d",
+      "promptId": "t_3c6fff5d09ed505c",
+      "promptText": "\ndef check_dict_case(dict):\n    \"\"\"\n    Given a dictionary, return True if all keys are strings in lower \n    case or all keys are strings in upper case, else return False.\n    The function should return False is the given dictionary is empty.\n    Examples:\n    check_dict_case({\"a\":\"apple\", \"b\":\"banana\"}) should return True.\n    check_dict_case({\"a\":\"apple\", \"A\":\"banana\", \"B\":\"banana\"}) should return False.\n    check_dict_case({\"a\":\"apple\", 8:\"banana\", \"a\":\"apple\"}) should return False.\n    check_dict_case({\"Name\":\"John\", \"Age\":\"36\", \"City\":\"Houston\"}) should return False.\n    check_dict_case({\"STATE\":\"NC\", \"ZIP\":\"12345\" }) should return True.\n    \"\"\"\n",
+      "language": "python",
+      "candidates": [
+        {
+          "candidateId": "c_2adb6fec63f930d51b99",
+          "code": "def check_dict_case(dict):\n    if not dict:\n        return False\n    keys = list(dict.keys())\n    if not all(isinstance(k, str) for k in keys):\n        return False\n    return all(k.islower() for k in keys) or all(k.isupper() for k in keys)"
+        },
+        {
+          "candidateId": "c_e25fa848e26b5b3b532a",
+          "code": "def check_dict_case(dict):\n    if not dict:\n        return False\n    \n    # Check if all keys are strings\n    if not all(isinstance(k, str) for k in dict.keys()):\n        return False\n    \n    # Check if all keys are lower case\n    all_lower = all(k.islower() for k in dict.keys())\n    # Check if all keys are upper case\n    all_upper = all(k.isupper() for k in dict.keys())\n    \n    return all_lower or all_upper"
+        }
+      ]
+    }
+  ]
+}

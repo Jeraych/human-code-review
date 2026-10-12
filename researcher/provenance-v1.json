@@ -1,0 +1,1529 @@
+{
+  "poolHash": "3bd17a5a0a0810b3e7c9ef3ad48ffe8775ceb5ebfea4b534e6e4afe4451c1d70",
+  "sourceCommit": "8cc4accd0c687a040543a791e472e3f5b236e2e2",
+  "inputsSha256": {
+    "UnSloth-RL-heplus-fix\\results\\33\\eval_base_holdout_tasks.csv": "1b3aab33a1cc549b0388d52be1ca4d122b2000f31f4856cd4f7a2ebf62bc5e81",
+    "UnSloth-RL-heplus-fix\\results\\33\\base_holdout.log": "ebfef90c768ec68948d5af43dc20cb84b5bf08b7f0a809cb5ab81eebd8fef901",
+    "UnSloth-RL-heplus-fix\\results\\33\\eval_lora_holdout_tasks.csv": "bca19a16b0ca3c183d71d6b5997c97f05e40a52110778d902bc9923fb619c93f",
+    "UnSloth-RL-heplus-fix\\results\\33\\lora_holdout.log": "3a58a334fef57ebd1e7c8443c328f157850272e953885d157d71fb7a79b85c61",
+    "UnSloth-RL-heplus-fix\\results\\33\\before_after_code.csv": "7c75193152987783ba84d8c84c55ffe11ae8ec227e5cd05a3ccca287efbddca4",
+    "UnSloth-RL-heplus-fix\\results\\34\\eval_base_holdout_tasks.csv": "18e0d248439132b46f17be3d64787538550aafdecbd38b58155dadf468c063bf",
+    "UnSloth-RL-heplus-fix\\results\\34\\base_holdout.log": "ec868cb1d3b68d1a50b041021984fa47ea6ed55731c481f23dd308cd2b864c36",
+    "UnSloth-RL-heplus-fix\\results\\34\\eval_lora_holdout_tasks.csv": "77610c477353597b9824096d463ac71a7cd48aa2601c34965dae6f3f4afb5f96",
+    "UnSloth-RL-heplus-fix\\results\\34\\lora_holdout.log": "141c10348a1b60f42913c148c9d2b47b6fd165f613aedfaafd2a0b97a563542e",
+    "UnSloth-RL-heplus-fix\\results\\34\\before_after_code.csv": "c098306781fe1b2df46675ff53d40c9b270e8150f50921cd2bd2f52db5a8ca3c",
+    "UnSloth-RL-heplus-fix\\results\\35\\eval_base_holdout_tasks.csv": "7a8c4c613ec81d4a747203f55e598c28517300c7e2c6cfcc96fc0f50ecdd7134",
+    "UnSloth-RL-heplus-fix\\results\\35\\base_holdout.log": "daa6a721597ae9644819100b9bf7174a4564628f79b81c6595148a1efc4547d9",
+    "UnSloth-RL-heplus-fix\\results\\35\\eval_lora_holdout_tasks.csv": "593ace9e1dae6206a029a57e1120be4c512852f11f0feb2925727090b379ee09",
+    "UnSloth-RL-heplus-fix\\results\\35\\lora_holdout.log": "c38e2f414291ae4b32e4604a096a0f563c6e809d5c2e2274118ffe5a5c580f4e",
+    "UnSloth-RL-heplus-fix\\results\\35\\before_after_code.csv": "44efc1806b9a4222724c1f024404ee5277d48114cc21ed17c3e0fe30139b318b",
+    "UnSloth-RL\\results\\heplus_rows_0.json": "d48237eb488921781c4d7f29b22233a680346762c4515552663588ed2ae5d8d0"
+  },
+  "dataset": {
+    "name": "evalplus/humanevalplus",
+    "split": "test",
+    "revision": null,
+    "snapshot": "UnSloth-RL\\results\\heplus_rows_0.json"
+  },
+  "extractionFunctionSha256": "e37ee3ba6e8de87332a87a4ffbdf95bb3809e799714e1cd4deac2f1d44db8259",
+  "validation": [
+    {
+      "run": 33,
+      "seed": 3407,
+      "validatedRowsPerCondition": 200,
+      "selectedTasks": [
+        57,
+        94,
+        62,
+        59,
+        72,
+        77,
+        95,
+        84,
+        63,
+        82
+      ]
+    },
+    {
+      "run": 34,
+      "seed": 3408,
+      "validatedRowsPerCondition": 200,
+      "selectedTasks": [
+        51,
+        98,
+        69,
+        81,
+        88,
+        79,
+        96,
+        75,
+        55,
+        78
+      ]
+    },
+    {
+      "run": 35,
+      "seed": 3409,
+      "validatedRowsPerCondition": 200,
+      "selectedTasks": [
+        65,
+        74,
+        70,
+        66,
+        91,
+        67,
+        87,
+        99,
+        76,
+        56
+      ]
+    }
+  ],
+  "candidates": {
+    "c_8e33030d4a7351e19b87": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/57",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def monotonic(l: list):\n    \"\"\"Return True is list elements are monotonically increasing or decreasing.\n    >>> monotonic([1, 2, 4, 20])\n    True\n    >>> monotonic([1, 20, 4, 10])\n    False\n    >>> monotonic([4, 1, 0, -10])\n    True\n    \"\"\"\n    if len(l) <= 1:\n        return True\n    \n    increasing = True\n    decreasing = True\n    \n    for i in range(1, len(l)):\n        if l[i] > l[i-1]:\n            decreasing = False\n        if l[i] < l[i-1]:\n            increasing = False\n            \n    return increasing or decreasing\n</code>",
+      "rawSha256": "1e81a5f92be6ce9501fedf76d6201483362259461e311bc348ff74fee1f630b2",
+      "displayedSha256": "9664dcced0aaeea5bef9cb0655bc4f22d05c609e81b67148e1e40794ca56c0a3",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_0250547a26b0964ce5c1": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/57",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def monotonic(l: list):\n    inc = all(l[i] <= l[i + 1] for i in range(len(l) - 1))\n    dec = all(l[i] >= l[i + 1] for i in range(len(l) - 1))\n    return inc or dec\n</code>",
+      "rawSha256": "c02b6afcdede65953cad9f86fadad0ef1743e2f8f1aabf2c31b6f3fdfa64131c",
+      "displayedSha256": "6da6ebbae2eeac453d9411a683a831a415dc669d1530c361291ebdf3ce202144",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_e5a94347ec698a5f49b1": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/94",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(digit) for digit in str(largest_prime))\n</code>",
+      "rawSha256": "43ee7d87a390b62f2ca1b59fe6fac1bcc9c8b7f6bbea8be299d716836a23b3c5",
+      "displayedSha256": "b9ef9e3a7cf31700c36c74b1337ed2fa52d8b9220717c7c55c82fe01feb42002",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_ae4d333b09120223e783": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/94",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def skjkasdkd(lst):\n    def is_prime(n):\n        if n < 2:\n            return False\n        if n == 2:\n            return True\n        if n % 2 == 0:\n            return False\n        for i in range(3, int(n**0.5) + 1, 2):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [x for x in lst if is_prime(x)]\n    if not primes:\n        return 0\n    largest_prime = max(primes)\n    return sum(int(d) for d in str(largest_prime))\n</code>",
+      "rawSha256": "b747efd29910ed6a90dbb0e24e6b95c346730c52a6c47d83622a2f3e3590751a",
+      "displayedSha256": "b9e306204b3609979ee40e75b0a737a2142ac4e0843d476bec94189018d56e08",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_718715adcfac8606f4f0": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/62",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def derivative(xs: list):\n    if len(xs) <= 1:\n        return []\n    return [xs[i] * i for i in range(1, len(xs))]\n</code>",
+      "rawSha256": "8c5146f772e3a01771e97c58caccfbe49872024da2ea24f90232dd57b9061acf",
+      "displayedSha256": "b2d1a6635eb4371740e94cc69775972eba3595cf0f1ab4e9b04114fa1c8f6f33",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_053d7bcbb708cf75555f": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/62",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def derivative(xs: list):\n    if not xs:\n        return []\n    return [coeff * i for i, coeff in enumerate(xs[1:], start=1)]\n</code>",
+      "rawSha256": "4cccbc94c8f69b2de3573eeb3f3beca1e4c7b2d7acaec6e0670569e628b991e4",
+      "displayedSha256": "46f868f4c720ed81e752ea6518210338b0abe1abac22065544a3236b5af247a2",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_9cfe73796db229575ff5": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/59",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def largest_prime_factor(n: int):\n    \"\"\"Return the largest prime factor of n. Assume n > 1 and is not a prime.\n    >>> largest_prime_factor(13195)\n    29\n    >>> largest_prime_factor(2048)\n    2\n    \"\"\"\n    largest = -1\n    while n % 2 == 0:\n        largest = 2\n        n //= 2\n    i = 3\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 2\n    if n > 2:\n        largest = n\n    return largest\n</code>",
+      "rawSha256": "b0eaff7b8339d0e806414391ad201647f04485bbd19e3d64dfb69049558e927b",
+      "displayedSha256": "8b810720671492ab0f105bbec664913a015cb317f2aab05a6c19bbb1afdfe238",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_f92899a5ba99903ed228": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/59",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def largest_prime_factor(n: int):\n    i = 2\n    largest = -1\n    while i * i <= n:\n        while n % i == 0:\n            largest = i\n            n //= i\n        i += 1\n    if n > 1:\n        largest = n\n    return largest\n</code>",
+      "rawSha256": "a6576c4196cef1a3d96ac410d0e570e87aa8f474b748bd23f01babec7a2c1e47",
+      "displayedSha256": "5b93fb2f4bab7f0675e7ffac94df4fa35a8ac909d206d40f1a3e259017c7e172",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_1019f58c1736c6fa06f3": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/72",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w\n</code>",
+      "rawSha256": "8270ee762f9bdcb94d884b32e599159fb6ee1ee9a025282bda11cbfb77123aab",
+      "displayedSha256": "9f93e0cb9a57c38bff477a91c50ba75a32a3b8c7867172779a7c14d880d76411",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_efc1991a89b6df4b0baf": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/72",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def will_it_fly(q, w):\n    return q == q[::-1] and sum(q) <= w\n</code>",
+      "rawSha256": "8270ee762f9bdcb94d884b32e599159fb6ee1ee9a025282bda11cbfb77123aab",
+      "displayedSha256": "9f93e0cb9a57c38bff477a91c50ba75a32a3b8c7867172779a7c14d880d76411",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_5b97531ad9a9dd34bb36": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/77",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def iscube(a):\n    if a >= 0:\n        root = round(a ** (1/3))\n        return root ** 3 == a\n    else:\n        root = round((-a) ** (1/3))\n        return (-root) ** 3 == a\n</code>",
+      "rawSha256": "9e5b64fd7d20018a3a464dc991f5d308813fbf130e41e1cd81054fbdbecdc87e",
+      "displayedSha256": "b5c185642f5d060170296016c257cb127c7f902c37a32442c8e10932c41e54fc",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_75e396e331d8c4477086": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/77",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def iscube(a):\n    if a >= 0:\n        root = round(a ** (1/3))\n        return root ** 3 == a\n    else:\n        root = round((-a) ** (1/3))\n        return -root ** 3 == a\n</code>",
+      "rawSha256": "cf6f83ad2adddecc44dc75bf4e7ec322d777bc2253a5528cc39ff22110ab0208",
+      "displayedSha256": "ffb2f5440e233d98a300cb7a98ffd1c63d222913f6463189ec2dd60ec9a9bcc6",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_e25fa848e26b5b3b532a": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/95",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def check_dict_case(dict):\n    if not dict:\n        return False\n    \n    # Check if all keys are strings\n    if not all(isinstance(k, str) for k in dict.keys()):\n        return False\n    \n    # Check if all keys are lower case\n    all_lower = all(k.islower() for k in dict.keys())\n    # Check if all keys are upper case\n    all_upper = all(k.isupper() for k in dict.keys())\n    \n    return all_lower or all_upper\n</code>",
+      "rawSha256": "b24fc6b6f5194e0a7fc331cfd0e2d23dad3f88a6badd48ef3140f28a95dada54",
+      "displayedSha256": "7953b6c55595c3163ad4d2cbd88cbc91d4b1949df8577c0a8debb6dcd1ce894e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_2adb6fec63f930d51b99": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/95",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def check_dict_case(dict):\n    if not dict:\n        return False\n    keys = list(dict.keys())\n    if not all(isinstance(k, str) for k in keys):\n        return False\n    return all(k.islower() for k in keys) or all(k.isupper() for k in keys)\n</code>",
+      "rawSha256": "cbba79f92998ed7709c7ed80c57cf43d4705b621cf12eafb6dd84aff0aced3fd",
+      "displayedSha256": "8f2545a99afe8ea4fca10d8c8b8f1f0b576d6b9d575053819256ec9654060b67",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_7e287cc5d9ccef318a23": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/84",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]\n</code>",
+      "rawSha256": "41741400fbe3610fbc2bb98541e6b04fb5141eaf61cfd9ef553b5a5ea4deefa5",
+      "displayedSha256": "49f53cb38f9741e2f5eb847e6adb37fe396ad4b9b5dff0284ec8dc300179cb3d",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_311dc1b4b0f0ac96c81a": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/84",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def solve(N):\n    digit_sum = sum(int(d) for d in str(N))\n    return bin(digit_sum)[2:]\n</code>",
+      "rawSha256": "41741400fbe3610fbc2bb98541e6b04fb5141eaf61cfd9ef553b5a5ea4deefa5",
+      "displayedSha256": "49f53cb38f9741e2f5eb847e6adb37fe396ad4b9b5dff0284ec8dc300179cb3d",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_d35b43fa6f2c234e5fe7": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/63",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    \n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    \n    return c\n</code>",
+      "rawSha256": "4e26d1420ce110b8ffe9ca63cf405b739ed242e7c6877c4b1f82f7c5e66a0cda",
+      "displayedSha256": "f313ea0781a5a079b4681d4d38efe771c2c5e0942936f38ed0c3987b9cc74ca4",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_9b265a2612a0d0ce1467": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/63",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fibfib(n: int):\n    if n == 0 or n == 1:\n        return 0\n    if n == 2:\n        return 1\n    a, b, c = 0, 0, 1\n    for _ in range(3, n + 1):\n        a, b, c = b, c, a + b + c\n    return c\n</code>",
+      "rawSha256": "6357f03dfb567702925547b602044474b5e71444b56f354d9fc19fbbc42c108b",
+      "displayedSha256": "d75cfbc509efff4d811d55c5ab614fa5c8076d033a1d3760bffb2775193ff161",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_a0175391b52307948cfb": {
+      "condition": "base",
+      "run": 33,
+      "taskId": "HumanEval/82",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n</code>",
+      "rawSha256": "e6f976a754d5a382782d5880442dea1f170c7b2b822500bb1d214ce5e7215c41",
+      "displayedSha256": "1896d85cb2ac44b9db006744eb8953588bdf47f50ea54e79d574fc272af68b74",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_bf7614b49e28e23ea72d": {
+      "condition": "style-trained",
+      "run": 33,
+      "taskId": "HumanEval/82",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/33/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3407/style/grpo_mvp_lora/style_train",
+        "seed": 3407,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def prime_length(string):\n    n = len(string)\n    if n < 2:\n        return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n</code>",
+      "rawSha256": "e6f976a754d5a382782d5880442dea1f170c7b2b822500bb1d214ce5e7215c41",
+      "displayedSha256": "1896d85cb2ac44b9db006744eb8953588bdf47f50ea54e79d574fc272af68b74",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_c007ea33b7138f68941c": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/51",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def remove_vowels(text):\n    \"\"\"\n    remove_vowels is a function that takes string and returns string without vowels.\n    >>> remove_vowels('')\n    ''\n    >>> remove_vowels(\"abcdef\\nghijklm\")\n    'bcdf\\nghjklm'\n    >>> remove_vowels('abcdef')\n    'bcdf'\n    >>> remove_vowels('aaaaa')\n    ''\n    >>> remove_vowels('aaBAA')\n    'B'\n    >>> remove_vowels('zbcd')\n    'zbcd'\n    \"\"\"\n    vowels = set('aeiouAEIOU')\n    return ''.join(char for char in text if char not in vowels)\n</code>",
+      "rawSha256": "3d88a92454e0a0e2571c4b9a22e5b206ec8809b619da01d5da4f76dbf73e9686",
+      "displayedSha256": "552eb4a3ef373be1646d01e73cccd23ad6a5bed6b4ab87b30e23282d90bdb91b",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_149dabf4d4f4dec288a8": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/51",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def remove_vowels(text):\n    vowels = 'aeiouAEIOU'\n    return ''.join(char for char in text if char not in vowels)\n</code>",
+      "rawSha256": "c469d0b7707db3ee1023a915c8d4e7a12654523ef33cfa125ba66267ae8b6638",
+      "displayedSha256": "12e24098572c0370da5b4ecd4e1e5980254158915e692513f4e3c1360af38ca4",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_2d35ad6875964170c44c": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/98",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_upper(s):\n    \"\"\"\n    Given a string s, count the number of uppercase vowels in even indices.\n    \n    For example:\n    count_upper('aBCdEf') returns 1\n    count_upper('abcdefg') returns 0\n    count_upper('dBBE') returns 0\n    \"\"\"\n    uppercase_vowels = set('AEIOU')\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in uppercase_vowels:\n            count += 1\n    return count\n</code>",
+      "rawSha256": "13f2cf3887004fe89600ab3aba65156d5f28292e235f451d40956d27b3d90a53",
+      "displayedSha256": "9c8ecb7850e0850c97ac7a3e012b2c6ae8374c94d9b6e002bb9f90c86e84e441",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_721c4c268092371033c5": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/98",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_upper(s):\n    count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in 'AEIOU':\n            count += 1\n    return count\n</code>",
+      "rawSha256": "6d98f9c4f72307b05ab7657ce2da1c7e29d4e03a749b47dcd6772add01cffee3",
+      "displayedSha256": "578b55aebc41bdb3cb97cc5c29757bcb1f606ea7ba052ff0db489021cf535610",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_40b6897d493a63a9d0ae": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/69",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def search(lst):\n    from collections import Counter\n    freq = Counter(lst)\n    candidates = [num for num, count in freq.items() if num > 0 and count >= num]\n    return max(candidates) if candidates else -1\n</code>",
+      "rawSha256": "db20e367aab313b2bb98758dcd56dad2acd4dafa3a5adbd183715c7f996d3b00",
+      "displayedSha256": "0cf2c55b24f2f837dbcc9a7dc8cf45cb1cb253ff4870db3d0fb43bd770dd0430",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_29a049a93388955b0487": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/69",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def search(lst):\n    from collections import Counter\n    counts = Counter(lst)\n    result = -1\n    for num, freq in counts.items():\n        if num > 0 and freq >= num:\n            if num > result:\n                result = num\n    return result\n</code>",
+      "rawSha256": "84bfa7bd9e122cb168941713f364b64a9e45e71e4af6560424d04f39499002be",
+      "displayedSha256": "a3b1792960c467993c4abbaa1b6756730956d4dec1b026752ae800ca716766c6",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_a0f3225282d4ea50754a": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/81",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def numerical_letter_grade(grades):\n    result = []\n    for gpa in grades:\n        if gpa == 4.0:\n            result.append('A+')\n        elif gpa > 3.7:\n            result.append('A')\n        elif gpa > 3.3:\n            result.append('A-')\n        elif gpa > 3.0:\n            result.append('B+')\n        elif gpa > 2.7:\n            result.append('B')\n        elif gpa > 2.3:\n            result.append('B-')\n        elif gpa > 2.0:\n            result.append('C+')\n        elif gpa > 1.7:\n            result.append('C')\n        elif gpa > 1.3:\n            result.append('C-')\n        elif gpa > 1.0:\n            result.append('D+')\n        elif gpa > 0.7:\n            result.append('D')\n        elif gpa > 0.0:\n            result.append('D-')\n        else:\n            result.append('E')\n    return result\n</code>",
+      "rawSha256": "62f0ec2df9989d128c310971a6cf2b6395274e0b53ab0479147ef4bfef84b900",
+      "displayedSha256": "b2a0edb5336d787feb5f636e45657933a57e1632174213d6c7bb558b81772105",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_e31659c73467399dda51": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/81",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def numerical_letter_grade(grades):\n    result = []\n    for g in grades:\n        if g == 4.0:\n            result.append('A+')\n        elif g > 3.7:\n            result.append('A')\n        elif g > 3.3:\n            result.append('A-')\n        elif g > 3.0:\n            result.append('B+')\n        elif g > 2.7:\n            result.append('B')\n        elif g > 2.3:\n            result.append('B-')\n        elif g > 2.0:\n            result.append('C+')\n        elif g > 1.7:\n            result.append('C')\n        elif g > 1.3:\n            result.append('C-')\n        elif g > 1.0:\n            result.append('D+')\n        elif g > 0.7:\n            result.append('D')\n        elif g > 0.0:\n            result.append('D-')\n        else:\n            result.append('E')\n    return result\n</code>",
+      "rawSha256": "43cf22efc340da46eaae5a43f0b3ba6ebc7d713f31a8bdf4b40231f0dbc307e0",
+      "displayedSha256": "fb9ace49e027dbb6ecd99024b4bce3cc730a4cefd384d27f951b9138ff9b2479",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_d4178d02917c7bf5b6b9": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/88",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def sort_array(array):\n    if not array:\n        return []\n    \n    first = array[0]\n    last = array[-1]\n    total = first + last\n    \n    sorted_arr = sorted(array)\n    \n    if total % 2 == 1:\n        return sorted_arr\n    else:\n        return sorted_arr[::-1]\n</code>",
+      "rawSha256": "9f516bbe7d444895ac936fd0d62e6206a195a898040d9663083a6cb68fa634c7",
+      "displayedSha256": "8a41b7daf3441006c298b77c126469733c68e228aff23ff1b8fec5d8e6fba538",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_9028ebbdf7e4ab990a3f": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/88",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def sort_array(array):\n    if not array:\n        return []\n    if (array[0] + array[-1]) % 2 == 1:\n        return sorted(array)\n    else:\n        return sorted(array, reverse=True)\n</code>",
+      "rawSha256": "7ed2365e0e0fd2525103e9e3856ca2c2b54164a214b1389c44bbe0823a1d8ec7",
+      "displayedSha256": "6d954fb4da4e99bf282e1aff6ac78f024cdd241d594d61646755a7fcb7e0cfe9",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_c7932c0b82989e33c829": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/79",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def decimal_to_binary(decimal):\n    if decimal == 0:\n        return \"db0db\"\n    binary = bin(decimal)[2:]\n    return f\"db{binary}db\"\n</code>",
+      "rawSha256": "de9249cdf019f4b114ae9017d42fb17a5f4e24713ac29588631be466615b08da",
+      "displayedSha256": "0e39da7009ce54f92d6706a97c1eceeb52afe01c1ac70628fb34bf4f9c63d296",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_01cfb526c368af104c9e": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/79",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def decimal_to_binary(decimal):\n    return f\"db{bin(decimal)[2:]}db\"\n</code>",
+      "rawSha256": "7f73336c28608e2696148dd8350bd42024272d9d58d0b9ab9d5d0dbb305210fa",
+      "displayedSha256": "15bb0c0f782d3796c0ceb69192d1f64ecbbf97c5ab439660e8bc48198a0c39fe",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_d1d6efbd8209102026c4": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/96",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_up_to(n):\n    \"\"\"Implement a function that takes an non-negative integer and returns an array of the first n\n    integers that are prime numbers and less than n.\n    for example:\n    count_up_to(5) => [2,3]\n    count_up_to(11) => [2,3,5,7]\n    count_up_to(0) => []\n    count_up_to(20) => [2,3,5,7,11,13,17,19]\n    count_up_to(1) => []\n    count_up_to(18) => [2,3,5,7,11,13,17]\n    \"\"\"\n    if n <= 1:\n        return []\n    \n    primes = []\n    is_prime = [True] * n\n    is_prime[0] = False\n    is_prime[1] = False\n    \n    for i in range(2, n):\n        if is_prime[i]:\n            primes.append(i)\n            for j in range(i * i, n, i):\n                is_prime[j] = False\n                \n    return primes\n</code>",
+      "rawSha256": "8cb20216aeee655d5187e370d7f45f671bb0a1114148dff474555f570e86829e",
+      "displayedSha256": "44d1802ba9573518f33f597886b3efc8ed0657c8752b7ad67bb4bff412b6cdc0",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_4f88d7ab99b85a0b6f3f": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/96",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def count_up_to(n):\n    def is_prime(num):\n        if num < 2:\n            return False\n        for i in range(2, int(num ** 0.5) + 1):\n            if num % i == 0:\n                return False\n        return True\n\n    return [i for i in range(2, n) if is_prime(i)]\n</code>",
+      "rawSha256": "a1fdd3799013a5f1387a7eb33da3663a116e1780ffb5f83a36185560d0252efd",
+      "displayedSha256": "2f88609813b12e5c4f4318874778d2383b81d4963976848f8428a821c7fb1f32",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_106ca3752f38cb367a32": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/75",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_multiply_prime(a):\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n**0.5) + 1):\n            if n % i == 0:\n                return False\n        return True\n\n    primes = [i for i in range(2, a) if is_prime(i)]\n    \n    for i in range(len(primes)):\n        for j in range(i, len(primes)):\n            for k in range(j, len(primes)):\n                if primes[i] * primes[j] * primes[k] == a:\n                    return True\n    return False\n</code>",
+      "rawSha256": "195157e12f9d35297903ddbf7a610b84df62e5aa9966e668330db715fad0a0e6",
+      "displayedSha256": "522a83f78da6abeb9953c3f7bcbe5055a89ca99746ff1dabcf51f540365f6313",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_6cb774a030f49c842fc0": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/75",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_multiply_prime(a):\n    primes = [p for p in range(2, 100) if all(p % d != 0 for d in range(2, int(p**0.5) + 1))]\n    count = 0\n    for p in primes:\n        while a % p == 0:\n            a //= p\n            count += 1\n    return count == 3 and a == 1\n</code>",
+      "rawSha256": "39a8dc0f4c65f33bc2a2785cdc072534f040c62ee688dd4353803cf2cfde8b2d",
+      "displayedSha256": "f96bf2216d3bed3e7a49e88cb289a4f2c143ea1499cc0712f1285f180cb5117d",
+      "automatedTestStatus": "timeout",
+      "styleStatus": "violations"
+    },
+    "c_e2353e6359ca0ce07159": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/55",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fib(n: int):\n    \"\"\"Return n-th Fibonacci number.\n    >>> fib(10)\n    55\n    >>> fib(1)\n    1\n    >>> fib(8)\n    21\n    \"\"\"\n    if n <= 0:\n        raise ValueError(\"n must be a positive integer\")\n    if n == 1:\n        return 1\n    if n == 2:\n        return 1\n    a, b = 1, 1\n    for _ in range(2, n):\n        a, b = b, a + b\n    return b\n</code>",
+      "rawSha256": "c570e0cd510fa07a5cd48cc49bc6b7a0a562ef808f3b8ed8a5d86865bb831b61",
+      "displayedSha256": "e5c9b9ea54b541dc5d19652bdccf9a1e1196b8459d8130e462ebacd3663897da",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok"
+    },
+    "c_65bdef42b77723aaf4d0": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/55",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fib(n: int):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n</code>",
+      "rawSha256": "3fd42019eb8788ae4fac67a39f70f40a574e292f5e751d53107b3cd9a382d2f1",
+      "displayedSha256": "c8fa78240d2f10276b03c2d1ecd1c34d1a722f9b116156bf43f386545190d5d7",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_93f02158236a26ef5740": {
+      "condition": "base",
+      "run": 34,
+      "taskId": "HumanEval/78",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def hex_key(num):\n    \"\"\"You have been tasked to write a function that receives \n    a hexadecimal number as a string and counts the number of hexadecimal \n    digits that are primes (prime number, or a prime, is a natural number \n    greater than 1 that is not a product of two smaller natural numbers).\n    Hexadecimal digits are 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F.\n    Prime numbers are 2, 3, 5, 7, 11, 13, 17,...\n    So you have to determine a number of the following digits: 2, 3, 5, 7, \n    B (=decimal 11), D (=decimal 13).\n    Note: you may assume the input is always correct or empty string, \n    and symbols A,B,C,D,E,F are always uppercase.\n    Examples:\n    For num = \"AB\" the output should be 1.\n    For num = \"1077E\" the output should be 2.\n    For num = \"ABED1A33\" the output should be 4.\n    For num = \"123456789ABCDEF0\" the output should be 6.\n    For num = \"2020\" the output should be 2.\n    \"\"\"\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    count = 0\n    for digit in num:\n        if digit in prime_digits:\n            count += 1\n    return count\n</code>",
+      "rawSha256": "cc637b793723a956f866555e1e2f3cc7aae33eaba7c558d4c2e86f709de42532",
+      "displayedSha256": "301993db7565ba09a4836e95b9faa6afc916df4b14a4fe4d8ba3b51b511d6d3e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_1f562e0a48f2dfdf499b": {
+      "condition": "style-trained",
+      "run": 34,
+      "taskId": "HumanEval/78",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/34/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3408/style/grpo_mvp_lora/style_train",
+        "seed": 3408,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def hex_key(num):\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    return sum(1 for c in num if c in prime_digits)\n</code>",
+      "rawSha256": "69eca0c8575c5bfcb2c852ced155f2aa843b89d4f0ba25c1fb70469ce34af518",
+      "displayedSha256": "9c2fe17e27c93e5b9d9599dee4f59f7a979dd2574e02015301cd42deee9aed66",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_f5406c7d8fdbd0b5a683": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/65",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]\n</code>",
+      "rawSha256": "ffaa7447513e236868ced377b84a78feffb19ddf6013e5a6270e3955ed53fac0",
+      "displayedSha256": "ffbdfe6916a6847f0c7a0e626cf8aad4aab02d957e1835f267d60372c3fe819f",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_9c8556b6b9e0b612563b": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/65",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def circular_shift(x, shift):\n    s = str(x)\n    n = len(s)\n    if shift > n:\n        return s[::-1]\n    shift = shift % n\n    return s[-shift:] + s[:-shift]\n</code>",
+      "rawSha256": "ffaa7447513e236868ced377b84a78feffb19ddf6013e5a6270e3955ed53fac0",
+      "displayedSha256": "ffbdfe6916a6847f0c7a0e626cf8aad4aab02d957e1835f267d60372c3fe819f",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_5cb2627ebd01806f75be": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/74",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        return sum(len(s) for s in lst)\n    \n    chars1 = count_chars(lst1)\n    chars2 = count_chars(lst2)\n    \n    if chars1 <= chars2:\n        return lst1\n    else:\n        return lst2\n</code>",
+      "rawSha256": "cd28de93c8d2a4e5c93b403e75add6cf094d22b76cf854976c12b95c4dff82a2",
+      "displayedSha256": "e889191e852ad88b528d3af7c974b57b739bb4e03905ac330e6ef76cb3254d38",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_4ca230278cfd37a1844a": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/74",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def total_match(lst1, lst2):\n    def count_chars(lst):\n        total = 0\n        for s in lst:\n            total += len(s)\n        return total\n\n    chars1 = count_chars(lst1)\n    chars2 = count_chars(lst2)\n\n    if chars1 <= chars2:\n        return lst1\n    else:\n        return lst2\n</code>",
+      "rawSha256": "ee52cf491aeb632772239707e912ed74d90c05aae627e4714dfe9d36f1dc5850",
+      "displayedSha256": "e443a320641d1e445061370615f26b03b0c1d72d63354bc8b06f1191925a0d94",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_091db27baf456bea8a17": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/70",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    \n    sorted_lst = sorted(lst)\n    result = []\n    left = 0\n    right = len(sorted_lst) - 1\n    pick_min = True\n    \n    while left <= right:\n        if pick_min:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        pick_min = not pick_min\n        \n    return result\n</code>",
+      "rawSha256": "5b9700a7f72d5735085f546837cf4f6ea1bc5d925563f74016ccf4490572ef06",
+      "displayedSha256": "e769207a97475eeb0be745e5e1983a604d607b416fff1768eb67386c80d31509",
+      "automatedTestStatus": "passed",
+      "styleStatus": "violations"
+    },
+    "c_488e1dc903af990bab36": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/70",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def strange_sort_list(lst):\n    if not lst:\n        return []\n    sorted_lst = sorted(lst)\n    result = []\n    left, right = 0, len(sorted_lst) - 1\n    turn_min = True\n    while left <= right:\n        if turn_min:\n            result.append(sorted_lst[left])\n            left += 1\n        else:\n            result.append(sorted_lst[right])\n            right -= 1\n        turn_min = not turn_min\n    return result\n</code>",
+      "rawSha256": "cf52cb19d53fd99726f16aaf4d6718526004b6a31bbe0bcfc7711f3aefadf2f8",
+      "displayedSha256": "f3a5deb88c784356c1c3547364dde0c521b6f98441bd5f54f2913030a01cf716",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_ec6eb93028938c315e88": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/66",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())\n</code>",
+      "rawSha256": "31415d5882331e2d3642bf0527ee3bdfcac8b0328dc047d51679203e7b60309f",
+      "displayedSha256": "a481862b2c8ac565451bb622d546415908cf5d86c75787b5c27423cac59d009e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_4fe6b885d484967e6c55": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/66",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())\n</code>",
+      "rawSha256": "31415d5882331e2d3642bf0527ee3bdfcac8b0328dc047d51679203e7b60309f",
+      "displayedSha256": "a481862b2c8ac565451bb622d546415908cf5d86c75787b5c27423cac59d009e",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_ef647539ad1ee733d7f7": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/91",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_bored(S):\n    \"\"\"\n    You'll be given a string of words, and your task is to count the number\n    of boredoms. A boredom is a sentence that starts with the word \"I\".\n    Sentences are delimited by '.', '?' or '!'.\n   \n    For example:\n    >>> is_bored(\"Hello world\")\n    0\n    >>> is_bored(\"The sky is blue. The sun is shining. I love this weather\")\n    1\n    \"\"\"\n    if not S:\n        return 0\n    \n    # Split the string into sentences based on '.', '?', or '!'\n    import re\n    sentences = re.split(r'[.?!]', S)\n    \n    boredom_count = 0\n    for sentence in sentences:\n        # Strip leading/trailing whitespace and check if it starts with \"I\"\n        stripped = sentence.strip()\n        if not stripped:\n            continue\n        # Check if the sentence starts with \"I\" followed by a space or end of string\n        # We need to make sure it's the word \"I\", not just \"I\" as part of another word\n        if stripped.startswith(\"I \") or stripped == \"I\":\n            boredom_count += 1\n            \n    return boredom_count\n</code>",
+      "rawSha256": "abfb3b4fcbebaa538e3ddbe25bf43fcb7793f14ff5331ffff86381bb672e78b2",
+      "displayedSha256": "96877cce9627772b4693159157537f4c8e15816c329b1b795444cba473432369",
+      "automatedTestStatus": "failed",
+      "styleStatus": "violations"
+    },
+    "c_027131686e192967df72": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/91",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_bored(S):\n    import re\n    sentences = re.split(r'[.?!]', S)\n    count = 0\n    for sentence in sentences:\n        if sentence.strip().startswith(\"I\"):\n            count += 1\n    return count\n</code>",
+      "rawSha256": "b673c06c9a231e789ccb6493049077988a43a8eac2b357d99c7e0d40df16e552",
+      "displayedSha256": "a7b8a365419350ca9e6c4a96c6337fee725d6eafeccede6b504cfdafbe619e31",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok"
+    },
+    "c_bea29c5cc150cb7794b0": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/67",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fruit_distribution(s, n):\n    import re\n    numbers = re.findall(r'\\d+', s)\n    apples = int(numbers[0])\n    oranges = int(numbers[1])\n    return n - apples - oranges\n</code>",
+      "rawSha256": "9bd6acc0850db4f03ca1bb9241d0481d83fd89662d7f478296a8fa740c2508e8",
+      "displayedSha256": "09eb0969035afaa640fb82929e2554a2f77bfa0d11d2c0e5ac3d8ef3c7eced9a",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_8d183ba29743780ea19b": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/67",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def fruit_distribution(s, n):\n    parts = s.split()\n    apples = int(parts[0])\n    oranges = int(parts[2])\n    return n - apples - oranges\n</code>",
+      "rawSha256": "72b2d520af440e59a1b30ae1e5b6b1fb67c883996b4f1b49b2e4c38d87a83f0f",
+      "displayedSha256": "dc32ffb8f4921c68619d061daeae04cd7bda716a8ffd06084832e773ad35bee0",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok"
+    },
+    "c_0aa6e73549401fdb8f97": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/87",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        for j, val in enumerate(row):\n            if val == x:\n                result.append((i, j))\n    # Sort by row ascending, then by column descending\n    result.sort(key=lambda coord: (coord[0], -coord[1]))\n    return result\n</code>",
+      "rawSha256": "e4d15e0c4b6ffa509412fa11a0d52d2e44012c18e90b5fc21f937e6eb9645c23",
+      "displayedSha256": "164bafca06b8dd77244d9f6b3af83783e1f3fd0e20a225d600b9837d45b4955a",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_d4f4f658d3a709ba02e6": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/87",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def get_row(lst, x):\n    result = []\n    for i, row in enumerate(lst):\n        row_coords = [j for j, val in enumerate(row) if val == x]\n        row_coords.reverse()\n        for j in row_coords:\n            result.append((i, j))\n    return result\n</code>",
+      "rawSha256": "ffbe77ea884ad64d5bbfe90b9dc6527ac774aca10309e45f7e74e9da0dadac9b",
+      "displayedSha256": "74a4e4cc170296637884b8cd03ea25dd1c53bbcebe7fa2aa3e81e6383fc768ce",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_512c32d30599e7a4f448": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/99",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def closest_integer(value):\n    '''\n    Create a function that takes a value (string) representing a number\n    and returns the closest integer to it. If the number is equidistant\n    from two integers, round it away from zero.\n\n    Examples\n    >>> closest_integer(\"10\")\n    10\n    >>> closest_integer(\"15.3\")\n    15\n\n    Note:\n    Rounding away from zero means that if the given number is equidistant\n    from two integers, the one you should return is the one that is the\n    farthest from zero. For example closest_integer(\"14.5\") should\n    return 15 and closest_integer(\"-14.5\") should return -15.\n    '''\n    import math\n    num = float(value)\n    if num >= 0:\n        return math.floor(num + 0.5)\n    else:\n        return math.ceil(num - 0.5)\n</code>",
+      "rawSha256": "19bef3e19cc624248d7c8f1cb799829f7be2ec1740273fe4b2e714686753cc4b",
+      "displayedSha256": "0e07b82735ca147556688e5672d3a0a57730bebf452ca4c8a2693259b985bb6f",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_d479fab29ef6df38b3ab": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/99",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def closest_integer(value):\n    num = float(value)\n    if num >= 0:\n        return int(num + 0.5)\n    else:\n        return int(num - 0.5)\n</code>",
+      "rawSha256": "62e9652ff4db07b2ede10054b4c75310c4773f0c798a5f762e71d3258bb94bbb",
+      "displayedSha256": "f576bb755aa65aab00b736d654b299cec44996295000922496e0abdcb726a4f3",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_20d79787c93a7e92546e": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/76",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_simple_power(x, n):\n    if n == 1:\n        return x == 1\n    if n == 0:\n        return x == 1\n    import math\n    if x <= 0:\n        return False\n    log_x = math.log(x)\n    log_n = math.n\n    if log_n == 0:\n        return False\n    power = log_x / log_n\n    if abs(power - round(power)) > 1e-10:\n        return False\n    return n ** int(round(power)) == x\n</code>",
+      "rawSha256": "4812ccdb42cf4137bf51f1b002893e0cd545d59f4c8a2fed504de343209bc6fa",
+      "displayedSha256": "ef05e3d9498902a01800510e1ec6c756a98cf2d6e24def34e986489c5c8d6b6a",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok"
+    },
+    "c_0f6e280d4aaf65b047a3": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/76",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def is_simple_power(x, n):\n    if n == 1:\n        return x == 1\n    if n == 0:\n        return x == 1 or x == 0\n    import math\n    if x <= 0:\n        return False\n    log_val = math.log(x) / math.log(n)\n    rounded = round(log_val)\n    return n ** rounded == x\n</code>",
+      "rawSha256": "202fc0caadb0f7145ed877d96bab2a1fd80072122af0a0c2d91631ba6d88cb76",
+      "displayedSha256": "df1eca04f3dee5093c77527e19b17553da456755836165e6b23d23b877db42a1",
+      "automatedTestStatus": "failed",
+      "styleStatus": "ok"
+    },
+    "c_af6cd4c26ef094f8f762": {
+      "condition": "base",
+      "run": 35,
+      "taskId": "HumanEval/56",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_base_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": null,
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def correct_bracketing(brackets: str):\n    count = 0\n    for bracket in brackets:\n        if bracket == '<':\n            count += 1\n        elif bracket == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0\n</code>",
+      "rawSha256": "6e0a1b2a1485b9a3d079029bdfd825a12db92beb54bb2354c63c1ea351f08450",
+      "displayedSha256": "b3fdd55d0d2d496626b6177e95e970fea4ffcd52eaf49f64b861d6f2097f6d04",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    },
+    "c_f768a327e2ecebb22fa9": {
+      "condition": "style-trained",
+      "run": 35,
+      "taskId": "HumanEval/56",
+      "generationIndex": 0,
+      "sourceFile": "UnSloth-RL-heplus-fix/results/35/eval_lora_holdout_tasks.csv",
+      "sourceConfig": {
+        "model": "unsloth/Qwen3.6-27B",
+        "remoteAdapterPath": "/home/ajhz488/llm/pycharm/UnSloth-RL/results/restart-20260913-163144/style-3409/style/grpo_mvp_lora/style_train",
+        "seed": 3409,
+        "maxCompletionTokens": 384,
+        "generation": {
+          "doSample": true,
+          "temperature": 0.8,
+          "topP": 0.95
+        },
+        "checkpointHash": null
+      },
+      "rawCompletion": "def correct_bracketing(brackets: str):\n    count = 0\n    for b in brackets:\n        if b == '<':\n            count += 1\n        elif b == '>':\n            count -= 1\n        if count < 0:\n            return False\n    return count == 0\n</code>",
+      "rawSha256": "b4d14e1e2c5edb04c4c8d1ac2ebb1e71ea840bcc240023570a9625702ee2ab38",
+      "displayedSha256": "ea6ec943b0fa20200d9c60b072ee9bc3e9842f71a71277617de7b1b3bcaea05a",
+      "automatedTestStatus": "passed",
+      "styleStatus": "ok"
+    }
+  },
+  "limitations": [
+    "Historical dataset revision and checkpoint binary hashes are unavailable.",
+    "Prompt snapshot corroborated with saved training-task chat prompts, not complete holdout chat prompts.",
+    "Run 35 recorded 70 training test timeouts; included without filtering."
+  ]
+}
