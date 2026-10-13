@@ -1,19 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import Home from './components/Home';
 import Comparison from './components/Comparison';
+import ResearcherConfiguration from './components/ResearcherConfiguration';
 import { download } from './export';
 import { assetUrl } from './navigation';
 import {
   PROTOCOL,
   REVIEWERS,
   activeAnswers,
+  configuration,
+  configureProtocol,
+  DEFAULT_CONFIG,
+  formalStarted,
   analyse,
   assert,
   canonical,
   generateFormal,
+  GUIDELINE,
   initialProtocol,
   invalidate,
   lockCalibration,
+  protocolEdition,
+  regenerateFormal,
+  replaceProtocol,
+  resetCalibration,
   nextUnanswered,
   researchExport,
   ruffTied,
@@ -21,6 +31,7 @@ import {
   undoFormal,
   validateCatalog,
   validateState,
+  workload,
 } from './v2';
 import type { Answer, DatabaseV2, Preference, Presentation, ProtocolState, Reviewer } from './v2';
 import { api, importProgress, loadCache, reconcile, V2_KEY, writeCache } from './v2Storage';
@@ -67,6 +78,7 @@ export default function V2App() {
   const [reviewer, setReviewer] = useState<Reviewer>('Jacky');
   const [choice, setChoice] = useState<Preference>();
   const [guideline, setGuideline] = useState('');
+  const [configDirty, setConfigDirty] = useState(false);
   const [calReveal, setCalReveal] = useState<Presentation>();
   const [recoveryId, setRecoveryId] = useState(''),
     [reason, setReason] = useState('wrong reviewer');
@@ -81,6 +93,20 @@ export default function V2App() {
   const playSyncing = useRef(false);
   const [remotePlay, setRemotePlay] = useState<any[]>([]);
   const s = cache?.state;
+  const configuredWorkload = workload(s ? configuration(s) : DEFAULT_CONFIG);
+  const lastEdition = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!s) return;
+    const edition = protocolEdition(s),
+      replaced = lastEdition.current !== undefined && lastEdition.current !== edition;
+    lastEdition.current = edition;
+    if ((view === 'formal' || view === 'confirm') && (!s.formal || replaced)) {
+      navigate('study');
+      setStatus(
+        'Researcher updated the active protocol. Select and confirm your reviewer after Formal assignments are available.',
+      );
+    }
+  }, [s?.edition, s?.formal, view]);
   function remember(next: Cache) {
     rawRef.current = writeCache(next, rawRef.current);
     cacheRef.current = next;
@@ -466,7 +492,9 @@ export default function V2App() {
   const choices = (submit: () => void) => (
     <div className="v2-vote">
       <h2>
-        Which solution would you prefer to work with based on readability and maintainability?
+        {s?.calibration.guideline === GUIDELINE
+          ? 'Which solution would you prefer to work with based on readability and maintainability?'
+          : 'Which solution would you prefer to work with based on the reviewer guideline?'}
       </h2>
       <div className="v2-actions">
         {(['A', 'Equal', 'B'] as const).map((c) => (
@@ -630,7 +658,7 @@ export default function V2App() {
                 ? 'Formal assignments are locked. Review independently without discussing comparisons.'
                 : s.calibration.lockedAt
                   ? 'Calibration is locked. Researcher can generate Formal V2.'
-                  : 'Begin with 12 joint calibration comparisons.'}
+                  : `Begin with ${configuredWorkload.calibration} joint calibration comparisons.`}
             </p>
             <details>
               <summary>Backup / Recovery</summary>
@@ -663,7 +691,9 @@ export default function V2App() {
         {s && view === 'confirm' && (
           <section className="setup-form v2-narrow">
             <h1>You selected: {reviewer.toUpperCase()}</h1>
-            <p>Formal progress: {count} / 48</p>
+            <p>
+              Formal progress: {count} / {configuredWorkload[reviewer]}
+            </p>
             <p>This session contains {reviewer}'s assigned comparisons.</p>
             <button className="primary" onClick={() => navigate('formal')}>
               Continue as {reviewer}
@@ -676,7 +706,9 @@ export default function V2App() {
             <div className="study-top">
               <div>
                 <strong>Reviewer: {reviewer}</strong>
-                <p>Formal V2 · {count} / 48</p>
+                <p>
+                  Formal V2 · {count} / {configuredWorkload[reviewer]}
+                </p>
               </div>
               <button
                 disabled={busy}
@@ -750,7 +782,10 @@ export default function V2App() {
             <div className="study-top">
               <div>
                 <h1>Joint Calibration</h1>
-                <p>Jacky + Conrad · {s.calibration.answers.length} / 12 · Separate from Formal</p>
+                <p>
+                  Jacky + Conrad · {s.calibration.answers.length} / {configuredWorkload.calibration}{' '}
+                  · Separate from Formal
+                </p>
               </div>
               <button onClick={() => navigate('study')}>Exit Study</button>
             </div>
@@ -813,7 +848,7 @@ export default function V2App() {
                 }
               })
             ) : (
-              <p>All 12 calibration comparisons are complete.</p>
+              <p>All {configuredWorkload.calibration} calibration comparisons are complete.</p>
             )}
             <section className="setup-form">
               <label>
@@ -837,7 +872,11 @@ export default function V2App() {
               </button>
               <button
                 className="primary"
-                disabled={busy || s.calibration.answers.length !== 12 || !!s.calibration.lockedAt}
+                disabled={
+                  busy ||
+                  s.calibration.answers.length !== configuredWorkload.calibration ||
+                  !!s.calibration.lockedAt
+                }
                 onClick={() =>
                   change((next) => {
                     next.calibration.guideline = guideline;
@@ -859,21 +898,41 @@ export default function V2App() {
               </div>
               <button onClick={() => navigate('study')}>Study Home</button>
             </div>
+            <ResearcherConfiguration
+              state={s}
+              db={db}
+              busy={busy}
+              onDraftChange={setConfigDirty}
+              onSave={(config, criterion) =>
+                change((next) => configureProtocol(next, db, config, criterion, date()))
+              }
+              onReset={() => change((next) => resetCalibration(next, db, date()))}
+              onRegenerate={() => change((next) => regenerateFormal(next, db, date()))}
+              onReplace={(reason) => change((next) => replaceProtocol(next, db, reason, date()))}
+            />
             <div className="setup-grid">
               <section className="setup-form">
                 <h2>Calibration</h2>
                 <p>
-                  {s.calibration.answers.length} / 12 · {s.calibration.lockedAt ? 'Locked' : 'Open'}
+                  {s.calibration.answers.length} / {configuredWorkload.calibration} ·{' '}
+                  {s.calibration.lockedAt ? 'Locked' : 'Open'}
                 </p>
                 <h2>Formal</h2>
                 {REVIEWERS.map((r) => (
                   <p key={r}>
-                    {r}: {activeAnswers(s, r).length} / 48
+                    {r}: {activeAnswers(s, r).length} / {configuredWorkload[r]}
                   </p>
                 ))}
-                <p>Protocol: {s.formal ? 'Locked' : 'Not generated'}</p>
+                <p>
+                  Protocol:{' '}
+                  {formalStarted(s)
+                    ? `Frozen · Edition ${protocolEdition(s)}`
+                    : s.formal
+                      ? 'Assignments generated · not started'
+                      : 'Not generated'}
+                </p>
                 <button
-                  disabled={busy || !s.calibration.lockedAt || !!s.formal}
+                  disabled={busy || configDirty || !s.calibration.lockedAt || !!s.formal}
                   onClick={() => change((next) => generateFormal(next, db, date()))}
                 >
                   Generate / Lock Formal V2
@@ -882,7 +941,8 @@ export default function V2App() {
                   disabled={
                     busy ||
                     !!s.unblindedAt ||
-                    REVIEWERS.some((r) => activeAnswers(s, r).length !== 48)
+                    !s.formal ||
+                    REVIEWERS.some((r) => activeAnswers(s, r).length !== configuredWorkload[r])
                   }
                   onClick={() =>
                     change((next) => {

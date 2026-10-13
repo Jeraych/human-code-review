@@ -6,6 +6,15 @@ import {
   analyse,
   canonical,
   CONTRASTS,
+  configuration,
+  configureProtocol,
+  DEFAULT_CONFIG,
+  formalStarted,
+  workload,
+  resetCalibration,
+  regenerateFormal,
+  replaceProtocol,
+  validateConfiguration,
   generateFormal,
   initialProtocol,
   invalidate,
@@ -20,7 +29,7 @@ import {
   validateState,
   validateTransition,
 } from '../src/v2';
-import type { DatabaseV2, ProtocolState } from '../src/v2';
+import type { DatabaseV2, ProtocolState, ProtocolConfig } from '../src/v2';
 import { reconcile, importProgress } from '../src/v2Storage';
 const at = '2026-10-14T01:00:00.000Z';
 const read = (p: string) => JSON.parse(readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
@@ -44,8 +53,8 @@ function calibration(s: ProtocolState) {
   }));
   lockCalibration(s, at);
 }
-function formal() {
-  const s = initialProtocol(db);
+function formal(config: ProtocolConfig = DEFAULT_CONFIG) {
+  const s = initialProtocol(db, config);
   calibration(s);
   generateFormal(s, db, at);
   return s;
@@ -53,7 +62,7 @@ function formal() {
 function completed() {
   const s = formal();
   for (const r of REVIEWERS)
-    for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < s.formal!.assignments[r].length; i++) {
       submitFormal(s, r, i % 3 === 0 ? 'Equal' : 'A', at, `fixture-${r}-${i}`);
       delete s.pending[r];
     }
@@ -114,15 +123,17 @@ describe('V2 actual assignment invariants', () => {
     const s = formal();
     validateState(s, db);
     const f = s.formal!;
-    expect(Object.values(f.assignments).flat()).toHaveLength(96);
+    const config = configuration(s),
+      expected = workload(config);
+    expect(Object.values(f.assignments).flat()).toHaveLength(expected.Jacky + expected.Conrad);
     expect(
       new Set(
         Object.values(f.assignments)
           .flat()
           .map((p) => p.pairId),
       ).size,
-    ).toBe(80);
-    expect(f.overlap).toHaveLength(16);
+    ).toBe(expected.distinct);
+    expect(f.overlap).toHaveLength(expected.overlap);
     for (const c of CONTRASTS) {
       const distinct = [
         ...new Set(
@@ -133,14 +144,14 @@ describe('V2 actual assignment invariants', () => {
       ]
         .map((id) => db.pairs.find((p) => p.pairId === id)!)
         .filter((p) => p.contrast === c);
-      expect(distinct).toHaveLength(20);
-      expect(new Set(distinct.map((p) => p.taskId)).size).toBe(20);
+      expect(distinct).toHaveLength(config.formalPerContrast);
+      expect(new Set(distinct.map((p) => p.taskId)).size).toBe(config.formalPerContrast);
       expect(
         [3407, 3408, 3409].map((seed) => distinct.filter((p) => p.seed === seed).length).sort(),
       ).toEqual([6, 7, 7]);
       expect(
         f.overlap.filter((id) => db.pairs.find((p) => p.pairId === id)!.contrast === c),
-      ).toHaveLength(4);
+      ).toHaveLength(config.overlapPerContrast);
     }
     expect(JSON.stringify(f)).toBe(JSON.stringify(formal().formal));
     expect(() => generateFormal(s, db, at)).toThrow();
@@ -233,8 +244,9 @@ describe('V2 auditable response and locking semantics', () => {
     const report = analyse(s, db);
     expect(report.results.every((r) => r.rawAgreement === 1)).toBe(true);
     const exported = researchExport(s, db);
-    expect(exported.formal).toHaveLength(96);
-    expect(exported.calibration).toHaveLength(12);
+    const expected = workload(configuration(s));
+    expect(exported.formal).toHaveLength(expected.Jacky + expected.Conrad);
+    expect(exported.calibration).toHaveLength(expected.calibration);
     expect(exported.play).toHaveLength(0);
     expect(exported.formal.every((a) => a.canonicalPreference === a.contrast.split('-')[0])).toBe(
       true,
@@ -269,5 +281,269 @@ describe('shared/local fallback and conflicts', () => {
     const wrong = structuredClone(next);
     wrong.protocolVersion = 'v3';
     expect(() => mergeBackup(s, wrong, db)).toThrow();
+  });
+});
+
+describe('Researcher-configurable V2', () => {
+  it('retains the official defaults in one explicit configuration', () => {
+    expect(DEFAULT_CONFIG).toEqual({
+      contrasts: [...CONTRASTS],
+      calibrationPerContrast: 3,
+      formalPerContrast: 20,
+      overlapPerContrast: 4,
+      seed: 7002026,
+    });
+    expect(workload(DEFAULT_CONFIG)).toMatchObject({
+      calibration: 12,
+      distinct: 80,
+      overlap: 16,
+      Jacky: 48,
+      Conrad: 48,
+    });
+  });
+  it('trusts a concise non-empty Researcher criterion and rejects only empty wording', () => {
+    const s = initialProtocol(db);
+    configureProtocol(s, db, DEFAULT_CONFIG, 'Clarity', at);
+    calibration(s);
+    generateFormal(s, db, at);
+    validateState(s, db);
+    expect(s.calibration.guideline).toBe('Clarity');
+    expect(() => configureProtocol(initialProtocol(db), db, DEFAULT_CONFIG, '   ', at)).toThrow();
+  });
+  it.each([
+    {
+      contrasts: ['C-S'],
+      calibrationPerContrast: 1,
+      formalPerContrast: 5,
+      overlapPerContrast: 2,
+      seed: 19,
+    },
+    {
+      contrasts: ['B-C', 'S-SJ'],
+      calibrationPerContrast: 2,
+      formalPerContrast: 7,
+      overlapPerContrast: 2,
+      seed: 123,
+    },
+    {
+      contrasts: ['B-C', 'C-J', 'S-SJ'],
+      calibrationPerContrast: 1,
+      formalPerContrast: 5,
+      overlapPerContrast: 0,
+      seed: 0,
+    },
+    {
+      contrasts: ['C-J'],
+      calibrationPerContrast: 0,
+      formalPerContrast: 1,
+      overlapPerContrast: 0,
+      seed: 4294967295,
+    },
+    {
+      contrasts: ['C-S'],
+      calibrationPerContrast: 1,
+      formalPerContrast: 4,
+      overlapPerContrast: 4,
+      seed: 77,
+    },
+  ] as ProtocolConfig[])(
+    'derives membership/workloads, breadth and A/B balance for %j',
+    (config) => {
+      const s = formal(config);
+      validateState(s, db);
+      const assignments = s.formal!.assignments;
+      const ids = Object.fromEntries(
+        REVIEWERS.map((r) => [r, new Set(assignments[r].map((a) => a.pairId))]),
+      );
+      const distinct = new Set([...ids.Jacky, ...ids.Conrad]);
+      expect(distinct.size).toBe(config.contrasts.length * config.formalPerContrast);
+      expect([...ids.Jacky].filter((id) => ids.Conrad.has(id))).toHaveLength(
+        config.contrasts.length * config.overlapPerContrast,
+      );
+      expect(Math.abs(assignments.Jacky.length - assignments.Conrad.length)).toBeLessThanOrEqual(1);
+      expect(s.calibration.assignments).toHaveLength(
+        config.contrasts.length * config.calibrationPerContrast,
+      );
+      for (const c of config.contrasts) {
+        const pairs = [...distinct]
+          .map((id) => db.pairs.find((p) => p.pairId === id)!)
+          .filter((p) => p.contrast === c);
+        expect(pairs).toHaveLength(config.formalPerContrast);
+        expect(new Set(pairs.map((p) => p.taskId)).size).toBe(config.formalPerContrast);
+        const seedCounts = [3407, 3408, 3409].map(
+          (seed) => pairs.filter((p) => p.seed === seed).length,
+        );
+        expect(Math.max(...seedCounts) - Math.min(...seedCounts)).toBeLessThanOrEqual(1);
+        for (const r of REVIEWERS) {
+          const items = assignments[r].filter(
+            (a) => db.pairs.find((p) => p.pairId === a.pairId)!.contrast === c,
+          );
+          const leftA = items.filter(
+            (a) => db.pairs.find((p) => p.pairId === a.pairId)!.left === a.a,
+          ).length;
+          expect(Math.abs(leftA - (items.length - leftA))).toBeLessThanOrEqual(1);
+        }
+      }
+      expect(
+        [...distinct].every((id) => !s.calibration.assignments.some((a) => a.pairId === id)),
+      ).toBe(true);
+      expect(s.formal).toEqual(formal(config).formal);
+      for (const r of REVIEWERS)
+        for (let i = 0; i < assignments[r].length; i++) {
+          submitFormal(s, r, 'Equal', at, `fixture-config-${r}-${i}`);
+          delete s.pending[r];
+        }
+      s.unblindedAt = at;
+      const analysis = analyse(s, db);
+      expect(analysis.results.map((r) => r.contrast)).toEqual(config.contrasts);
+      expect(analysis.results.every((r) => r.distinctPairs === config.formalPerContrast)).toBe(
+        true,
+      );
+      if (!config.overlapPerContrast)
+        expect(analysis.results.every((r) => r.rawAgreement === null && r.kappa === null)).toBe(
+          true,
+        );
+      expect(researchExport(s, db).configuration).toEqual(config);
+    },
+  );
+  it('rejects empty, fractional, negative, excessive-overlap, excessive-pool and invalid seed settings', () => {
+    for (const config of [
+      { ...DEFAULT_CONFIG, contrasts: [] },
+      { ...DEFAULT_CONFIG, contrasts: ['B-C', 'B-C'] },
+      { ...DEFAULT_CONFIG, calibrationPerContrast: 1.5 },
+      { ...DEFAULT_CONFIG, formalPerContrast: 0 },
+      { ...DEFAULT_CONFIG, overlapPerContrast: 21 },
+      { ...DEFAULT_CONFIG, overlapPerContrast: -1 },
+      { ...DEFAULT_CONFIG, contrasts: ['S-SJ'], calibrationPerContrast: 0, formalPerContrast: 227 },
+      { ...DEFAULT_CONFIG, seed: -1 },
+      { ...DEFAULT_CONFIG, seed: 4294967296 },
+    ] as ProtocolConfig[])
+      expect(() => validateConfiguration(config, db)).toThrow();
+  });
+  it('archives deliberate Calibration resets and excludes all previously assigned Calibration pairs', () => {
+    const before = initialProtocol(db);
+    before.calibration.answers.push({
+      ...before.calibration.assignments[0],
+      responseId: 'fixture-before-reset',
+      reviewer: 'Joint',
+      phase: 'Calibration',
+      choice: 'Equal',
+      at,
+    });
+    const after = structuredClone(before);
+    resetCalibration(after, db, at);
+    validateTransition(before, after, db);
+    expect(after.archives![0].state.calibration.answers).toEqual(before.calibration.answers);
+    expect(after.calibration.answers).toHaveLength(0);
+    expect(
+      after.calibration.assignments.every(
+        (a) => !before.calibration.assignments.some((b) => a.pairId === b.pairId),
+      ),
+    ).toBe(true);
+    calibration(after);
+    generateFormal(after, db, at);
+    validateState(after, db);
+    expect(
+      Object.values(after.formal!.assignments)
+        .flat()
+        .every((a) => !before.calibration.assignments.some((b) => a.pairId === b.pairId)),
+    ).toBe(true);
+  });
+  it('edits criterion/seed before any Formal answer and archives explicit unstarted regeneration', () => {
+    const before = formal(),
+      after = structuredClone(before);
+    const criterion =
+      'Fixture reviewer criterion: prefer clear structures that are straightforward to maintain and debug.';
+    configureProtocol(after, db, { ...DEFAULT_CONFIG, seed: 2027 }, criterion, at);
+    expect(after.calibration.answers).toEqual(before.calibration.answers);
+    expect(after.calibration.lockedAt).toBe(before.calibration.lockedAt);
+    expect(after.formal).toBeUndefined();
+    expect(after.archives![0].state.formal).toEqual(before.formal);
+    validateTransition(before, after, db);
+    generateFormal(after, db, at);
+    const generated = structuredClone(after);
+    regenerateFormal(after, db, at);
+    validateTransition(generated, after, db);
+    expect(after.archives![1].state.formal).toEqual(generated.formal);
+    expect(after.formal!.seed).toBe(2027);
+    expect(after.formal!.criterionVersion).toBe(after.calibration.criterionVersion);
+  });
+  it('freezes after first response even when Undo or recovery leaves zero active answers', () => {
+    const before = formal();
+    submitFormal(before, 'Jacky', 'A', at, 'fixture-freeze');
+    undoFormal(before, 'Jacky', at);
+    expect(activeAnswers(before, 'Jacky')).toHaveLength(0);
+    expect(formalStarted(before)).toBe(true);
+    expect(() =>
+      configureProtocol(
+        before,
+        db,
+        { ...DEFAULT_CONFIG, seed: 99 },
+        before.calibration.guideline,
+        at,
+      ),
+    ).toThrow();
+    expect(() => resetCalibration(before, db, at)).toThrow();
+    expect(() => regenerateFormal(before, db, at)).toThrow();
+    const tampered = structuredClone(before);
+    tampered.config!.seed = 99;
+    tampered.formal!.seed = 99;
+    expect(() => validateTransition(before, tampered, db)).toThrow();
+  });
+  it('requires explicit version replacement preserving full old state and immutable history', () => {
+    const before = formal();
+    submitFormal(before, 'Jacky', 'B', at, 'fixture-started');
+    const after = structuredClone(before);
+    replaceProtocol(after, db, 'Fixture invalidation: change research protocol', at);
+    validateTransition(before, after, db);
+    const { archives, ...oldState } = before;
+    expect(after.archives![0].state).toEqual(oldState);
+    expect(after.archives![0].disposition).toBe('invalidated');
+    expect(after.edition).toBe(2);
+    expect(after.answers).toHaveLength(0);
+    expect(after.formal).toBeUndefined();
+    expect(mergeBackup(before, after, db)).toEqual(after);
+    const edited = structuredClone(after);
+    edited.archives![0].state.answers[0].choice = 'A';
+    expect(() => validateTransition(after, edited, db)).toThrow();
+    const lost = structuredClone(after);
+    lost.archives = [];
+    expect(() => validateState(lost, db)).toThrow();
+  });
+  it('imports offline successive editions without losing prior Calibration records', () => {
+    const before = initialProtocol(db),
+      after = structuredClone(before);
+    calibration(after);
+    resetCalibration(after, db, at);
+    calibration(after);
+    resetCalibration(after, db, at);
+    expect(mergeBackup(before, after, db).archives).toHaveLength(2);
+  });
+  it('archives completed unblinded evidence without rewriting it when explicitly replacing', () => {
+    const before = completed();
+    before.unblindedAt = at;
+    const after = structuredClone(before);
+    replaceProtocol(after, db, 'Fixture explicit replacement after completion', at);
+    validateTransition(before, after, db);
+    expect(after.archives![0].state.answers).toEqual(before.answers);
+    expect(after.archives![0].state.unblindedAt).toBe(at);
+    expect(after.unblindedAt).toBeUndefined();
+  });
+  it('accepts legacy V2 shape in place without migrating or reshuffling', () => {
+    const legacy = formal();
+    delete legacy.config;
+    delete legacy.edition;
+    delete legacy.calibration.seed;
+    legacy.calibration.criterionVersion = 'readability-maintainability-v2';
+    legacy.formal!.criterionVersion = legacy.calibration.criterionVersion;
+    const raw = JSON.stringify(legacy);
+    validateState(legacy, db);
+    expect(JSON.stringify(legacy)).toBe(raw);
+    expect(configuration(legacy)).toEqual(DEFAULT_CONFIG);
+    expect(nextUnanswered(legacy, 'Conrad')).toEqual(legacy.formal!.assignments.Conrad[0]);
+    const responded = structuredClone(legacy);
+    submitFormal(responded, 'Conrad', 'Equal', at, 'fixture-legacy-answer');
+    validateTransition(legacy, responded, db);
+    expect(responded.formal).toEqual(legacy.formal);
   });
 });

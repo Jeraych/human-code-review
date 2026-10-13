@@ -61,15 +61,42 @@ Use one service instance and SQLite database. Serve frontend and API on the same
 
 No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
+## Researcher protocol configuration
+
+Study → Researcher → **Protocol configuration** edits the existing V2 study; there is no separate Custom/Pilot mode. The researcher is trusted to choose the criterion and sample size. Reviewer screens contain no configuration controls.
+
+| Setting | Official default |
+|---|---|
+| Enabled contrasts | B–C, C–S, C–J, S–SJ; any non-empty subset is supported |
+| Calibration pairs per enabled contrast | 3 |
+| Formal distinct pairs per enabled contrast | 20 |
+| Overlap pairs per enabled contrast | 4 |
+| Randomisation seed | 7002026; explicitly editable |
+| Criterion / guideline | Current readability/maintainability wording; editable and non-empty |
+
+The live preview shows Calibration total, Formal distinct pairs, double-rated overlaps and each reviewer's workload. Official defaults still give 12 Calibration pairs, 80 Formal pairs, 16 overlaps and 48 ratings each. Remaining non-overlap pairs are divided evenly; when odd, the extra alternates between reviewers across contrasts. Task breadth, approximately balanced source seeds and balanced A/B positions are automatic. Zero Calibration or overlap is allowed; Formal must have at least one pair per enabled contrast. With no overlaps, agreement/kappa are null rather than NaN.
+
+**Save configuration** applies the preview and archives the prior edition. Unsaved or impossible settings block generation. Counts must be integers, overlap cannot exceed Formal count, and the requested eligible sample must fit the frozen pool after Calibration exclusions. The 32-bit seed accepts 0–4294967295. Eligibility stays fixed: holdout only, both correctness-pass, exact-identical code excluded from the displayed sample but retained in research counts.
+
+Before any Formal response is recorded:
+
+- Changing contrasts or Calibration count starts fresh Calibration; previous assignments/responses are archived.
+- Criterion, Formal count, overlap or seed edits preserve Calibration and clear any unstarted Formal assignment. Save explicitly confirms this when progress already exists.
+- **Reset / regenerate Calibration** and **Regenerate unstarted Formal** are deliberate actions with confirmation. Earlier Calibration assignments remain excluded from future Formal samples, including after resets.
+
+After the first Formal response is recorded, the active configuration, criterion and assignments are frozen, even if Undo/invalidation subsequently leaves zero active answers. Researcher displays the active frozen values. To change it, open **Advanced / Recovery — protocol replacement**, enter a reason and explicitly **Invalidate active protocol & create replacement**. The new edition returns to Calibration; the old configuration, assignments, responses, invalidation records and completion/unblinding state remain immutable in Protocol history and progress backups. Research exports include active configuration, edition and archived protocols. No reset silently deletes evidence.
+
+Saved V2 data without configuration/edition fields is read as the original official defaults in edition 1, without rewriting or reshuffling assignments. V1 and the canonical V2 pools/provenance are unchanged. Pending offline editions/imports retain history; conflicting edits fail closed.
+
 ## Tomorrow's Study workflow
 
-1. Start the service (or visit a configured hosted installation), select Study and enter the shared access code.
-2. At one computer with Conrad, choose **Joint Calibration**. Discuss each pair, select A/Equal/B, then Submit. Reveal follows the choice. Complete all 12 pairs, finalise the editable guideline and click **Lock Calibration**.
-3. Choose Exit Study → Researcher → **Generate / Lock Formal V2**. This freezes 80 distinct pairs, 16 overlaps, 48 assignments each, order and A/B mappings. Generating again is disabled. Calibration pairs cannot enter Formal.
+1. Start the service (or visit a configured hosted installation), select Study and enter the shared access code. Open Researcher to verify the official default configuration or deliberately configure a different workload before Calibration.
+2. At one computer with Conrad, choose **Joint Calibration**. Discuss each pair, select A/Equal/B, then Submit. Reveal follows the choice. Complete the configured Calibration workload (12 with official defaults), finalise the editable guideline and click **Lock Calibration**.
+3. Choose Exit Study → Researcher → **Generate / Lock Formal V2**. This freezes the saved configuration, pair IDs, reviewer assignments, order and A/B mappings (80 distinct pairs, 16 overlaps, 48 assignments each with official defaults). Unstarted assignments can only regenerate deliberately through Researcher; after the first response they are immutable. Calibration pairs cannot enter Formal.
 4. Exit to Study Home → **Jacky** → check the identity/progress confirmation → Continue as Jacky. Read independently; select A/Equal/B and **Submit choice**. Undo is available only before Next. No results are revealed.
 5. Conrad independently follows Study → code → **Conrad** → Continue as Conrad. His overlap answers are separate from Jacky's. Do not discuss Formal comparisons or inspect Play/provenance before reviewing.
 6. After browser close, reopen the same site, enter Study/code, select your reviewer and confirm. Hosted state resumes on another device without manual files. Exit Study preserves progress. Avoid simultaneous tabs for the same reviewer.
-7. At 48/48 for both, Researcher → **Unblind & Analyse** → **Export research data**. Completion/version/assignment/mapping checks must pass first. JSON contains separate Calibration, Formal and Play sections, original invalidated records, source/code hashes and canonical agreement results.
+7. When both reviewers complete their configured workload (48/48 each with official defaults), Researcher → **Unblind & Analyse** → **Export research data**. Completion/version/assignment/mapping checks must pass first. JSON contains separate Calibration, Formal and Play sections, original invalidated records, source/code hashes and canonical agreement results.
 8. If an answer used the wrong reviewer, Researcher → Advanced / Recovery → find its response ID under Assignments, mappings and provenance → enter ID/reason → **Invalidate response**. The original is retained. Resume that reviewer to answer the newly unanswered pair. Do this before unblinding.
 
 ## Backup and local fallback

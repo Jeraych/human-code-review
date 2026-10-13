@@ -48,6 +48,83 @@
   margin-top: 28px;
   padding: 16px 0;
 }
+.protocol-configuration {
+  margin-bottom: 28px;
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.protocol-configuration fieldset {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px;
+  min-width: 0;
+}
+.protocol-configuration legend {
+  padding: 0 6px;
+}
+.protocol-configuration .protocol-contrasts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.protocol-configuration .protocol-contrasts label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.protocol-contrasts small {
+  flex-basis: 100%;
+  color: var(--muted);
+}
+.protocol-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.protocol-numbers label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.5;
+}
+.protocol-configuration input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #ccd4df;
+  border-radius: 6px;
+  color: inherit;
+  background: white;
+}
+.protocol-configuration fieldset > label {
+  display: block;
+  margin: 16px 0 8px;
+}
+.protocol-preview dl {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px 18px;
+}
+.protocol-preview dt {
+  font-weight: 600;
+}
+.protocol-preview dd {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .protocol-configuration .protocol-contrasts,
+  .protocol-numbers {
+    grid-template-columns: 1fr;
+  }
+  .protocol-preview dl {
+    grid-template-columns: 85px minmax(0, 1fr);
+  }
+}
 .v2-app.mode-play .pool-switch {
   flex-wrap: wrap;
   width: 100%;

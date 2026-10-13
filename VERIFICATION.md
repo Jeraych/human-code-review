@@ -1,3 +1,21 @@
+# Researcher-configurable V2 verification — 14 October 2026
+
+Scoped evolution from a5356af: configuration lives in the existing Researcher workflow, with original official values as defaults. V1 modules/assets, all canonical V2 pools and provenance, and actual research storage are untouched.
+
+- 58 TypeScript tests passed, including original V1 regressions, real pool/hash checks, config-derived workloads, single/multiple contrast subsets, odd and zero-overlap allocations, all-overlap assignments, seed/task/A/B balance, impossible settings, legacy V2 in-place compatibility, immutable started protocols and archived resets/replacements/imports.
+- Seven existing Python merge/download checks passed; publication audit found zero issues.
+- Strict TypeScript and production build passed. Application/highlighting chunk-size warnings remain; no dependencies were added.
+- Configurable Researcher browser pilot: 20 checks passed, including live preview and validation, saving before ratings, seed edits after Calibration, deliberate Formal regeneration, reviewer-only controls, freezing after Undo, server rejection of silent edits, explicit archived replacement, refresh and configured analysis/export.
+- Official V2 browser workflow: all 36 existing checks passed, now deriving workload assertions/loops from configuration.
+- V2 static/service/launcher integration: all 13 checks passed.
+- Desktop (1440×1000) and mobile (390×844) screenshots inspected; form stays within the viewport. Criterion label is explicitly associated with the textarea.
+
+Browser responses exist only in ignored isolated QA fixture databases; no actual Calibration or Formal ratings were started and no fake public Play records were created. Server/device verification remains localhost, not a configured remote deployment. History is kept in optional protocol editions/archives and included in backups/exports; existing absent-field V2 records retain their exact assignments without migration.
+
+New pilot: `node scripts/pilot_v2_configuration.mjs <existing-Playwright-module-path> <Chrome-executable-path>`. It uses qa/v2/configuration-fixture-*.sqlite, with screenshots/report under qa/v2; no real-study database is used. The original historical verification below remains for provenance.
+
+---
+
 # Human Validation V2 verification — 14 October 2026, Pacific/Auckland
 
 Starting baseline: clean main at 24b0ae5; successful origin fetch confirmed no ahead/behind changes. GitHub API confirmed Jeraych/human-code-review is private and its default branch is main.

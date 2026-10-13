@@ -4,7 +4,14 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { initialProtocol, lockCalibration, generateFormal, submitFormal } from '../src/v2.ts';
+import {
+  initialProtocol,
+  lockCalibration,
+  generateFormal,
+  submitFormal,
+  DEFAULT_CONFIG,
+  workload,
+} from '../src/v2.ts';
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.argv[2] || 'playwright');
 const root = resolve(import.meta.dirname, '..'),
@@ -18,6 +25,7 @@ function check(label, condition) {
   checks.push(label);
 }
 const access = 'fixture-' + crypto.randomUUID();
+const official = workload(DEFAULT_CONFIG);
 const port = 18787;
 const child = spawn(process.execPath, ['server/api.ts'], {
   cwd: root,
@@ -112,12 +120,14 @@ try {
   check(
     'Calibration selection alone does not submit',
     await page
-      .getByText('Jacky + Conrad · 0 / 12 · Separate from Formal', { exact: true })
+      .getByText(`Jacky + Conrad · 0 / ${official.calibration} · Separate from Formal`, {
+        exact: true,
+      })
       .isVisible(),
   );
   await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
   await page.getByRole('button', { name: 'Next calibration comparison' }).waitFor();
-  for (let i = 1; i < 12; i++) {
+  for (let i = 1; i < official.calibration; i++) {
     await page.getByRole('button', { name: 'Next calibration comparison' }).click();
     await page.getByRole('button', { name: 'Equal', exact: true }).click();
     await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
@@ -144,9 +154,9 @@ try {
   const protocol = await context.request.get(url + '/api/state').then((r) => r.json());
   check(
     'Hosted Formal assignments are 48/48 and 16 overlap',
-    protocol.formal.assignments.Jacky.length === 48 &&
-      protocol.formal.assignments.Conrad.length === 48 &&
-      protocol.formal.overlap.length === 16,
+    protocol.formal.assignments.Jacky.length === official.Jacky &&
+      protocol.formal.assignments.Conrad.length === official.Conrad &&
+      protocol.formal.overlap.length === official.overlap,
   );
   check(
     'Results cannot unblind early',
@@ -188,7 +198,7 @@ try {
   await page.getByRole('button', { name: 'B', exact: true }).click();
   check(
     'Formal choice waits for Submit',
-    await page.getByText('Formal V2 · 0 / 48', { exact: true }).isVisible(),
+    await page.getByText(`Formal V2 · 0 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
   await page.getByRole('button', { name: 'Undo', exact: true }).waitFor();
@@ -196,7 +206,7 @@ try {
   await page.getByRole('button', { name: 'Submit choice', exact: true }).waitFor();
   check(
     'Undo retains audit and removes active completion',
-    await page.getByText('Formal V2 · 0 / 48', { exact: true }).isVisible(),
+    await page.getByText(`Formal V2 · 0 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
   await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
@@ -214,7 +224,7 @@ try {
   await page.getByRole('button', { name: 'Jacky', exact: true }).click();
   check(
     'Browser refresh resumes own exact completion',
-    await page.getByText('Formal progress: 1 / 48', { exact: true }).isVisible(),
+    await page.getByText(`Formal progress: 1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   // A fresh isolated browser models a reasonable device change via the shared backend.
   const other = await browser.newContext();
@@ -225,7 +235,7 @@ try {
   await second.getByRole('button', { name: 'Jacky', exact: true }).click();
   check(
     'Fresh device resumes without JSON transfer',
-    await second.getByText('Formal progress: 1 / 48', { exact: true }).isVisible(),
+    await second.getByText(`Formal progress: 1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   const stale = await context.request.put(url + '/api/state', {
     data: { expectedRevision: 0, state: saved },
@@ -248,7 +258,7 @@ try {
   await page.getByRole('button', { name: 'Continue as Jacky' }).click();
   check(
     'Hosted outage resumes browser-local assignment',
-    await page.getByText('Formal V2 · 1 / 48', { exact: true }).isVisible(),
+    await page.getByText(`Formal V2 · 1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
   await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
@@ -299,7 +309,10 @@ try {
   // Fill the remaining isolated fixture protocol to exercise completeness/unblinding.
   for (const r of ['Jacky', 'Conrad']) {
     delete synced.pending[r];
-    while (synced.answers.filter((a) => a.reviewer === r && !a.invalidated).length < 48) {
+    while (
+      synced.answers.filter((a) => a.reviewer === r && !a.invalidated).length <
+      synced.formal.assignments[r].length
+    ) {
       submitFormal(
         synced,
         r,
@@ -327,8 +340,8 @@ try {
   const exported = JSON.parse(readFileSync(resolve(qa, 'fixture-research-export.json'), 'utf8'));
   check(
     'Unblinded export separates 96 active ratings, Calibration and Play',
-    exported.formal.filter((a) => !a.invalidated).length === 96 &&
-      exported.calibration.length === 12 &&
+    exported.formal.filter((a) => !a.invalidated).length === official.Jacky + official.Conrad &&
+      exported.calibration.length === official.calibration &&
       exported.play.length === 0,
   );
   check(

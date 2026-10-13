@@ -2,6 +2,21 @@
 export const PROTOCOL = 'human-validation-v2';
 export const SEED = 7002026;
 export const CONTRASTS = ['B-C', 'C-S', 'C-J', 'S-SJ'] as const;
+export type Contrast = (typeof CONTRASTS)[number];
+export interface ProtocolConfig {
+  contrasts: Contrast[];
+  calibrationPerContrast: number;
+  formalPerContrast: number;
+  overlapPerContrast: number;
+  seed: number;
+}
+export const DEFAULT_CONFIG: ProtocolConfig = {
+  contrasts: [...CONTRASTS],
+  calibrationPerContrast: 3,
+  formalPerContrast: 20,
+  overlapPerContrast: 4,
+  seed: SEED,
+};
 export const REVIEWERS = ['Jacky', 'Conrad'] as const;
 export type Reviewer = (typeof REVIEWERS)[number];
 export type Preference = 'A' | 'Equal' | 'B';
@@ -77,12 +92,17 @@ export interface ProtocolState {
   poolVersion: string;
   catalogHash: string;
   revision: number;
+  // Optional fields preserve already-saved V2 records without rewriting them.
+  config?: ProtocolConfig;
+  edition?: number;
+  archives?: ProtocolArchive[];
   calibration: {
     assignments: Presentation[];
     answers: Answer[];
     guideline: string;
     lockedAt?: string;
     criterionVersion?: string;
+    seed?: number;
   };
   formal?: {
     assignmentVersion: string;
@@ -95,6 +115,76 @@ export interface ProtocolState {
   answers: Answer[];
   pending: Partial<Record<Reviewer, string>>;
   unblindedAt?: string;
+}
+export interface ProtocolArchive {
+  at: string;
+  reason: string;
+  disposition: 'superseded' | 'invalidated';
+  state: Omit<ProtocolState, 'archives'>;
+}
+export const configuration = (s: ProtocolState): ProtocolConfig => s.config ?? DEFAULT_CONFIG;
+export const protocolEdition = (s: ProtocolState) => s.edition ?? 1;
+export const formalStarted = (s: ProtocolState) => s.answers.length > 0 || !!s.unblindedAt;
+export function workload(config: ProtocolConfig) {
+  const remaining = config.formalPerContrast - config.overlapPerContrast;
+  const perContrast = config.contrasts.map((contrast, i) => ({
+    contrast,
+    Jacky:
+      config.overlapPerContrast + Math.floor(remaining / 2) + (i % 2 === 0 ? remaining % 2 : 0),
+    Conrad:
+      config.overlapPerContrast + Math.floor(remaining / 2) + (i % 2 === 1 ? remaining % 2 : 0),
+  }));
+  return {
+    calibration: config.contrasts.length * config.calibrationPerContrast,
+    distinct: config.contrasts.length * config.formalPerContrast,
+    overlap: config.contrasts.length * config.overlapPerContrast,
+    Jacky: perContrast.reduce((n, c) => n + c.Jacky, 0),
+    Conrad: perContrast.reduce((n, c) => n + c.Conrad, 0),
+    perContrast,
+  };
+}
+function pastCalibration(s?: ProtocolState) {
+  return new Set(
+    s?.archives?.flatMap((a) => a.state.calibration.assignments.map((p) => p.pairId)) ?? [],
+  );
+}
+export function calibrationExclusions(s: ProtocolState) {
+  return new Set([...pastCalibration(s), ...s.calibration.assignments.map((p) => p.pairId)]);
+}
+export function validateConfiguration(
+  config: ProtocolConfig,
+  db: Catalog,
+  excluded = new Set<string>(),
+  reserveCalibration = true,
+) {
+  assert(
+    Array.isArray(config.contrasts) &&
+      config.contrasts.length > 0 &&
+      new Set(config.contrasts).size === config.contrasts.length &&
+      config.contrasts.every((c) => CONTRASTS.includes(c)),
+    'Enable at least one supported contrast, without duplicates.',
+  );
+  for (const [key, value] of Object.entries(config).filter(([key]) => key !== 'contrasts'))
+    assert(
+      Number.isInteger(value) && (value as number) >= 0,
+      `${key} must be a non-negative integer.`,
+    );
+  assert(config.formalPerContrast >= 1, 'Formal pairs per contrast must be at least 1.');
+  assert(
+    config.overlapPerContrast <= config.formalPerContrast,
+    'Overlap cannot exceed Formal pairs per contrast.',
+  );
+  assert(config.seed <= 0xffffffff, 'Randomisation seed must be between 0 and 4294967295.');
+  for (const c of config.contrasts) {
+    const available = db.pairs.filter(
+      (p) => p.contrast === c && p.eligible && !excluded.has(p.pairId),
+    ).length;
+    assert(
+      (reserveCalibration ? config.calibrationPerContrast : 0) + config.formalPerContrast <=
+        available,
+      `${c}: requested ${config.calibrationPerContrast} Calibration + ${config.formalPerContrast} Formal pairs, but only ${available} eligible pairs are available after archived Calibration exclusions.`,
+    );
+  }
 }
 export const GUIDELINE =
   'Judge based on readability and maintainability as if you were a developer who may need to understand, review, modify, or debug the code. Prefer only meaningful differences. Choose Equal when neither solution is clearly preferable.';
@@ -147,15 +237,28 @@ function sample(
   }
   return picked;
 }
-function orient(p: PairV2, next: () => number): Presentation {
-  return next() < 0.5
-    ? { pairId: p.pairId, a: p.left, b: p.right }
-    : { pairId: p.pairId, a: p.right, b: p.left };
+function orientBalanced(pairs: PairV2[], next: () => number): Presentation[] {
+  const leftInA = new Set(
+    shuffle(pairs, next)
+      .slice(0, Math.floor(pairs.length / 2) + (pairs.length % 2 && next() < 0.5 ? 1 : 0))
+      .map((p) => p.pairId),
+  );
+  return pairs.map((p) =>
+    leftInA.has(p.pairId)
+      ? { pairId: p.pairId, a: p.left, b: p.right }
+      : { pairId: p.pairId, a: p.right, b: p.left },
+  );
 }
-export function initialProtocol(db: Catalog): ProtocolState {
-  const next = random(SEED);
-  const assignments = CONTRASTS.flatMap((c) =>
-    sample(db, c, 3, new Set(), next).map((p) => orient(p, next)),
+export function initialProtocol(
+  db: Catalog,
+  config = DEFAULT_CONFIG,
+  guideline = GUIDELINE,
+  excluded = new Set<string>(),
+): ProtocolState {
+  validateConfiguration(config, db, excluded);
+  const next = random(config.seed);
+  const assignments = config.contrasts.flatMap((c) =>
+    orientBalanced(sample(db, c, config.calibrationPerContrast, excluded, next), next),
   );
   return {
     schemaVersion: 2,
@@ -163,7 +266,14 @@ export function initialProtocol(db: Catalog): ProtocolState {
     poolVersion: db.poolVersion,
     catalogHash: db.catalogHash,
     revision: 0,
-    calibration: { assignments: shuffle(assignments, next), answers: [], guideline: GUIDELINE },
+    config: structuredClone(config),
+    edition: 1,
+    calibration: {
+      assignments: shuffle(assignments, next),
+      answers: [],
+      guideline,
+      seed: config.seed,
+    },
     answers: [],
     pending: {},
   };
@@ -178,37 +288,39 @@ export function nextUnanswered(s: ProtocolState, r: Reviewer) {
 export function lockCalibration(s: ProtocolState, at: string) {
   assert(!s.calibration.lockedAt && !s.formal, 'Calibration is already frozen.');
   assert(
-    s.calibration.answers.length === 12 &&
-      new Set(s.calibration.answers.map((a) => a.pairId)).size === 12,
-    'Complete all 12 calibration comparisons.',
+    s.calibration.answers.length === workload(configuration(s)).calibration &&
+      new Set(s.calibration.answers.map((a) => a.pairId)).size === s.calibration.assignments.length,
+    `Complete all ${s.calibration.assignments.length} calibration comparisons.`,
   );
-  assert(s.calibration.guideline.trim().length >= 20, 'Enter a meaningful reviewer guideline.');
+  assert(s.calibration.guideline.trim().length > 0, 'Enter a reviewer criterion/guideline.');
   s.calibration.lockedAt = at;
-  s.calibration.criterionVersion = 'readability-maintainability-v2';
+  s.calibration.criterionVersion = `criterion-v2-${protocolEdition(s)}`;
 }
 export function generateFormal(s: ProtocolState, db: Catalog, at: string) {
   assert(
     s.calibration.lockedAt && !s.formal && !s.answers.length,
     'Lock Calibration first. Existing Formal protocols cannot be regenerated.',
   );
-  const next = random(SEED),
-    excluded = new Set(s.calibration.assignments.map((p) => p.pairId));
+  const config = configuration(s);
+  const next = random(config.seed),
+    excluded = calibrationExclusions(s);
+  validateConfiguration(config, db, excluded, false);
   const assignments: Record<Reviewer, Presentation[]> = { Jacky: [], Conrad: [] },
     overlap: string[] = [];
-  for (const contrast of CONTRASTS) {
-    const pairs = sample(db, contrast, 20, excluded, next);
+  for (const allocation of workload(config).perContrast) {
+    const pairs = sample(db, allocation.contrast, config.formalPerContrast, excluded, next);
     // Membership and orientation are frozen independently per reviewer.
-    overlap.push(...pairs.slice(0, 4).map((p) => p.pairId));
+    const common = pairs.slice(0, config.overlapPerContrast);
+    const split = allocation.Jacky;
+    overlap.push(...common.map((p) => p.pairId));
     assignments.Jacky.push(
-      ...[...pairs.slice(0, 4), ...pairs.slice(4, 12)].map((p) => orient(p, next)),
+      ...orientBalanced([...common, ...pairs.slice(config.overlapPerContrast, split)], next),
     );
-    assignments.Conrad.push(
-      ...[...pairs.slice(0, 4), ...pairs.slice(12, 20)].map((p) => orient(p, next)),
-    );
+    assignments.Conrad.push(...orientBalanced([...common, ...pairs.slice(split)], next));
   }
   s.formal = {
-    assignmentVersion: 'formal-v2-assignment-1',
-    seed: SEED,
+    assignmentVersion: `formal-v2-assignment-${protocolEdition(s)}`,
+    seed: config.seed,
     createdAt: at,
     criterionVersion: s.calibration.criterionVersion!,
     assignments: {
@@ -217,6 +329,88 @@ export function generateFormal(s: ProtocolState, db: Catalog, at: string) {
     },
     overlap,
   };
+}
+function archive(
+  s: ProtocolState,
+  at: string,
+  reason: string,
+  disposition: ProtocolArchive['disposition'],
+) {
+  assert(
+    reason.trim().length >= 3 && !isNaN(Date.parse(at)),
+    'Provide an audit reason and timestamp.',
+  );
+  const { archives, ...state } = structuredClone(s);
+  s.archives = [...(archives ?? []), { at, reason: reason.trim(), disposition, state }];
+  s.edition = protocolEdition(state) + 1;
+  s.config = structuredClone(configuration(state));
+}
+export function configureProtocol(
+  s: ProtocolState,
+  db: Catalog,
+  config: ProtocolConfig,
+  guideline: string,
+  at: string,
+) {
+  assert(!formalStarted(s), 'Formal has started. Invalidate and replace the protocol explicitly.');
+  assert(guideline.trim().length > 0, 'Enter a reviewer criterion/guideline.');
+  validateConfiguration(config, db);
+  if (
+    JSON.stringify(configuration(s)) === JSON.stringify(config) &&
+    s.calibration.guideline === guideline
+  )
+    return;
+  const old = configuration(s);
+  const keepCalibration =
+    old.calibrationPerContrast === config.calibrationPerContrast &&
+    JSON.stringify(old.contrasts) === JSON.stringify(config.contrasts);
+  archive(
+    s,
+    at,
+    'Researcher deliberately changed protocol configuration or criterion',
+    'superseded',
+  );
+  s.config = structuredClone(config);
+  if (!keepCalibration) {
+    const next = initialProtocol(db, config, guideline, pastCalibration(s));
+    s.calibration = next.calibration;
+  } else {
+    s.calibration.guideline = guideline;
+    if (s.calibration.lockedAt)
+      s.calibration.criterionVersion = `criterion-v2-${protocolEdition(s)}`;
+    validateConfiguration(config, db, calibrationExclusions(s), false);
+  }
+  delete s.formal;
+  s.pending = {};
+  delete s.unblindedAt;
+}
+export function resetCalibration(s: ProtocolState, db: Catalog, at: string) {
+  assert(!formalStarted(s), 'Formal has started. Replace the protocol explicitly.');
+  archive(s, at, 'Researcher deliberately reset/regenerated Calibration', 'superseded');
+  s.calibration = initialProtocol(
+    db,
+    configuration(s),
+    s.calibration.guideline,
+    pastCalibration(s),
+  ).calibration;
+  delete s.formal;
+  s.pending = {};
+}
+export function regenerateFormal(s: ProtocolState, db: Catalog, at: string) {
+  assert(!formalStarted(s) && s.formal, 'Only an unstarted Formal assignment can be regenerated.');
+  archive(s, at, 'Researcher deliberately regenerated unstarted Formal assignments', 'superseded');
+  delete s.formal;
+  generateFormal(s, db, at);
+}
+export function replaceProtocol(s: ProtocolState, db: Catalog, reason: string, at: string) {
+  assert(formalStarted(s), 'Only a started protocol requires explicit invalidation/replacement.');
+  archive(s, at, reason, 'invalidated');
+  const fresh = initialProtocol(db, configuration(s), s.calibration.guideline, pastCalibration(s));
+  s.calibration = fresh.calibration;
+  s.answers = [];
+  s.pending = {};
+  delete s.formal;
+  delete s.unblindedAt;
 }
 export function submitFormal(
   s: ProtocolState,
@@ -300,7 +494,7 @@ export function validateCatalog(db: DatabaseV2) {
     );
   }
 }
-export function validateState(s: ProtocolState, db: Catalog, requireComplete = false) {
+function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = false) {
   assert(
     s?.schemaVersion === 2 &&
       s.protocolVersion === PROTOCOL &&
@@ -309,6 +503,9 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
     'Protocol/pool/hash mismatch.',
   );
   assert(Number.isInteger(s.revision) && s.revision >= 0, 'Invalid revision.');
+  const config = configuration(s),
+    expected = workload(config);
+  validateConfiguration(config, db, calibrationExclusions(s), false);
   const byId = new Map(db.pairs.map((p) => [p.pairId, p]));
   const checkPresentation = (a: Presentation) => {
     const p = byId.get(a.pairId);
@@ -318,11 +515,17 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
     );
   };
   assert(
-    s.calibration.assignments.length === 12 &&
-      new Set(s.calibration.assignments.map((p) => p.pairId)).size === 12,
-    'Expected 12 distinct calibration pairs.',
+    s.calibration.assignments.length === expected.calibration &&
+      new Set(s.calibration.assignments.map((p) => p.pairId)).size === expected.calibration,
+    `Expected ${expected.calibration} distinct calibration pairs.`,
   );
   s.calibration.assignments.forEach(checkPresentation);
+  for (const c of CONTRASTS)
+    assert(
+      s.calibration.assignments.filter((p) => byId.get(p.pairId)!.contrast === c).length ===
+        (config.contrasts.includes(c) ? config.calibrationPerContrast : 0),
+      'Calibration contrasts/counts disagree with configuration.',
+    );
   assert(
     new Set(s.calibration.answers.map((a) => a.pairId)).size === s.calibration.answers.length,
     'Duplicate calibration answers.',
@@ -351,9 +554,9 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
   }
   if (s.calibration.lockedAt)
     assert(
-      s.calibration.answers.length === 12 &&
+      s.calibration.answers.length === expected.calibration &&
         !!s.calibration.criterionVersion &&
-        s.calibration.guideline.trim().length >= 20,
+        s.calibration.guideline.trim().length > 0,
       'Incomplete locked calibration.',
     );
   if (!s.formal) {
@@ -363,16 +566,16 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
   }
   assert(
     s.calibration.lockedAt &&
-      s.formal.seed === SEED &&
+      s.formal.seed === config.seed &&
       s.formal.criterionVersion === s.calibration.criterionVersion &&
-      s.formal.assignmentVersion === 'formal-v2-assignment-1',
+      s.formal.assignmentVersion === `formal-v2-assignment-${protocolEdition(s)}`,
     'Invalid Formal protocol metadata.',
   );
   const ids: Record<Reviewer, Set<string>> = { Jacky: new Set(), Conrad: new Set() };
-  const calibration = new Set(s.calibration.assignments.map((a) => a.pairId));
+  const calibration = calibrationExclusions(s);
   for (const r of REVIEWERS) {
     const list = s.formal.assignments[r];
-    assert(list.length === 48, 'Expected 48 assignments per reviewer.');
+    assert(list.length === expected[r], `Expected ${expected[r]} assignments for ${r}.`);
     for (const p of list) {
       checkPresentation(p);
       assert(
@@ -383,15 +586,16 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
     }
     for (const c of CONTRASTS)
       assert(
-        list.filter((p) => byId.get(p.pairId)!.contrast === c).length === 12,
-        'Expected 12 assignments per contrast/reviewer.',
+        list.filter((p) => byId.get(p.pairId)!.contrast === c).length ===
+          (expected.perContrast.find((item) => item.contrast === c)?.[r] ?? 0),
+        'Assignments per contrast/reviewer disagree with configuration.',
       );
     const active = activeAnswers(s, r);
     assert(
       new Set(active.map((a) => a.pairId)).size === active.length,
       'Duplicate active responses.',
     );
-    if (requireComplete) assert(active.length === 48, `${r} is incomplete.`);
+    if (requireComplete) assert(active.length === expected[r], `${r} is incomplete.`);
     if (s.pending[r])
       assert(
         active.some((a) => a.responseId === s.pending[r]),
@@ -401,16 +605,18 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
   const union = new Set([...ids.Jacky, ...ids.Conrad]),
     common = [...ids.Jacky].filter((id) => ids.Conrad.has(id));
   assert(
-    union.size === 80 &&
-      common.length === 16 &&
-      new Set(s.formal.overlap).size === 16 &&
+    union.size === expected.distinct &&
+      common.length === expected.overlap &&
+      new Set(s.formal.overlap).size === expected.overlap &&
       common.every((id) => s.formal!.overlap.includes(id)),
     'Wrong distinct/overlap membership.',
   );
   for (const c of CONTRASTS)
     assert(
-      [...union].filter((id) => byId.get(id)!.contrast === c).length === 20 &&
-        common.filter((id) => byId.get(id)!.contrast === c).length === 4,
+      [...union].filter((id) => byId.get(id)!.contrast === c).length ===
+        (config.contrasts.includes(c) ? config.formalPerContrast : 0) &&
+        common.filter((id) => byId.get(id)!.contrast === c).length ===
+          (config.contrasts.includes(c) ? config.overlapPerContrast : 0),
       'Wrong per-contrast membership.',
     );
   assert(
@@ -421,12 +627,65 @@ export function validateState(s: ProtocolState, db: Catalog, requireComplete = f
     assert(REVIEWERS.includes(a.reviewer as Reviewer), 'Invalid reviewer.');
     checkAnswer(a, 'Formal', s.formal.assignments[a.reviewer as Reviewer]);
   }
-  if (s.unblindedAt && !requireComplete) validateState(s, db, true);
+  if (s.unblindedAt && !requireComplete) validateActiveState(s, db, true);
+}
+export function validateState(s: ProtocolState, db: Catalog, requireComplete = false) {
+  validateActiveState(s, db, requireComplete);
+  const archives = s.archives ?? [];
+  assert(
+    Number.isInteger(protocolEdition(s)) && protocolEdition(s) === archives.length + 1,
+    'Protocol edition/history mismatch.',
+  );
+  for (const [i, entry] of archives.entries()) {
+    assert(
+      entry &&
+        typeof entry.reason === 'string' &&
+        entry.reason.trim().length >= 3 &&
+        !isNaN(Date.parse(entry.at)),
+      'Invalid protocol archive metadata.',
+    );
+    assert(
+      !('archives' in entry.state) && protocolEdition(entry.state) === i + 1,
+      'Invalid archived protocol edition.',
+    );
+    assert(
+      entry.disposition === (formalStarted(entry.state) ? 'invalidated' : 'superseded'),
+      'Started protocols must be explicitly invalidated before replacement.',
+    );
+    validateActiveState({ ...entry.state, archives: archives.slice(0, i) }, db);
+  }
 }
 export function validateTransition(before: ProtocolState, after: ProtocolState, db: Catalog) {
   validateState(after, db);
   assert(after.revision === before.revision, 'Revision changed by client.');
-  if (before.calibration.lockedAt)
+  const oldArchives = before.archives ?? [],
+    newArchives = after.archives ?? [];
+  assert(
+    JSON.stringify(oldArchives) === JSON.stringify(newArchives.slice(0, oldArchives.length)),
+    'Archived protocols changed or removed.',
+  );
+  if (protocolEdition(after) !== protocolEdition(before)) {
+    assert(
+      protocolEdition(after) > protocolEdition(before),
+      'Protocol edition cannot move backwards.',
+    );
+    const first = newArchives[oldArchives.length];
+    assert(first, 'Protocol replacement must preserve the previous state.');
+    // An offline backup may contain legitimate edits followed by several deliberate replacements.
+    const preserved = { ...first.state, archives: oldArchives };
+    preserved.revision = before.revision;
+    validateTransition(before, preserved, db);
+    return;
+  }
+  assert(
+    newArchives.length === oldArchives.length,
+    'Archive appended without a new protocol edition.',
+  );
+  assert(
+    JSON.stringify(configuration(before)) === JSON.stringify(configuration(after)),
+    'Configuration changed without deliberate version replacement.',
+  );
+  if (before.calibration.lockedAt && formalStarted(before))
     assert(
       JSON.stringify(before.calibration) === JSON.stringify(after.calibration),
       'Locked calibration changed.',
@@ -436,8 +695,19 @@ export function validateTransition(before: ProtocolState, after: ProtocolState, 
       JSON.stringify(before.formal) === JSON.stringify(after.formal),
       'Frozen Formal assignments changed.',
     );
-  if (before.unblindedAt)
-    assert(JSON.stringify(before) === JSON.stringify(after), 'Unblinded evidence is archived.');
+  if (before.formal)
+    assert(
+      JSON.stringify(before.calibration) === JSON.stringify(after.calibration),
+      'Formal criterion/calibration changed without version replacement.',
+    );
+  if (before.unblindedAt) {
+    const { archives: _oldHistory, ...oldActive } = before;
+    const { archives: _newHistory, ...newActive } = after;
+    assert(
+      JSON.stringify(oldActive) === JSON.stringify(newActive),
+      'Unblinded evidence is archived.',
+    );
+  }
   for (const a of before.calibration.answers)
     assert(
       after.calibration.answers.some((b) => JSON.stringify(a) === JSON.stringify(b)),
@@ -470,10 +740,14 @@ export function mergeBackup(
   validateState(incoming, db);
   // Only compatible cumulative backups are accepted; forks are never silently combined.
   const high =
-    incoming.answers.length + incoming.calibration.answers.length >=
-    current.answers.length + current.calibration.answers.length
-      ? incoming
-      : current;
+    protocolEdition(incoming) !== protocolEdition(current)
+      ? protocolEdition(incoming) > protocolEdition(current)
+        ? incoming
+        : current
+      : incoming.answers.length + incoming.calibration.answers.length >=
+          current.answers.length + current.calibration.answers.length
+        ? incoming
+        : current;
   const low = high === incoming ? current : incoming;
   const candidate = structuredClone(high);
   candidate.revision = low.revision;
@@ -484,7 +758,7 @@ export function mergeBackup(
 export function analyse(s: ProtocolState, db: DatabaseV2) {
   assert(s.unblindedAt, 'Unblind after complete validation to analyse.');
   validateState(s, db, true);
-  const results = CONTRASTS.map((contrast) => {
+  const results = configuration(s).contrasts.map((contrast) => {
     const responses = s.answers.filter(
       (a) => !a.invalidated && db.pairs.find((p) => p.pairId === a.pairId)!.contrast === contrast,
     );
@@ -500,13 +774,15 @@ export function analyse(s: ProtocolState, db: DatabaseV2) {
         ),
       ),
     );
-    const observed = paired.filter(([a, b]) => a === b).length / paired.length;
+    const observed = paired.length
+      ? paired.filter(([a, b]) => a === b).length / paired.length
+      : null;
     const expected = labels.reduce(
       (n, label) =>
         n +
         (paired.filter((p) => p[0] === label).length *
           paired.filter((p) => p[1] === label).length) /
-          paired.length ** 2,
+          (paired.length ** 2 || 1),
       0,
     );
     const ruffTies = responses.filter((a) => ruffTied(db.outputs[a.a], db.outputs[a.b]));
@@ -523,11 +799,11 @@ export function analyse(s: ProtocolState, db: DatabaseV2) {
     });
     return {
       contrast,
-      distinctPairs: 20,
+      distinctPairs: new Set(responses.map((a) => a.pairId)).size,
       ratings: responses.length,
       overlapPairs: paired.length,
       rawAgreement: observed,
-      kappa: expected === 1 ? null : (observed - expected) / (1 - expected),
+      kappa: observed === null || expected === 1 ? null : (observed - expected) / (1 - expected),
       counts: Object.fromEntries(
         labels.map((l) => [l, responses.filter((a) => canonical(a, db) === l).length]),
       ),
@@ -538,7 +814,7 @@ export function analyse(s: ProtocolState, db: DatabaseV2) {
     };
   });
   return {
-    note: '80 distinct pairs; 96 correlated ratings. No treatment of ratings as independent tasks. Missing Judge measurements are not metric ties.',
+    note: `${workload(configuration(s)).distinct} distinct pairs; ${workload(configuration(s)).Jacky + workload(configuration(s)).Conrad} correlated ratings. No treatment of ratings as independent tasks. Missing Judge measurements are not metric ties.`,
     results,
   };
 }
@@ -546,6 +822,9 @@ export function researchExport(s: ProtocolState, db: DatabaseV2, play: unknown[]
   assert(s.unblindedAt, 'Research results remain blinded until both reviewers complete.');
   return {
     protocol: s,
+    configuration: structuredClone(configuration(s)),
+    protocolEdition: protocolEdition(s),
+    archivedProtocols: s.archives ?? [],
     analysis: analyse(s, db),
     duplicateStats: db.stats,
     limitations: db.limitations,
@@ -555,6 +834,7 @@ export function researchExport(s: ProtocolState, db: DatabaseV2, play: unknown[]
       return {
         ...a,
         protocolVersion: s.protocolVersion,
+        protocolEdition: protocolEdition(s),
         poolVersion: s.poolVersion,
         assignmentVersion: s.formal!.assignmentVersion,
         criterion: s.calibration.guideline,
