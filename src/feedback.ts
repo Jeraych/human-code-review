@@ -1,4 +1,10 @@
 export function explainProblem(raw: string) {
+  if (/app updated/i.test(raw))
+    return {
+      title: 'A newer app version is available',
+      message:
+        'Download your saved Study progress, then reload this page. Reloading is kept manual so you can preserve any unsaved choice.',
+    };
   if (/another tab|Progress changed/i.test(raw))
     return {
       title: 'Your study changed in another tab',

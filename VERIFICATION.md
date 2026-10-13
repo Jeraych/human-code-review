@@ -1,5 +1,33 @@
 # V1 verification — 12 October 2026, Pacific/Auckland
 
+## Product polish — 13 October 2026
+
+Scope: product/game layer only. Research/session/storage/export/type modules, both frozen pools and all provenance are unchanged from commit 9eddbaa, verified by Git diff. No Combined data or research-schema change.
+
+- Added Code / Choice home with Play as primary action and a separate research entry. Active Study resumes and blocks overlapping Play, including direct links.
+- Refined symmetric code cards, native vote buttons, safe scrolling/selection, phone reading shortcuts, persistent focused reveal with chosen side/condition and manual Next comparison. N is available after reveal. No correct/wrong scoring or auto-advance.
+- Recovery messages explain failed writes, stale tabs, missing pools and invalid backups; technical details are collapsed. Existing data is never silently replaced. Empty/malformed import attempts give explicit feedback.
+- Production title/favicon/description, relative asset base, hash navigation and deferred WASM initialization prepared. Manual stale-build recovery preserves choice/progress. No public site deployment.
+
+Final evidence:
+
+| Check                                               | Result           |
+| --------------------------------------------------- | ---------------- |
+| Strict TypeScript + production build                | Passed           |
+| Unit suite, including original research regressions | 31 passed        |
+| Python merge/download suite                         | 7 passed         |
+| Style browser regression                            | 26 checks passed |
+| Judge/direct-vote browser regression                | 37 checks passed |
+| Product home/reveal/mobile/recovery walkthrough     | 15 checks passed |
+| Chromium phone emulation with actual touch events   | 8 checks passed  |
+| Local static /demo/ deployment + direct-link smoke  | 11 checks passed |
+
+All browser pilots reported zero runtime errors. Static smoke reported no failed asset responses, confirmed that home does not request highlighting WASM, checked route refresh and active Study protection, and simulated stale-build recovery without losing saved data.
+
+Visual evidence: qa/release-home-desktop.png, qa/release-home-mobile.png, qa/release-play-desktop.png, qa/release-play-mobile-final.png, qa/release-play-mobile-viewport.png and qa/release-touch-reveal.png. Desktop/390px phone layouts inspected. Full-page captures during sticky positioning or entrance animation can show transient capture artifacts; the settled actual phone viewport was inspected separately (solid reveal, chosen B and Next visible).
+
+Practical boundaries before public release: test physical Safari/iOS/Android and a screen reader; review the Code / Choice identity/copy and intentional static Play answer-key visibility; obtain explicit public deployment approval. Current checks establish Chromium desktop/emulated-touch functionality, not a WCAG certification or a human preference result. The Shiki WASM chunk still produces a non-blocking build size warning; it is deferred until code is shown. QA exports/profiles are synthetic and ignored.
+
 ## V1.1 Judge integration and Play update — 12 October 2026
 
 - Formal Judge sources: runs 36/37/38, seeds 3407/3408/3409. Completed/formal metadata, all passing health checks and 500 groups verified. All 600 holdout rows have the exact 50-task × four-generation coverage and nonempty extraction consistent with the common extraction function. Source runtime hashes and historical judge instrument agree across seeds.

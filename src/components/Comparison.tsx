@@ -5,11 +5,13 @@ import python from 'shiki/langs/python.mjs';
 import theme from 'shiki/themes/github-light.mjs';
 import type { Assignment, Choice, Pair } from '../types';
 
-const highlighter = createHighlighterCore({
-  langs: [python],
-  themes: [theme],
-  engine: createOnigurumaEngine(import('shiki/wasm')),
-});
+let highlighter: ReturnType<typeof createHighlighterCore> | undefined;
+const getHighlighter = () =>
+  (highlighter ??= createHighlighterCore({
+    langs: [python],
+    themes: [theme],
+    engine: createOnigurumaEngine(import('shiki/wasm')),
+  }));
 function CodePanel({
   label,
   code,
@@ -41,7 +43,7 @@ function CodePanel({
     let alive = true;
     setHtml(null);
     scroll.current?.scrollTo(0, 0);
-    highlighter
+    getHighlighter()
       .then((h) => {
         if (alive)
           setHtml(
@@ -178,14 +180,12 @@ export default function Comparison({
             <button
               key={side}
               onClick={() =>
-                document
-                  .getElementById(`code-${side}`)
-                  ?.scrollIntoView({
-                    block: 'start',
-                    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
-                      ? 'instant'
-                      : 'smooth',
-                  })
+                document.getElementById(`code-${side}`)?.scrollIntoView({
+                  block: 'start',
+                  behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+                    ? 'instant'
+                    : 'smooth',
+                })
               }
             >
               Read {side}

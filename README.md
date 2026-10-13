@@ -2,6 +2,8 @@
 
 A small local-first app for blinded pairwise human code preference studies and a lightweight comparison game. Vite, React, TypeScript, Shiki and plain CSS; no backend, accounts or remote result submission.
 
+The game is presented as **Code / Choice**. Home offers a primary Play action and a separate Enter Study path. An unfinished Study resumes automatically and replaces the home Play action with Resume Study. Play keeps its fast card → reveal → next loop, with a persistent reveal/Next bar, native keyboard-accessible card targets, an optional N shortcut after reveal and phone Read A/Read B controls. Study keeps its calmer presentation and explicit Submit workflow.
+
 ## Current conditions
 
 | Researcher selection | Frozen pool      | Trained outputs                                                    | Common Base reference                              |
@@ -32,6 +34,16 @@ npm.cmd run preview
 Run development or preview one at a time; both use port 5173. On Windows, double-click **Launch app.cmd** to reuse the existing app server or start the built preview in a hidden process, then open the default browser. It refuses to take over another application's port. Logs/PID stay under ignored .runtime/.
 
 Keep the same host/port, browser profile and device for resume. A normal browser restart resumes once the server is available. Local-first persistence does not mean an offline PWA. For static hosting, publish only dist/.
+
+## Static deployment preparation
+
+**Public deployment has not been approved or performed. Keep the GitHub repository private.** The prepared build works at a domain root or a subdirectory such as /demo/. Asset URLs respect Vite's relative base. Home/Play/Study/setup use #home, #play, #study and #research links, so direct navigation and refresh need no server-side SPA routing. Direct Play links still respect an active Study. Skip/content anchors do not change modes.
+
+To deploy later, with explicit approval, use npm ci, build command npm run build and output directory dist. Vercel or another HTTPS static host can serve those files; no functions/database/environment secrets are needed. A subdirectory URL should end with / or point to index.html. Use HTTPS in deployment; localhost is suitable for the current local tool. Opening index.html through file:// is unsupported.
+
+Set Cache-Control: no-cache for index.html so it references the current assets. Hashed assets can use a long immutable cache lifetime; retain previous hashed assets during an update if the host supports it. A detected stale dynamic import shows a manual reload/recovery prompt instead of automatically discarding an unsaved choice. Changing hosting origin separates browser storage: export Study backups before moving.
+
+The product has favicon/title/description metadata. Highlighting's WASM engine loads when code is displayed, not on home. An 11-check browser smoke test served the unchanged production build under /demo/ with no missing assets or browser errors. No deployment plugin was invoked and no site visibility changed.
 
 ## Study mode
 
@@ -136,3 +148,5 @@ python scripts/audit_repository.py
 session.ts owns instrument validation/scheduling; storage.ts owns checked writes; export.ts owns results. App.tsx connects researcher setup, pool-aware Study and Play. Comparison.tsx shares symmetric code panels and guarded direct-click selection. VoteForm.tsx remains Study-only. play.ts owns uniform comparison sampling and preference counts. Shiki includes only Python and one theme.
 
 Browser pilots scripts/pilot.cjs and scripts/pilot_judge_play.cjs require an existing Playwright installation and Chrome/Chromium executable. They use isolated test profiles and real frozen pools. Synthetic exports/screenshots stay under ignored qa/. Download-comparison tests skip until pilots produce files. See VERIFICATION.md for exact evidence and limits.
+
+Additional pilots: scripts/pilot_release.cjs checks the new-player and returning-participant flows; scripts/pilot_touch.cjs sends actual touch events in a Chromium phone emulation; scripts/pilot_static.cjs creates a temporary localhost-only static QA server and checks subdirectory/direct links. Pass the Playwright module path and Chrome executable as arguments. Emulation is not physical iOS/Android or screen-reader verification. The core research files and frozen pools remain unchanged from 9eddbaa.

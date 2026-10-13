@@ -5,7 +5,7 @@ $appUrl = 'http://127.0.0.1:5173/'
 function Test-AppServer {
     try {
         $response = Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2
-        if ($response.Content -notmatch '<title>Human Code Evaluation</title>') {
+        if ($response.Content -notmatch '(?:<title>Human Code Evaluation</title>|name="application-name" content="Human Code Evaluation")') {
             throw 'Port 5173 is occupied by another application. Stop that server or select another port deliberately.'
         }
         return $true

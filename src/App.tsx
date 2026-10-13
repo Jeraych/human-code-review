@@ -4,6 +4,7 @@ import VoteForm from './components/VoteForm';
 import Home from './components/Home';
 import PlayReveal from './components/PlayReveal';
 import RecoveryNotice from './components/RecoveryNotice';
+import { assetUrl, viewFromHash, hashForView, type View } from './navigation';
 import {
   createSession,
   hashPool,
@@ -41,13 +42,15 @@ export default function App() {
   const [loaded, setLoaded] = useState(initialStorage);
   const [pools, setPools] = useState<Record<string, LoadedPool>>({});
   const [selectedStudy, setSelectedStudy] = useState(poolConfigs[0].poolId);
-  const [view, setView] = useState<'home' | 'setup' | 'study' | 'play'>(() => {
+  const [view, setView] = useState<View>(() => {
     const active = loaded.store?.sessions.find(
       (s) => s.sessionId === loaded.store?.activeSessionId,
     );
-    return active && Object.keys(active.responses).length < active.assignments.length
-      ? 'study'
-      : 'home';
+    const unfinished = active && Object.keys(active.responses).length < active.assignments.length;
+    const requested = viewFromHash(location.hash);
+    if (requested === 'play' && unfinished) return 'study';
+    if (requested === 'study' && !active) return 'setup';
+    return requested ?? (unfinished ? 'study' : 'home');
   });
   const [error, setError] = useState(loaded.error),
     [notice, setNotice] = useState('');
@@ -61,7 +64,7 @@ export default function App() {
     let alive = true;
     Promise.all(
       poolConfigs.map(async (config) => {
-        const response = await fetch(config.poolUrl);
+        const response = await fetch(assetUrl(config.poolUrl));
         if (!response.ok) throw new Error('A frozen pool could not be loaded.');
         const data = await response.json();
         validatePool(data);
@@ -81,9 +84,17 @@ export default function App() {
         );
     };
     window.addEventListener('storage', changed);
+    const outdated = (event: Event) => {
+      event.preventDefault();
+      setError(
+        'The app updated while this page was open. Download saved progress before reloading.',
+      );
+    };
+    window.addEventListener('vite:preloadError', outdated);
     return () => {
       alive = false;
       window.removeEventListener('storage', changed);
+      window.removeEventListener('vite:preloadError', outdated);
     };
   }, []);
   const store = loaded.store;
@@ -232,7 +243,7 @@ export default function App() {
     setError('');
     try {
       const assigned = pools[play.poolId];
-      const response = await fetch(assigned.config.playRevealUrl);
+      const response = await fetch(assetUrl(assigned.config.playRevealUrl));
       if (!response.ok) throw new Error('Demo identities are unavailable.');
       const data = await response.json();
       const labels = [
@@ -281,6 +292,36 @@ export default function App() {
     window.addEventListener('keydown', advance);
     return () => window.removeEventListener('keydown', advance);
   }, [view, play?.roundId, play?.labels, playFilter, revealing]);
+  useEffect(() => {
+    const route = () => {
+      const requested = viewFromHash(location.hash);
+      if (!requested) return;
+      const safe =
+        requested === 'play' && incomplete
+          ? 'study'
+          : requested === 'study' && !session
+            ? 'setup'
+            : requested;
+      if (safe !== requested) history.replaceState(null, '', hashForView(safe));
+      if (safe !== view) {
+        setView(safe);
+        if (safe === 'play' && !revealing) nextPlay();
+      }
+    };
+    window.addEventListener('hashchange', route);
+    if (view === 'play' && incomplete) setView('study');
+    else if (view === 'play' && !play && Object.keys(pools).length) nextPlay();
+    return () => window.removeEventListener('hashchange', route);
+  }, [view, incomplete, session?.sessionId, pools, play?.roundId, revealing]);
+  useEffect(() => {
+    if (location.hash !== hashForView(view)) history.pushState(null, '', hashForView(view));
+    document.title =
+      view === 'study' || view === 'setup'
+        ? 'Human Code Evaluation · Code / Choice'
+        : view === 'play'
+          ? 'Play · Code / Choice'
+          : 'Code / Choice — AI code. Human preference.';
+  }, [view]);
   return (
     <div className={`app mode-${view} ${view === 'play' && play?.labels ? 'has-reveal' : ''}`}>
       <a className="skip-link" href="#main-content">
@@ -289,7 +330,7 @@ export default function App() {
       <header className="app-header">
         <a
           className="brand"
-          href="#"
+          href="#home"
           onClick={(e) => {
             e.preventDefault();
             if (!revealing) setView('home');
