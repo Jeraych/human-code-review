@@ -1,3 +1,134 @@
+# Code / Choice — Human Validation V2
+
+One React/Vite application for hosted Study, local fallback and public Play. V2 evolves the existing application; historical V1 remains available at `/?v1=1#home` with unchanged assets, storage and exports. The repository stays private. **No public deployment is authorized or performed.**
+
+The full implementation/provenance/counts report is [V2_IMPLEMENTATION.md](V2_IMPLEMENTATION.md).
+
+## Install and run V2
+
+Use Node **24.12+** and npm. Verified on Windows with Node 24.12.0:
+
+```powershell
+npm.cmd ci
+npm.cmd run build
+```
+
+Double-click **Launch app.cmd**. On first launch it asks you to choose one Study access code, stores it only in ignored `.env.local`, starts the local Node/SQLite service in a hidden process and opens `http://127.0.0.1:5173/`. Share that code with Conrad. It refuses to take over an occupied port. Stop an older preview/dev server first. It starts no ratings. Normal Study data lives in ignored `.runtime/study-v2.sqlite`; keep that database, its WAL files and exported backups private.
+
+For an explicit terminal process, create `.env.local` with your own code:
+
+```text
+STUDY_ACCESS_CODE=<your-own-code-at-least-8-characters>
+```
+
+Then:
+
+```powershell
+npm.cmd run serve
+```
+
+This serves the production build and API at `http://127.0.0.1:8787/`. Stop with Ctrl+C. Do not delete the database to restart a research protocol.
+
+For development, leave `npm.cmd run serve` running on port 8787, and run this in a second terminal:
+
+```powershell
+npm.cmd run dev
+```
+
+Open `http://127.0.0.1:5173/`; Vite proxies `/api` to the service. For a static production preview:
+
+```powershell
+npm.cmd run preview
+```
+
+Preview runs on 5173 and has no persistence API. Stop dev/launcher before previewing. Play still works; Study uses local fallback as described below. Use `npm` instead of `npm.cmd` on macOS/Linux.
+
+## Hosted configuration
+
+The normal workflow requires the small Node service, not a static-only host. Run `npm ci`, `npm run build`, then `npm run serve` on a Node 24.12+ host with a **persistent disk**. Set server variables through the host's secret/configuration facility:
+
+| Variable | Purpose |
+|---|---|
+| `STUDY_ACCESS_CODE` | Required shared Study code, minimum 8 characters; never commit it |
+| `STUDY_DB_PATH` | SQLite file on the persistent disk; default `.runtime/study-v2.sqlite` |
+| `HOST` | Default `127.0.0.1`; use `0.0.0.0` when your host requires it |
+| `PORT` | Default `8787`; host-assigned port supported |
+| `COOKIE_SECURE` | Set `1` behind production HTTPS |
+| `APP_ORIGIN` | Exact public origin when proxy forwarding changes the Host header |
+| `APP_BASE_PATH` | Optional prefix such as `/demo`; serve at `/demo/` |
+
+Use one service instance and SQLite database. Serve frontend and API on the same public origin; proxy `<base>/api/*` to this service when a separate static frontend is needed. An ephemeral/serverless filesystem loses shared progress and is unsuitable. Hash routes and relative Vite assets support root/subdirectory hosting without SPA rewrites. Back up the database using SQLite backup tools or stop the service before copying the database and associated WAL files.
+
+No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
+
+## Tomorrow's Study workflow
+
+1. Start the service (or visit a configured hosted installation), select Study and enter the shared access code.
+2. At one computer with Conrad, choose **Joint Calibration**. Discuss each pair, select A/Equal/B, then Submit. Reveal follows the choice. Complete all 12 pairs, finalise the editable guideline and click **Lock Calibration**.
+3. Choose Exit Study → Researcher → **Generate / Lock Formal V2**. This freezes 80 distinct pairs, 16 overlaps, 48 assignments each, order and A/B mappings. Generating again is disabled. Calibration pairs cannot enter Formal.
+4. Exit to Study Home → **Jacky** → check the identity/progress confirmation → Continue as Jacky. Read independently; select A/Equal/B and **Submit choice**. Undo is available only before Next. No results are revealed.
+5. Conrad independently follows Study → code → **Conrad** → Continue as Conrad. His overlap answers are separate from Jacky's. Do not discuss Formal comparisons or inspect Play/provenance before reviewing.
+6. After browser close, reopen the same site, enter Study/code, select your reviewer and confirm. Hosted state resumes on another device without manual files. Exit Study preserves progress. Avoid simultaneous tabs for the same reviewer.
+7. At 48/48 for both, Researcher → **Unblind & Analyse** → **Export research data**. Completion/version/assignment/mapping checks must pass first. JSON contains separate Calibration, Formal and Play sections, original invalidated records, source/code hashes and canonical agreement results.
+8. If an answer used the wrong reviewer, Researcher → Advanced / Recovery → find its response ID under Assignments, mappings and provenance → enter ID/reason → **Invalidate response**. The original is retained. Resume that reviewer to answer the newly unanswered pair. Do this before unblinding.
+
+## Backup and local fallback
+
+Study saves immediately in the browser before sending to the service. Hosted failures show pending-sync status; reconnecting/re-entering Study retries safely. Independent reviewer edits can merge; contradictory edits are reported without overwriting.
+
+Backup controls live under **Study Home → Backup / Recovery**. Export Progress is an emergency/reproducibility backup, not the normal hosted workflow. Import Progress accepts matching protocol/pool/hash backups and compatible cumulative histories. Conflicts fail closed. Export before changing origin or clearing browser data.
+
+If hosting fails, use the same checked-out app locally:
+
+1. On the original browser, Export Progress if available.
+2. Run `npm.cmd ci`, `npm.cmd run build`, then **Launch app.cmd** locally. Choose a local code if needed.
+3. Study → local code → Backup / Recovery → Import Progress. The exact saved assignment/order/mapping resumes; answered pairs do not repeat.
+4. Keep collecting backups; when the shared service returns, import/sync the compatible backup there. Incompatible histories need researcher recovery, not silent replacement.
+
+A browser that previously logged into the service can use its salted local code verifier during an API outage. A fresh static-only fallback can instead set `VITE_STUDY_ACCESS_CODE` in ignored `.env.local` before `npm.cmd run build` (or before dev), then run preview. That value is present in client bundles and is an access convenience, not authentication. Browser storage/cache/backups are inspectable; Formal blinding assumes non-adversarial reviewers. A new device without cache cannot recover unknown hosted answers while the backend is offline. The app is not a PWA and does not support `file://` execution.
+
+## Play and privacy
+
+Play needs no login or reviewer identity. A/Equal/B gives immediate reveal and Next. Read A/Read B, safe scrolling/text selection and native keyboard controls are retained. Play never consumes Study completion. Playlists share the canonical pair database; a recap is visit-local.
+
+By default, opted-in anonymous Play responses are queued locally and sent to the hosted service with idempotent response IDs. They contain anonymous session ID, pair ID, displayed mapping/choice, canonical preference, timestamp and app/pool versions. No name, email or student ID is requested. **Play without storing new responses** opts out for subsequent choices; it does not retract previously opted-in responses. External responses remain exploratory pending ethics/course confirmation.
+
+Optional build setting `VITE_PLAY_NOTICE` customises the concise collection notice. Researcher can refresh/export exploratory Play summaries separately, even before Formal unblinding. No fake anonymous users were added during verification; browser Play QA used opt-out.
+
+## Frozen data and verification
+
+V1 assets remain under `public/pools`, `public/play` and `researcher/*-v1.json`. V2 adds `public/v2/catalog.json`, five output files and `researcher/provenance-v2.json`. All pairs are holdout tasks 50–99 matched by task/seed/ordinal. Every eligible Formal side passed tests; exact duplicates stay in the record but are excluded from the displayed primary sample. No metric/answer-based Formal selection occurs. Counts and historical limitations are in [V2_IMPLEMENTATION.md](V2_IMPLEMENTATION.md).
+
+```powershell
+npm.cmd test
+npm.cmd run build
+```
+
+The real-source builder needs the adjacent course artifacts, including `combined_39_41_review.tar.gz`; a standalone clone uses the committed frozen files. On this machine, the verified Python runtime is:
+
+```powershell
+$PythonExe = 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
+& $PythonExe scripts/prepare_v2.py
+& $PythonExe -m unittest discover -s tests -p 'test_*.py' -v
+& $PythonExe scripts/audit_repository.py
+```
+
+Another machine can use its Python 3.10+ executable. The builder refuses changed frozen files; use a new version for new data. It never imports GPU trainers, executes generated code or regenerates outputs.
+
+Browser QA (requires an existing Playwright module and Chrome executable):
+
+```powershell
+node scripts/pilot_v2.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+```
+
+This uses only ignored `qa/v2/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [VERIFICATION.md](VERIFICATION.md). Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.
+
+---
+
+# Historical V1 documentation
+
+The material below describes V1 only. V2's rules and commands above take precedence for the final study.
+
 # Human Code Evaluation
 
 A small local-first app for blinded pairwise human code preference studies and a lightweight comparison game. Vite, React, TypeScript, Shiki and plain CSS; no backend, accounts or remote result submission.

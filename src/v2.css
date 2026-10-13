@@ -1,0 +1,96 @@
+.v2-narrow {
+  max-width: 720px;
+  margin: 50px auto;
+}
+.v2-menu,
+.v2-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+.v2-menu button {
+  padding: 22px 28px;
+}
+.v2-vote {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 24px;
+  margin: 24px 0;
+  border-radius: 8px;
+}
+.v2-vote h2 {
+  font-size: 19px;
+  max-width: 750px;
+}
+.v2-vote button[aria-pressed='true'] {
+  background: var(--accent);
+  color: white;
+}
+.v2-guideline {
+  max-width: 950px;
+  line-height: 1.6;
+}
+.v2-optout {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 16px 0;
+}
+.v2-json {
+  max-height: 480px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.v2-recap {
+  margin-top: 28px;
+  padding: 16px 0;
+}
+.v2-app.mode-play .pool-switch {
+  flex-wrap: wrap;
+  width: 100%;
+}
+.v2-app.mode-play .pool-switch button {
+  flex: 1 1 130px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mode-research table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.mode-research td,
+.mode-research th {
+  text-align: left;
+  padding: 10px 5px;
+  border-bottom: 1px solid var(--line);
+}
+.mode-research details,
+.mode-study details {
+  margin: 28px 0;
+}
+.mode-research details label {
+  display: block;
+  margin: 16px 0;
+}
+.mode-research details input {
+  display: block;
+  max-width: 100%;
+}
+.mode-calibration .setup-form {
+  margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .v2-narrow {
+    margin: 24px auto;
+  }
+  .v2-vote {
+    padding: 18px;
+  }
+  .v2-menu button {
+    width: 100%;
+  }
+}

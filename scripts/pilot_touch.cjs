@@ -22,7 +22,7 @@ const check = (label, ok) => {
   });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173/#play');
+  await page.goto('http://127.0.0.1:5173/?v1=1#play');
   await page.getByRole('button', { name: 'Choose implementation A', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Judge', exact: true }).tap();
   let index = -1;

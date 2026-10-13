@@ -45,7 +45,7 @@ function check(label, ok) {
     fs.createReadStream(file).pipe(response);
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const url = `http://127.0.0.1:${server.address().port}/demo/`;
+  const url = `http://127.0.0.1:${server.address().port}/demo/?v1=1`;
   browser = await chromium.launch({ headless: true, executablePath: process.argv[3] });
   const page = await browser.newPage();
   page.on('pageerror', (e) => errors.push(e.message));

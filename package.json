@@ -1,13 +1,14 @@
 {
   "name": "human-code-review",
   "private": true,
-  "version": "1.1.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 5173 --strictPort",
-    "test": "vitest run"
+    "test": "vitest run",
+    "serve": "node --env-file-if-exists=.env.local server/api.ts"
   },
   "dependencies": {
     "react": "^19.2.0",

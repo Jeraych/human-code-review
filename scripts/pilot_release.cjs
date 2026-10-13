@@ -17,7 +17,7 @@ function check(label, ok) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173');
+  await page.goto('http://127.0.0.1:5173/?v1=1');
   await page.locator('.home-play').waitFor({ state: 'visible' });
   await page.waitForFunction(() => !document.querySelector('.home-play').disabled);
   check(

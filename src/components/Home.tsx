@@ -4,12 +4,14 @@ export default function Home({
   onResume,
   activeStudy,
   ready,
+  allowBothPoor = true,
 }: {
   onPlay: () => void;
   onStudy: () => void;
   onResume: () => void;
   activeStudy: boolean;
   ready: boolean;
+  allowBothPoor?: boolean;
 }) {
   return (
     <section className="home">
@@ -80,7 +82,7 @@ export default function Home({
         <div>
           <span>02</span>
           <h2>Make your choice</h2>
-          <p>Pick a card, or call it equal or both poor.</p>
+          <p>Pick a card, or call it {allowBothPoor ? 'equal or both poor' : 'equal'}.</p>
         </div>
         <div>
           <span>03</span>

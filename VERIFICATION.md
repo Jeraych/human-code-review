@@ -1,3 +1,35 @@
+# Human Validation V2 verification — 14 October 2026, Pacific/Auckland
+
+Starting baseline: clean main at 24b0ae5; successful origin fetch confirmed no ahead/behind changes. GitHub API confirmed Jeraych/human-code-review is private and its default branch is main.
+
+| Check | Fresh result |
+|---|---|
+| Lockfile installation (`npm.cmd ci`) | Passed; no dependency versions changed |
+| TypeScript/Vitest suite | 43 passed, including 12 focused V2 tests and all 31 prior tests |
+| Strict TypeScript + production build | Passed; existing Shiki WASM chunk size warning remains |
+| Python V1 merge/download suite | 7 passed |
+| Real-source V2 importer + immutable re-run | Passed; 3,000 outputs, 2,400 matched slots, source/code hashes and configuration checks |
+| V2 workflow browser pilot | 36 checks passed; no runtime errors |
+| V2 integration browser/launcher pilot | 13 checks passed; no runtime errors |
+| Existing V1 static subdirectory pilot | 11 checks passed; no failed assets/runtime errors |
+| Production dependency audit | Zero advisories |
+| Full dependency audit | Three inherited dev/test advisories; recorded in V2_IMPLEMENTATION.md |
+| Repository history/working-file credential/artifact scan | Zero findings |
+
+V2 workflow checks cover calibration selection/Submit/reveal/locking, exact 48/48 assignments with 16 overlaps, premature-unblind prevention, reviewer confirmation without writes, Formal DOM blinding, explicit Submit, auditable Undo, locking older answers, Exit/refresh, fresh-device shared resume, stale-write/assignment-tamper rejection, API outage/local resume, JSON backup, pending-answer sync, complete-protocol unblinding/export and V1 access. Integration covers /demo/ production assets/hash routes/login/cookies, real SQLite persistence across service restart, actual Vite dev/preview entrypoints, hidden Windows launcher startup/reuse and refusal to occupy an unrelated port.
+
+Screenshots were inspected at 1440×1000 and 390×844. The observed mobile playlist overflow and unavailable-Judge-as-zero display were corrected. Home, symmetric code panels, safe selection/scrolling, Play reveal focus and Formal readability were checked in the rendered UI. Desktop/mobile screenshots and machine-readable reports are ignored under qa/v2.
+
+All browser protocol answers are clearly isolated synthetic QA fixtures in qa/v2/fixture-*.sqlite, never the normal .runtime/study-v2.sqlite. Play walkthroughs opted out; the tested service recorded zero anonymous Play responses. No actual Calibration/Formal ratings or fake public players were created. No model code was executed, no raw experiment files were edited, no outputs were regenerated, and no public site was deployed.
+
+Evidence boundaries: service/device workflows were verified on localhost, not on a provisioned remote host. Anonymous opt-in transport/storage is implemented; browser QA intentionally did not submit Play responses. Server access-code verification and supplied-environment launcher startup were exercised; the interactive first-use secure prompt was source-inspected. Phone emulation does not establish physical iOS/Android or screen-reader compatibility. The app uses non-adversarial browser blinding and a shared Study access code, as detailed in the implementation report.
+
+Re-run commands are in README. The pilots require Playwright/Chrome paths and keep test artifacts under qa; there is no browser automation dependency added to the app. Production/service code uses Node 24.12.0; built-in SQLite reports an experimental warning in that version.
+
+---
+
+# Historical V1 verification
+
 # V1 verification — 12 October 2026, Pacific/Auckland
 
 ## Product polish — 13 October 2026
