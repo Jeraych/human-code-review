@@ -162,7 +162,7 @@ async function labelsCorrect(condition) {
   );
   await labelsCorrect('Judge');
   await page.screenshot({ path: path.join(qa, 'judge-play-reveal-desktop.png'), fullPage: true });
-  await page.getByRole('button', { name: /Next round/ }).click();
+  await page.getByRole('button', { name: /Next comparison/ }).click();
   check(
     'Next hides identity and opens an unvoted round',
     (await page.locator('.reveal').count()) === 0 &&
@@ -174,14 +174,14 @@ async function labelsCorrect(condition) {
     'B votes immediately',
     (await count()) === 2 && (await card('B').getAttribute('aria-pressed')) === 'true',
   );
-  await page.getByRole('button', { name: /Next round/ }).click();
+  await page.getByRole('button', { name: /Next comparison/ }).click();
   await page.getByRole('button', { name: 'About equal', exact: true }).click();
   await page.getByText('THE REVEAL', { exact: true }).waitFor();
   check(
     'Equal is immediate and distinct',
     (await count()) === 3 && /about equal/.test(await page.locator('.reveal').innerText()),
   );
-  await page.getByRole('button', { name: /Next round/ }).click();
+  await page.getByRole('button', { name: /Next comparison/ }).click();
   await page.getByRole('button', { name: 'Both poor', exact: true }).click();
   await page.getByText('THE REVEAL', { exact: true }).waitFor();
   check(
@@ -260,7 +260,7 @@ async function labelsCorrect(condition) {
       'Random reveal comes from an available real pool',
       /(Style-trained|Judge-trained)/.test(heading),
     );
-    await page.getByRole('button', { name: /Next round/ }).click();
+    await page.getByRole('button', { name: /Next comparison/ }).click();
   }
   check(
     'Play never changes either Study session',

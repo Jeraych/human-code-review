@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
 import VoteForm from './components/VoteForm';
 import Home from './components/Home';
+import PlayReveal from './components/PlayReveal';
 import {
   createSession,
   hashPool,
@@ -206,6 +207,7 @@ export default function App() {
     setPlay(sampleRound(Object.values(pools), filter, random, crypto.randomUUID()));
     playLock.current = null;
     setNotice('');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }
   async function revealVote(choice: Choice) {
     if (!play || playLock.current === play.roundId || (play.choice && play.choice !== choice))
@@ -246,8 +248,27 @@ export default function App() {
       setRevealing(false);
     }
   }
+  useEffect(() => {
+    if (view !== 'play' || !play?.labels) return;
+    const advance = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        event.key.toLowerCase() === 'n' &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !target.closest('input,textarea,select,[contenteditable="true"]') &&
+        !window.getSelection()?.toString()
+      ) {
+        event.preventDefault();
+        nextPlay();
+      }
+    };
+    window.addEventListener('keydown', advance);
+    return () => window.removeEventListener('keydown', advance);
+  }, [view, play?.roundId, play?.labels, playFilter, revealing]);
   return (
-    <div className={`app mode-${view}`}>
+    <div className={`app mode-${view} ${view === 'play' && play?.labels ? 'has-reveal' : ''}`}>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
@@ -557,8 +578,8 @@ export default function App() {
             <div className="study-top">
               <div>
                 <div className="section-label">PLAY MODE</div>
-                <h1>Which implementation would you rather work with?</h1>
-                <p>Click a code card to choose. Then compare the reveal at your own pace.</p>
+                <h1>Which one would you rather work with?</h1>
+                <p>Choose a card. Discover the conditions. Make your next call.</p>
               </div>
               <div className="play-stat">
                 <strong>
@@ -588,6 +609,13 @@ export default function App() {
               </div>
               <span className="hint">Random gives each available comparison an equal chance.</span>
             </div>
+            {play.labels && (
+              <PlayReveal
+                round={play}
+                comparison={pools[play.poolId].config.researcherLabel}
+                onNext={() => nextPlay()}
+              />
+            )}
             <Comparison
               key={play.roundId}
               pair={play.pair}
@@ -597,26 +625,7 @@ export default function App() {
               choice={play.choice}
               labels={play.labels}
             />
-            {play.choice && play.labels ? (
-              <section className="reveal">
-                <div className="section-label">THE REVEAL</div>
-                <h2>
-                  {play.choice === 'tie'
-                    ? 'You found them about equal.'
-                    : play.choice === 'both_poor'
-                      ? 'Neither implementation suited you.'
-                      : `You preferred ${play.labels[play.choice === 'A' ? play.assignment.aCandidateId : play.assignment.bCandidateId]} this round.`}
-                </h2>
-                <p>
-                  A — {play.labels[play.assignment.aCandidateId]}{' '}
-                  <span className="reveal-divider">/</span> B —{' '}
-                  {play.labels[play.assignment.bCandidateId]}
-                </p>
-                <button className="primary" onClick={() => nextPlay()}>
-                  Next round →
-                </button>
-              </section>
-            ) : revealing ? (
+            {play.labels ? null : revealing ? (
               <p role="status">Loading the reveal…</p>
             ) : play.choice ? (
               <button onClick={() => void revealVote(play.choice!)}>Retry reveal</button>
@@ -639,10 +648,16 @@ export default function App() {
                     <thead>
                       <tr>
                         <th>Comparison</th>
-                        <th>Base preferred</th>
-                        <th>Trained preferred</th>
+                        <th scope="col">
+                          Base<span className="sr-only"> preferred</span>
+                        </th>
+                        <th scope="col">
+                          Trained<span className="sr-only"> preferred</span>
+                        </th>
                         <th>Equal</th>
-                        <th>Both poor</th>
+                        <th scope="col">
+                          Poor<span className="sr-only"> (both implementations)</span>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -672,8 +687,10 @@ export default function App() {
         <span>Human judgement, one comparison at a time.</span>
         <span>
           {view === 'play'
-            ? 'Demo responses are separate from study data.'
-            : 'Local progress · No community results'}
+            ? 'Preferences from this visit only.'
+            : view === 'home'
+              ? 'Choose. Reveal. Repeat.'
+              : 'Local progress · No community results'}
         </span>
       </footer>
     </div>

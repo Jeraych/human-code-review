@@ -61,11 +61,8 @@ function CodePanel({
   return (
     <section
       className={`code-panel ${onVote ? 'play-selectable' : ''} ${selected ? 'chosen' : ''} ${locked ? 'locked' : ''}`}
-      role={onVote ? 'button' : undefined}
-      tabIndex={onVote ? 0 : undefined}
-      aria-label={onVote ? `Choose implementation ${label}` : `Code ${label}`}
-      aria-disabled={onVote ? !!locked : undefined}
-      aria-pressed={onVote ? !!selected : undefined}
+      id={`code-${label}`}
+      aria-label={`Code ${label}`}
       onPointerDownCapture={(e) => {
         gesture.current = {
           x: e.clientX,
@@ -104,22 +101,22 @@ function CodePanel({
         )
           onVote(label);
       }}
-      onKeyDown={(e) => {
-        if (
-          onVote &&
-          !locked &&
-          e.target === e.currentTarget &&
-          (e.key === 'Enter' || e.key === ' ')
-        ) {
-          e.preventDefault();
-          onVote(label);
-        }
-      }}
     >
       <div className="code-heading">
-        <strong>
-          <span className="candidate-letter">{label}</span> Implementation {label}
-        </strong>
+        {onVote ? (
+          <button
+            className="code-select-target"
+            aria-label={`Choose implementation ${label}`}
+            disabled={locked}
+            aria-pressed={selected}
+          >
+            <span className="candidate-letter">{label}</span> Implementation {label}
+          </button>
+        ) : (
+          <strong>
+            <span className="candidate-letter">{label}</span> Implementation {label}
+          </strong>
+        )}
         <span>{revealLabel ?? language}</span>
       </div>
       {onVote && (
@@ -161,10 +158,41 @@ export default function Comparison({
   const b = pair.candidates.find((c) => c.candidateId === assignment.bCandidateId)!;
   return (
     <>
-      <section className="task">
-        <div className="section-label">THE TASK</div>
-        <pre>{pair.promptText}</pre>
-      </section>
+      {onVote ? (
+        <details className="task play-task" open>
+          <summary>
+            Task prompt <span>Read the brief</span>
+          </summary>
+          <pre>{pair.promptText}</pre>
+        </details>
+      ) : (
+        <section className="task">
+          <div className="section-label">THE TASK</div>
+          <pre>{pair.promptText}</pre>
+        </section>
+      )}
+      {onVote && (
+        <nav className="reading-nav" aria-label="Read implementations">
+          <span>Compare both</span>
+          {(['A', 'B'] as const).map((side) => (
+            <button
+              key={side}
+              onClick={() =>
+                document
+                  .getElementById(`code-${side}`)
+                  ?.scrollIntoView({
+                    block: 'start',
+                    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+                      ? 'instant'
+                      : 'smooth',
+                  })
+              }
+            >
+              Read {side}
+            </button>
+          ))}
+        </nav>
+      )}
       <div className="comparison">
         <CodePanel
           label="A"

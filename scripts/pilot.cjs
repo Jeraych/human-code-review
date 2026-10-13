@@ -150,7 +150,7 @@ async function mapping(page, s) {
       /Style-trained/.test(await page.locator('.reveal').innerText()),
   );
   await page.screenshot({ path: path.join(qa, 'play-reveal.png'), fullPage: true });
-  await page.getByRole('button', { name: /Next round/ }).click();
+  await page.getByRole('button', { name: /Next comparison/ }).click();
   await page.getByRole('button', { name: 'Choose implementation A', exact: true }).waitFor();
   check(
     'Next Play round hides identities again',
