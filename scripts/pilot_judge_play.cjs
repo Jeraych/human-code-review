@@ -60,6 +60,7 @@ async function labelsCorrect(condition) {
 }
 (async () => {
   await start();
+  await page.getByRole('button', { name: /Enter Study/ }).click();
   await page.getByRole('combobox', { name: 'Study condition' }).selectOption('evaluation-02');
   await page.getByLabel('Evaluator ID', { exact: true }).fill('judge-pilot-only');
   await page.getByRole('button', { name: 'Start study', exact: true }).click();

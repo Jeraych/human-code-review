@@ -48,6 +48,7 @@ async function mapping(page, s) {
 }
 (async () => {
   let page = await start();
+  await page.getByRole('button', { name: /Enter Study/ }).click();
   await page.getByLabel('Evaluator ID', { exact: true }).fill('pilot-only-01');
   await page.getByRole('button', { name: 'Start study', exact: true }).click();
   await page.getByText('Read the code. Make your choice.', { exact: true }).waitFor();

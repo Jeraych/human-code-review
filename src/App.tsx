@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Comparison from './components/Comparison';
 import VoteForm from './components/VoteForm';
+import Home from './components/Home';
 import {
   createSession,
   hashPool,
@@ -38,9 +39,14 @@ export default function App() {
   const [loaded, setLoaded] = useState(initialStorage);
   const [pools, setPools] = useState<Record<string, LoadedPool>>({});
   const [selectedStudy, setSelectedStudy] = useState(poolConfigs[0].poolId);
-  const [view, setView] = useState<'setup' | 'study' | 'play'>(
-    loaded.store?.activeSessionId ? 'study' : 'setup',
-  );
+  const [view, setView] = useState<'home' | 'setup' | 'study' | 'play'>(() => {
+    const active = loaded.store?.sessions.find(
+      (s) => s.sessionId === loaded.store?.activeSessionId,
+    );
+    return active && Object.keys(active.responses).length < active.assignments.length
+      ? 'study'
+      : 'home';
+  });
   const [error, setError] = useState(loaded.error),
     [notice, setNotice] = useState('');
   const [evaluator, setEvaluator] = useState('');
@@ -241,30 +247,38 @@ export default function App() {
     }
   }
   return (
-    <div className="app">
+    <div className={`app mode-${view}`}>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <header className="app-header">
         <a
           className="brand"
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            if (!revealing) setView('setup');
+            if (!revealing) setView('home');
           }}
         >
           <span className="brand-mark" aria-hidden="true">
             [ / ]
           </span>
           <span>
-            Human Code Evaluation<small>A pairwise preference study</small>
+            {view === 'study' || view === 'setup' ? 'Human Code Evaluation' : 'Code / Choice'}
+            <small>
+              {view === 'study' || view === 'setup'
+                ? 'Research evaluation'
+                : 'AI code. Human preference.'}
+            </small>
           </span>
         </a>
         <nav aria-label="Application mode">
           <button
-            className={view !== 'play' ? 'active' : ''}
+            className={view === 'study' || view === 'setup' ? 'active' : ''}
             disabled={revealing}
             onClick={() => setView(session ? 'study' : 'setup')}
           >
-            Study
+            {incomplete ? 'Resume Study' : 'Study'}
           </button>
           <button
             disabled={incomplete || revealing || !Object.keys(pools).length}
@@ -279,7 +293,7 @@ export default function App() {
           </button>
         </nav>
       </header>
-      <main>
+      <main id="main-content">
         {(error || sessionError) && (
           <div className="alert" role="alert">
             <strong>Progress needs attention</strong>
@@ -297,6 +311,18 @@ export default function App() {
           </p>
         )}
         {!pool && !error && <p>Loading the frozen evaluation pool…</p>}
+        {view === 'home' && (
+          <Home
+            ready={!!pool && !error}
+            activeStudy={incomplete}
+            onPlay={() => {
+              setView('play');
+              nextPlay();
+            }}
+            onStudy={() => setView('setup')}
+            onResume={() => setView('study')}
+          />
+        )}
         {pool && view === 'setup' && (
           <>
             <div className="page-title">
