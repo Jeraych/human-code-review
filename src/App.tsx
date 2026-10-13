@@ -3,6 +3,7 @@ import Comparison from './components/Comparison';
 import VoteForm from './components/VoteForm';
 import Home from './components/Home';
 import PlayReveal from './components/PlayReveal';
+import RecoveryNotice from './components/RecoveryNotice';
 import {
   createSession,
   hashPool,
@@ -160,18 +161,31 @@ export default function App() {
   }
   function recovery() {
     try {
-      download(
-        localStorage.getItem(STORAGE_KEY) ?? '{}',
-        'evaluation-storage-recovery.json',
-        'application/json',
-      );
+      let raw: string | null = null;
+      try {
+        raw = localStorage.getItem(STORAGE_KEY);
+      } catch {
+        raw = loaded.raw ?? (store ? JSON.stringify(store) : null);
+      }
+      if (raw === null)
+        throw new Error(
+          'No saved progress is accessible in this browser. Keep any unsaved choice on screen and ask the researcher for help.',
+        );
+      download(raw, 'evaluation-storage-recovery.json', 'application/json');
     } catch (e) {
       setError(String(e));
     }
   }
   async function importBackup(file: File) {
-    if (!store) return;
     try {
+      if (!store)
+        throw new Error(
+          'Saved browser storage is unreadable. Download its recovery backup before asking the researcher to restore your result in a clean browser profile.',
+        );
+      if (file.size > 2_000_000)
+        throw new Error(
+          'Backup is too large. Select an individual JSON session result, not the research archive.',
+        );
       const data = JSON.parse(await file.text());
       const incoming = data.session;
       const assigned = pools[incoming?.poolId];
@@ -192,19 +206,19 @@ export default function App() {
       setView('study');
       setNotice('Backup restored.');
     } catch (e) {
-      setError(String(e));
+      setError(`Could not restore backup: ${String(e)}`);
     }
   }
   function nextPlay(filter = playFilter) {
     if (!Object.keys(pools).length || revealing) return;
     try {
       localStorage.setItem('human-code-evaluation.play-exposure', 'yes');
+      const random = rng(crypto.getRandomValues(new Uint32Array(1))[0]);
+      setPlay(sampleRound(Object.values(pools), filter, random, crypto.randomUUID()));
     } catch (e) {
       setError(String(e));
       return;
     }
-    const random = rng(crypto.getRandomValues(new Uint32Array(1))[0]);
-    setPlay(sampleRound(Object.values(pools), filter, random, crypto.randomUUID()));
     playLock.current = null;
     setNotice('');
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -242,7 +256,7 @@ export default function App() {
         ),
       }));
     } catch (e) {
-      setError(String(e));
+      setError(`Reveal unavailable: ${String(e)}`);
       playLock.current = null;
     } finally {
       setRevealing(false);
@@ -316,22 +330,22 @@ export default function App() {
       </header>
       <main id="main-content">
         {(error || sessionError) && (
-          <div className="alert" role="alert">
-            <strong>Progress needs attention</strong>
-            <p>{error || sessionError}</p>
-            <div className="actions">
-              <button onClick={() => location.reload()}>Reload page</button>
-              <button onClick={recovery}>Download recovery backup</button>
-              {session && <button onClick={() => setView('setup')}>Researcher setup</button>}
-            </div>
-          </div>
+          <RecoveryNotice
+            error={error || sessionError}
+            onBackup={recovery}
+            onSetup={session ? () => setView('setup') : undefined}
+          />
         )}
         {notice && (
           <p className="notice" role="status">
             {notice}
           </p>
         )}
-        {!pool && !error && <p>Loading the frozen evaluation pool…</p>}
+        {!pool && !error && (
+          <p className="loading-note" role="status">
+            Preparing the comparisons…
+          </p>
+        )}
         {view === 'home' && (
           <Home
             ready={!!pool && !error}

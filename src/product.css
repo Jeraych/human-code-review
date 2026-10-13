@@ -20,6 +20,36 @@
   white-space: nowrap;
   border: 0;
 }
+.recovery-notice details {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid #e4cb9e;
+  font-size: 11px;
+}
+.recovery-notice summary {
+  cursor: pointer;
+  color: #715733;
+}
+.recovery-notice pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 140px;
+  overflow: auto;
+  padding: 12px;
+  background: #fffaf1;
+  font-size: 11px;
+}
+.recovery-notice strong {
+  font-size: 16px;
+}
+.loading-note {
+  font-size: 13px;
+  padding: 14px 18px;
+  border: 1px solid #d8dfe8;
+  background: white;
+  border-radius: 6px;
+  width: fit-content;
+}
 .mode-play {
   background: #f4f2ed;
 }

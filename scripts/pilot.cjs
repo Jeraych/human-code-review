@@ -183,7 +183,7 @@ async function mapping(page, s) {
     (await page
       .getByRole('alert')
       .innerText()
-      .then((t) => t.includes('different frozen pool'))) &&
+      .then((t) => t.includes('original examples'))) &&
       (await state(page)).sessions[0].responses !== undefined &&
       (await page.getByRole('button', { name: /Submit & next/ }).count()) === 0,
   );

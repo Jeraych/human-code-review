@@ -109,6 +109,22 @@ function check(label, ok) {
     'Returning unfinished Study resumes automatically',
     (await page.getByRole('radio', { name: /Prefer A/ }).count()) === 1,
   );
+  await page.getByRole('button', { name: 'Researcher setup', exact: true }).click();
+  fs.writeFileSync(path.join(qa, 'malformed-backup.json'), '{broken');
+  await page.locator('input[type=file]').setInputFiles(path.join(qa, 'malformed-backup.json'));
+  await page.getByRole('alert').waitFor();
+  check(
+    'Malformed backup shows readable guidance and preserves Study',
+    (await page
+      .getByRole('alert')
+      .innerText()
+      .then((t) => t.includes('This backup could not be restored'))) &&
+      (await page.evaluate(() => localStorage.getItem('human-code-evaluation.v1'))) === original,
+  );
+  check(
+    'Technical error details stay collapsed by default',
+    (await page.locator('.recovery-notice details').getAttribute('open')) === null,
+  );
   check('No browser runtime errors', errors.length === 0);
   fs.writeFileSync(
     path.join(qa, 'release-pilot-report.json'),
