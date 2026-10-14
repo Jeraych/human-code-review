@@ -62,50 +62,51 @@ Use one service instance and SQLite database. Serve frontend and API on the same
 
 No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
-## Study workflow and setup
+## Human review
 
-Keep the same Study/Researcher workflow: **Joint Calibration → lock guideline → Generate Study → Joint Consensus Review + Independent Formal → Summary / Export**.
+Open **Study**. The start screen follows the actual workflow:
 
-Researcher → **Study Setup** has comparison checkboxes (B–C / C–S / C–J / S–SJ) and four simple totals:
+1. **Calibrate together** — discuss the examples; reveal is allowed here. At the end, agree the guideline and click **Finish Calibration**. This locks the guideline and prepares the reviews in one action. Calibration never enters the results.
+2. **Review together** — choose one shared A / Equal / B answer per blinded comparison. These answers enter the Formal results and their pairs cannot appear in Independent review.
+3. **Review independently** — Jacky and Conrad click **Review on this device** or **Continue** beside their own name. Intentional overlap remains independent; agreement and Cohen’s kappa use only these overlapping Independent responses.
+4. When everyone is finished, click **View results**, then **Export research data**. Results combine the three review streams, with separate reviewer summaries in **Results by reviewer**. The research export retains the original sources, mappings and audit history.
 
-| Setting | Recommended default for new studies |
+While reviewing, the page contains the reviewer/phase and count, task, Code A/Code B, A / Equal / B, and Submit. The frozen guideline is one disclosure away. Submit saves explicitly; Undo is available before Next. **Exit** returns directly to the Study start screen. Progress remains when exiting, refreshing or closing the browser.
+
+**Edit setup** is a small action on the main Study start screen. It contains comparison checkboxes and four totals. Recommended defaults are unchanged:
+
+| Setting | Default |
 |---|---:|
-| Calibration pairs | 10 |
-| Joint Consensus Formal pairs | 50 |
-| Independent Formal pairs per reviewer | 50 |
-| Independent overlap pairs | 10 |
+| Calibration | 10 |
+| Joint review | 50 |
+| Independent · each | 50 |
+| Overlap | 10 |
 
-These are editable defaults. The live preview derives 50 Joint + 50 Jacky + 50 Conrad = **150 Formal ratings**, on **140 distinct Formal pairs** (the 10 Independent overlaps are counted once for distinctness). Calibration is separate. Totals are distributed deterministically as evenly as possible across selected comparisons, including remainders; source task breadth, seed and A/B balance stay automatic. Requested counts never silently shrink. Invalid integers, overlap greater than Independent count and insufficient eligible pools block saving/generation with the affected comparison, requested count and available count.
+The live workload remains **150 Formal ratings / 140 distinct Formal pairs** with these defaults. These values are editable before Formal responses begin. Counts are distributed as evenly and deterministically as possible across selected comparisons. Empty selections, impossible overlap and insufficient eligible pools block saving with a reason and available counts. Requested counts never silently shrink. Criterion, seed, capacity diagnostics and deliberate regeneration stay under Advanced.
 
-**Calibration:** sit together or screen-share; A/Equal/B → Submit → discuss the existing reveal → Next. Finalise the guideline and **Lock Calibration**. Calibration responses never enter Formal results.
+The first Joint or Independent Formal response freezes configuration, criterion and assignments, including after Undo. Existing per-comparison V2 studies keep their original allocations. Editing totals deliberately creates a new setup; no historical study is silently migrated. Holdout-only, both correctness-pass and exact-identical exclusion defaults, automatic task/seed/A–B balance, frozen source data and provenance remain unchanged.
 
-**Joint Consensus Review:** choose its Study Home card. Jacky and Conrad discuss the blinded pair and submit **one shared** A/Equal/B answer. It uses the frozen guideline and the same Submit → Undo/Next → Exit/resume controls as Independent Formal. Conditions, metrics and rewards stay hidden; there is no reveal. Joint pairs are excluded from both Independent assignments, and previously archived Joint pairs remain excluded on replacement.
+## Review on separate computers
 
-**Independent Formal:** each reviewer chooses their own Start/Continue card and answers independently. Intentional overlap remains double-rated in separate reviewer namespaces. Agreement/raw agreement and Cohen's kappa use **Independent overlap only**, never consensus answers.
+On the main computer, **Send review to Conrad** (or Jacky) saves that person’s reviewer file. Send the file yourself. On the receiving computer, open the same app → Study → **Open reviewer file** → Start. Identity comes from the file; no Study code or identity confirmation is required.
 
-**Offline:** Researcher → Offline Transfer → Export Jacky Study / Export Conrad Study. Reviewers run the same app/build locally, Study → Import Study → Start/Continue; identity comes from the file and no code/configuration is needed to review. Completion → Export Result. Researcher imports matching Results, then **Merge & Analyse → Export Final Research Data**. Joint Consensus also supports its own Study/Result file if transfer is needed; it remains one shared response namespace. Result imports preserve original source files/checksums and stop on incompatible or conflicting evidence.
+When finished, click **Save result for researcher** and send that file back. On the main computer, use **Import Conrad result** beside Conrad’s progress. When all reviews are complete, View results combines them. These buttons save/open files locally; they do not send messages or upload to an external service.
 
-**Hosted:** the same Node/SQLite service persists all three phases and shows shared progress automatically. Reviewers choose their cards; normal file transfer is unnecessary. Researcher → **Unblind & Analyse** after every configured Formal phase is complete. SQLite progress survives service restart; a restarted session requests the Study code again. Localhost defaults to file transport with persistent main Study storage; remote origins default to shared transport, overridable by `STUDY_TRANSPORT`.
+**Open reviewer file** remains available on the local Study start screen, after login and after completion. It works without refreshing. Opening a different reviewer or study preserves the previous package and responses on the device; **Other reviews saved on this device** lets you reopen that work or save its result. Reopening the same file retains cumulative progress. Incompatible, altered or conflicting files fail without overwriting responses. **Main study** leaves the reviewer file and returns to the main workflow; the main Study requires its access code.
 
-Summary/export separates Joint Consensus, Jacky Independent, Conrad Independent, combined Formal, and Independent overlap agreement/kappa. New saved responses use `joint_calibration`, `joint_consensus_formal`, or `independent_formal`. Old V2 response labels and protocols remain unchanged in original audit/history; exported analysis rows normalize their phase labels. Play stays separate and exploratory.
+## Shared hosted review
 
-## Start screen, reset and history
+On a shared Node/SQLite service, reviewers open Study, click their name and continue. Progress synchronizes automatically. Normal hosted screens hide file sending/import controls; offline transfer remains under Study options → Advanced. Browser refresh/close reuses a valid server session without another code prompt. Service restart or session expiry may require the code again; saved answers remain.
 
-**Start screen** is available in the header at any time, including after importing/completing a reviewer package. It returns to the main Study/access screen and retains the entire imported package/progress as a paused browser backup. **Resume imported Study** restores it without losing answers. On the main computer, unlock Study to return to Calibration/Researcher and import the completed Result files.
+No public/remote hosting has been configured or deployed. Localhost defaults to local file transfer with persistent main Study storage; remote origins default to hosted transport, overridable with `STUDY_TRANSPORT`.
 
-**Reset / Start over** in the header asks once for confirmation. Resetting the main protocol archives its assignments, responses, imported sources and unblinding state before returning to the starter screen; imported reviewer progress remains saved. Main Study access is still required to reset research data. Reset retains the chosen setup, so check/change totals and selected comparisons before the next Calibration.
+## Start over and history
 
-The first Joint Consensus or Independent Formal response freezes configuration, criterion and assignments, even after Undo/invalidation. Counts/selected comparisons may change beforehand; Calibration changes restart it while other changes preserve Calibration and clear unstarted Formal. Seed/criterion, exact pool capacity, history, regeneration and recovery stay under Advanced. Holdout-only / both correctness-pass / exact-identical exclusion rules remain unchanged.
+On the main Study start screen, **Study options → Start over** asks once for confirmation and archives the old protocol, assignments, responses, original imported files and analysis. It returns to Calibration while retaining the setup. Imported reviewer progress remains saved. Researcher access is required; reset never deletes historical data.
 
-Existing V1/V2 studies are not migrated, relabelled in-place or reshuffled. Saved per-comparison configurations retain their allocations; editing the new totals explicitly creates a new setup. New studies default to 10/50/50/10. Use Reset before replacing the existing manual QA protocol, then choose your intended totals/criterion before Calibration with Conrad. No real ratings, hosting/deployment or model generation are started by an app update.
+Rare backup/restore, response invalidation, provenance, historical protocol inspection and explicit **V1 recovery** live under **Study options → Advanced**. V2 is always the normal application, including import, Exit, refresh, reset and restart. V1 is loaded only by an explicit `?v1=1` historical recovery link; V1 files and storage remain intact.
 
-Backups and response invalidation remain under Researcher Advanced. Export before clearing browser data/changing origin, and avoid concurrent tabs for the same reviewer. A static reviewer installation needs a local web server; it is not a PWA or file:// application. A fresh static-only researcher gate can use `VITE_STUDY_ACCESS_CODE` at build time; imported reviewers need no code.
-
-## V1 / V2 routing
-
-V2 is the default for normal navigation, hashes and saved sessions. V1 loads only with the deliberate `?v1=1` request. Presence-only/false flags (`?v1`, `?v1=0`, `?v1=false`) stay V2. Historical recovery opens in a separate tab under Advanced; V1 also has a **Return to Code / Choice V2** link that clears the legacy query. Back/Forward handles explicit app selection. V1 saved data and historical pools remain untouched.
-
-The browser requests a restart when it detects an older Study service and keeps browser progress locally. The launcher always opens the clean root URL and rejects an older running V2 service. Stop that service deliberately, rebuild and relaunch when updating. HTML revalidates, built JS/CSS assets use content hashes, and a stale-chunk error requests recovery/reload without resetting progress or falling back to V1.
+Back up/export results before clearing browser storage or changing origin. Avoid concurrent tabs for the same reviewer. A static reviewer installation needs a local web server; it is not a standalone `file://` application.
 
 ## Play and privacy
 
@@ -138,7 +139,7 @@ Another machine can use its Python 3.10+ executable. The builder refuses changed
 Browser QA (requires an existing Playwright module and Chrome executable):
 
 ```powershell
-node scripts/pilot_v2_transport.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node scripts/pilot_v2_guided.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 ```
 
 This uses only ignored `qa/v2/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [VERIFICATION.md](VERIFICATION.md). Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.

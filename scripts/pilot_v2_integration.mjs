@@ -66,12 +66,8 @@ try {
   );
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
-  await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page
-    .locator('.study-card')
-    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
-    .getByRole('button')
-    .waitFor();
+  await page.getByRole('button', { name: 'Open study', exact: true }).click();
+  await page.getByRole('button', { name: 'Start Calibration', exact: true }).waitFor();
   check('Subdirectory login/cookie/API work without root-path rewrites', true);
   const requests = page.context().request,
     state = await requests.get('http://127.0.0.1:18788/demo/api/state').then((r) => r.json());

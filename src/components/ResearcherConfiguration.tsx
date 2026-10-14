@@ -14,23 +14,13 @@ export default function ResearcherConfiguration({
   db,
   busy,
   onSave,
-  onGenerate,
-  onCalibration,
-  onReset,
   onRegenerate,
-  onReplace,
-  onDraftChange,
 }: {
   state: ProtocolState;
   db: Catalog;
   busy: boolean;
   onSave: (config: ProtocolConfig, guideline: string) => Promise<boolean>;
-  onGenerate: (config: ProtocolConfig, guideline: string) => Promise<boolean>;
-  onCalibration: () => void;
-  onReset: () => Promise<boolean>;
   onRegenerate: () => Promise<boolean>;
-  onReplace: (reason: string) => Promise<boolean>;
-  onDraftChange: (dirty: boolean) => void;
 }) {
   const [draft, setDraft] = useState(() => structuredClone(configuration(state)));
   const [criterion, setCriterion] = useState(state.calibration.guideline);
@@ -43,19 +33,13 @@ export default function ResearcherConfiguration({
     shown = frozen ? configuration(state) : draft;
   const preview = workload(shown);
   const dirty = savedConfig !== JSON.stringify(draft) || criterion !== state.calibration.guideline;
-  let problem = '',
-    canGenerate = false;
+  let problem = '';
   try {
     const candidate = structuredClone(state);
     if (!frozen) configureProtocol(candidate, db, draft, criterion, new Date().toISOString());
-    canGenerate = !!candidate.calibration.lockedAt && !candidate.formal;
   } catch (e) {
     problem = e instanceof Error ? e.message : String(e);
   }
-  useEffect(
-    () => onDraftChange(!frozen && (dirty || !!problem)),
-    [dirty, problem, frozen, onDraftChange],
-  );
   const amount = (n: number) => (Number.isFinite(n) && n >= 0 ? n : '—');
   const totals = shown.totals ?? {
     calibration: preview.calibration,
@@ -93,8 +77,7 @@ export default function ResearcherConfiguration({
     await onSave(draft, criterion);
   }
   return (
-    <section className="setup-form protocol-configuration" aria-labelledby="protocol-config-title">
-      <h2 id="protocol-config-title">Study Setup</h2>
+    <section className="setup-form protocol-configuration" aria-label="Study setup">
       {frozen && <p className="hint">Study started · setup is frozen.</p>}
       <fieldset disabled={frozen || busy}>
         <legend>Comparisons</legend>
@@ -118,10 +101,10 @@ export default function ResearcherConfiguration({
           ))}
         </div>
         <div className="protocol-numbers">
-          {totalControl('Calibration pairs', 'calibration')}
-          {totalControl('Joint Consensus Formal pairs', 'joint')}
-          {totalControl('Independent Formal pairs per reviewer', 'independent')}
-          {totalControl('Independent overlap pairs', 'overlap')}
+          {totalControl('Calibration', 'calibration')}
+          {totalControl('Joint review', 'joint')}
+          {totalControl('Independent · each', 'independent')}
+          {totalControl('Overlap', 'overlap')}
         </div>
       </fieldset>
       <div className="protocol-preview" aria-live="polite">
@@ -138,34 +121,12 @@ export default function ResearcherConfiguration({
       </div>
       {problem && <p role="alert">{problem}</p>}
       <div className="v2-actions">
-        {!frozen && dirty && (
-          <button disabled={busy || !!problem} onClick={save}>
-            Save Setup
-          </button>
-        )}
-        {!state.formal && (
-          <button
-            className="primary"
-            disabled={busy || !!problem || !canGenerate}
-            onClick={() => onGenerate(draft, criterion)}
-          >
-            Generate Study
-          </button>
-        )}
-        {!state.calibration.lockedAt && (
-          <button disabled={busy || dirty || !!problem} onClick={onCalibration}>
-            {state.calibration.answers.length
-              ? 'Continue Joint Calibration'
-              : 'Start Joint Calibration'}
+        {!frozen && (
+          <button className="primary" disabled={busy || !!problem} onClick={save}>
+            Save setup
           </button>
         )}
       </div>
-      {!state.calibration.lockedAt && (
-        <p className="hint">
-          Complete Joint Calibration and lock your guideline before generating the Study.
-        </p>
-      )}
-      {state.calibration.lockedAt && <p>Calibration complete ✓ Locked</p>}
       <details>
         <summary>Advanced</summary>
         <label>
@@ -228,23 +189,6 @@ export default function ResearcherConfiguration({
           and retained in research counts. Task breadth, seed balance and A/B balance are automatic.
         </p>
         <div className="v2-actions">
-          <button
-            disabled={busy || dirty || !!problem}
-            onClick={() => {
-              if (
-                confirm(
-                  'Reset Study and return to Joint Calibration? All previous assignments and responses will remain in history.',
-                )
-              )
-                void (frozen
-                  ? onReplace(
-                      'Researcher explicitly reset Study; previous protocol invalidated and retained',
-                    )
-                  : onReset());
-            }}
-          >
-            Reset Study
-          </button>
           {!frozen && state.formal && (
             <button
               disabled={busy || dirty || !!problem}

@@ -2,6 +2,164 @@
   max-width: 720px;
   margin: 50px auto;
 }
+.guided-study {
+  max-width: 800px;
+}
+.study-heading,
+.step-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.study-heading {
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.study-heading h1 {
+  margin: 0;
+}
+.text-action {
+  font-size: 13px;
+  color: var(--muted);
+}
+.study-steps {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0;
+}
+.study-step {
+  border-top: 1px solid var(--line);
+  padding: 25px 0;
+}
+.study-step.is-current {
+  border-top-color: var(--accent);
+}
+.step-number {
+  font-family: var(--font-mono, monospace);
+  color: var(--muted);
+  font-size: 13px;
+}
+.step-heading h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.step-status {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+.is-finished .step-heading h2 {
+  color: var(--muted);
+}
+.study-step p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.reviewer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.reviewer-row h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.reviewer-row p {
+  margin: 5px 0 0;
+}
+.reviewer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 70%;
+}
+.reviewer-actions button,
+.reviewer-actions .import-button {
+  font-size: 12px;
+}
+.study-results {
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.study-results h2 {
+  margin-top: 0;
+}
+.study-results p {
+  color: var(--muted);
+}
+.study-file-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 25px 0;
+}
+.study-file-actions details button {
+  margin: 8px;
+}
+.review-guideline {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.review-guideline p {
+  max-width: 800px;
+  line-height: 1.6;
+}
+.v2-app .study-top h1 {
+  font-size: 21px;
+  margin: 0;
+}
+.calibration-finish {
+  max-width: 720px;
+  margin: 30px auto;
+}
+.calibration-finish label {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+}
+.saved-reviews {
+  padding-bottom: 25px;
+}
+@media (max-width: 600px) {
+  .guided-study {
+    margin: 30px auto;
+  }
+  .study-heading {
+    align-items: flex-start;
+  }
+  .study-heading h1 {
+    font-size: 32px;
+  }
+  .step-heading {
+    gap: 10px;
+  }
+  .step-heading h2 {
+    font-size: 19px;
+  }
+  .step-status {
+    width: 100%;
+    margin-left: 24px;
+  }
+  .reviewer-row {
+    display: block;
+  }
+  .reviewer-actions {
+    max-width: 100%;
+    margin-top: 14px;
+  }
+  .study-file-actions {
+    align-items: flex-start;
+  }
+}
 .v2-app .app-header {
   flex-wrap: wrap;
   gap: 12px;
@@ -110,6 +268,19 @@
 .v2-vote button[aria-pressed='true'] {
   background: var(--accent);
   color: white;
+}
+.v2-vote .v2-actions:has(button[aria-pressed]) {
+  max-width: 460px;
+  flex-wrap: nowrap;
+}
+.v2-vote button[aria-pressed] {
+  flex: 1;
+  min-height: 52px;
+  font-size: 18px;
+}
+.v2-vote > button.primary {
+  min-width: 130px;
+  min-height: 46px;
 }
 .v2-guideline {
   max-width: 950px;

@@ -1,3 +1,28 @@
+# Guided Human review UX verification — 14 October 2026
+
+Baseline: PRIVATE main afa73ad. This replaces Study presentation/navigation and the obsolete dashboard browser journeys. The research/data engine (`src/v2.ts`, `src/v2Transfer.ts`, storage reconciliation, server schema), frozen pools/provenance/model outputs, V1 application, defaults and dependency lockfile are unchanged. QA uses synthetic answers in isolated databases and browser contexts; no actual human ratings or deployment were started.
+
+| Check | Result |
+|---|---|
+| Existing TypeScript unit tests | 78 passed |
+| Existing Python merge tests | 7 passed |
+| Strict TypeScript / production build | Passed; existing app/Shiki chunk warnings remain |
+| New guided V2 local/hosted/import/navigation suite | 57 passed, zero runtime errors |
+| Service / subdirectory / dev / preview / Windows launcher | 14 passed |
+| Historical V1 browser suites | 26 / 37 / 15 / 8 / 11 passed |
+| Total browser checks | 168 passed |
+| Desktop/mobile rendering | Inspected at 1440×1000 and 390×844 |
+
+Before implementing, an in-app browser walkthrough used separate QA services on 18804/18805/18806. It exercised Calibration/lock/generation, Joint, Jacky Exit/resume, Conrad, final results, reviewer-file opening and hosted entry. The observed friction was repeated dashboard/setup screens, separate save/lock/generate actions, completed Continue buttons, transfer hidden behind Researcher, and file opening unavailable after main login. The original saved-reviewer block was reproduced in an isolated browser: exporting did not change the unconditional different-identity rejection.
+
+The replacement browser suite verifies defaults/live workloads and exact feasibility errors, a single Calibration finish transition, formal blinding, phase exclusions, explicit Submit/Undo/Next, frozen setup, Exit/refresh/close resume, valid-session reuse, exact file history/identity, corrupt/wrong-reviewer rejection, the export-then-open regression, saved reviewer and cross-edition restore, import directly from an authenticated main Study without refresh, independent stores, cumulative Result/source preservation, stale-write/configuration rejection, complete results/export and one-confirmation Start over with intact audit history. Hosted tests cover two browser contexts, automatic progress, a real service restart, offline persistence and reconnect, complete results and V2/explicit-V1 back/forward behavior. Unchanged unit tests continue to cover deterministic balance/eligibility, cumulative conflicts, source hashes and Independent-only kappa.
+
+Operational Study storage was accessed read-only, not used by any QA service or browser. A final read-only snapshot was revision 37; the earlier revision-19 snapshot belongs to the previous implementation and is not claimed as the baseline for this work. No operational write/reset/import was issued by this verification. Browser tests generate only clearly isolated fixture ratings.
+
+Reports/screenshots: ignored `qa/v2/guided-verification.json`, `guided-start-{desktop,mobile}.png`, `guided-setup-desktop.png`, `guided-comparison-{desktop,mobile}.png`, `guided-results-{desktop,mobile}.png`; integration and historical reports remain in ignored qa. Old V2 browser entry points now delegate to the current guided suite rather than preserving obsolete dashboard selectors. Run the guided suite once, followed by `pilot_v2_integration.mjs` and `pilot_legacy_all.cjs`; all accept the Playwright module and Chrome path arguments documented in README.
+
+---
+
 # Joint Consensus / total-count / starter navigation verification — 14 October 2026
 
 Baseline: PRIVATE main d3d842a. No source outputs, pools/provenance, V1 app modules, dependency lockfile, or operational responses were modified. New research responses were created only as synthetic fixtures in ignored QA storage. No deployment or model-output generation occurred.
