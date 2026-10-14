@@ -96,6 +96,14 @@ export interface ProtocolState {
   config?: ProtocolConfig;
   edition?: number;
   archives?: ProtocolArchive[];
+  resultImports?: {
+    filename: string;
+    raw: string;
+    sha256: string;
+    at: string;
+    reviewer: Reviewer;
+    studyId: string;
+  }[];
   calibration: {
     assignments: Presentation[];
     answers: Answer[];
@@ -344,6 +352,7 @@ function archive(
   s.archives = [...(archives ?? []), { at, reason: reason.trim(), disposition, state }];
   s.edition = protocolEdition(state) + 1;
   s.config = structuredClone(configuration(state));
+  delete s.resultImports;
 }
 export function configureProtocol(
   s: ProtocolState,
@@ -503,6 +512,20 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
     'Protocol/pool/hash mismatch.',
   );
   assert(Number.isInteger(s.revision) && s.revision >= 0, 'Invalid revision.');
+  assert(
+    !s.resultImports ||
+      (Array.isArray(s.resultImports) &&
+        s.resultImports.every(
+          (r) =>
+            typeof r.filename === 'string' &&
+            typeof r.raw === 'string' &&
+            /^[a-f0-9]{64}$/.test(r.sha256) &&
+            /^[a-f0-9]{64}$/.test(r.studyId) &&
+            REVIEWERS.includes(r.reviewer) &&
+            !isNaN(Date.parse(r.at)),
+        )),
+    'Invalid result import provenance.',
+  );
   const config = configuration(s),
     expected = workload(config);
   validateConfiguration(config, db, calibrationExclusions(s), false);
@@ -680,6 +703,11 @@ export function validateTransition(before: ProtocolState, after: ProtocolState, 
   assert(
     newArchives.length === oldArchives.length,
     'Archive appended without a new protocol edition.',
+  );
+  assert(
+    JSON.stringify(before.resultImports ?? []) ===
+      JSON.stringify((after.resultImports ?? []).slice(0, (before.resultImports ?? []).length)),
+    'Imported source files changed or removed.',
   );
   assert(
     JSON.stringify(configuration(before)) === JSON.stringify(configuration(after)),

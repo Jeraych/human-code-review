@@ -11,13 +11,11 @@ import {
   configuration,
   configureProtocol,
   DEFAULT_CONFIG,
-  formalStarted,
   analyse,
   assert,
   canonical,
   generateFormal,
   GUIDELINE,
-  initialProtocol,
   invalidate,
   lockCalibration,
   protocolEdition,
@@ -31,14 +29,24 @@ import {
   undoFormal,
   validateCatalog,
   validateState,
+  validateTransition,
   workload,
 } from './v2';
-import type { Answer, DatabaseV2, Preference, Presentation, ProtocolState, Reviewer } from './v2';
+import type { DatabaseV2, Preference, Presentation, ProtocolState, Reviewer } from './v2';
 import { api, importProgress, loadCache, reconcile, V2_KEY, writeCache } from './v2Storage';
 import type { Cache } from './v2Storage';
 import type { Choice } from './types';
+import {
+  REVIEWER_KEY,
+  exportStudy,
+  importStudy,
+  exportResult,
+  importResult,
+  overlapAvailable,
+} from './v2Transfer';
+import type { ReviewerSession } from './v2Transfer';
 
-type View = 'home' | 'play' | 'gate' | 'study' | 'confirm' | 'formal' | 'calibration' | 'research';
+type View = 'home' | 'play' | 'gate' | 'study' | 'formal' | 'calibration' | 'research';
 const labels = {
   B: 'Pretrained Base',
   C: 'Correctness-focused',
@@ -70,6 +78,11 @@ export default function V2App() {
   const [view, setView] = useState<View>('home');
   const [authorized, setAuthorized] = useState(false);
   const [hosting, setHosting] = useState<'checking' | 'hosted' | 'local'>('checking');
+  const [backend, setBackend] = useState(false);
+  const [reviewerSession, setReviewerSession] = useState<ReviewerSession>();
+  const reviewerRaw = useRef<string | null>(null);
+  const reviewerRef = useRef<ReviewerSession | undefined>(undefined);
+  const [transferError, setTransferError] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -92,7 +105,7 @@ export default function V2App() {
   const [playQueue, setPlayQueue] = useState<any[]>([]);
   const playSyncing = useRef(false);
   const [remotePlay, setRemotePlay] = useState<any[]>([]);
-  const s = cache?.state;
+  const s = reviewerSession?.state ?? cache?.state;
   const configuredWorkload = workload(s ? configuration(s) : DEFAULT_CONFIG);
   const lastEdition = useRef<number | undefined>(undefined);
   useEffect(() => {
@@ -100,17 +113,27 @@ export default function V2App() {
     const edition = protocolEdition(s),
       replaced = lastEdition.current !== undefined && lastEdition.current !== edition;
     lastEdition.current = edition;
-    if ((view === 'formal' || view === 'confirm') && (!s.formal || replaced)) {
+    if (view === 'formal' && (!s.formal || replaced)) {
       navigate('study');
-      setStatus(
-        'Researcher updated the active protocol. Select and confirm your reviewer after Formal assignments are available.',
-      );
+      setStatus('Researcher updated the Study. Return when new assignments are ready.');
     }
   }, [s?.edition, s?.formal, view]);
   function remember(next: Cache) {
     rawRef.current = writeCache(next, rawRef.current);
     cacheRef.current = next;
     setCache(next);
+  }
+  function rememberReviewer(session: ReviewerSession) {
+    assert(
+      localStorage.getItem(REVIEWER_KEY) === reviewerRaw.current,
+      'Reviewer progress changed in another tab. Reload before continuing.',
+    );
+    const raw = JSON.stringify(session);
+    localStorage.setItem(REVIEWER_KEY, raw);
+    assert(localStorage.getItem(REVIEWER_KEY) === raw, 'Reviewer progress could not be saved.');
+    reviewerRaw.current = raw;
+    reviewerRef.current = session;
+    setReviewerSession(session);
   }
   useEffect(() => {
     let alive = true;
@@ -137,13 +160,36 @@ export default function V2App() {
       cacheRef.current = loaded;
       setCache(loaded);
       setGuideline(loaded.state.calibration.guideline);
+      const reviewerSaved = localStorage.getItem(REVIEWER_KEY);
+      if (reviewerSaved) {
+        const session = JSON.parse(reviewerSaved) as ReviewerSession;
+        await importStudy(JSON.stringify(session.package), database);
+        validateState(session.state, database);
+        validateTransition(session.package.state, session.state, database);
+        assert(
+          session.state.answers.every((a) => a.reviewer === session.package.reviewer),
+          'Reviewer cache contains another reviewer.',
+        );
+        reviewerRaw.current = reviewerSaved;
+        reviewerRef.current = session;
+        setReviewerSession(session);
+        setReviewer(session.package.reviewer);
+      }
       try {
         const health = await api('health');
         assert(
           health.catalogHash === database.catalogHash,
           'Hosted catalog differs from this browser build.',
         );
-        setHosting('hosted');
+        if (health.appWorkflow !== 'study-transfer-v2') {
+          setHosting('local');
+          setStatus(
+            'Restart the Study service to use this update. Your browser progress is preserved.',
+          );
+          return;
+        }
+        setBackend(true);
+        setHosting(health.transport === 'local' ? 'local' : 'hosted');
       } catch {
         setHosting('local');
       }
@@ -151,7 +197,7 @@ export default function V2App() {
       if (alive) setError(String(e));
     });
     const changed = (e: StorageEvent) => {
-      if (e.key === V2_KEY || e.key === null)
+      if (e.key === V2_KEY || e.key === REVIEWER_KEY || e.key === null)
         setError('Progress changed in another tab. Export a backup and reload before continuing.');
     };
     const stale = (e: Event) => {
@@ -172,7 +218,7 @@ export default function V2App() {
     setView(next);
   }
   function study() {
-    navigate(authorized ? 'study' : 'gate');
+    navigate(authorized || reviewerSession ? 'study' : 'gate');
   }
   useEffect(() => {
     const route = () => {
@@ -180,15 +226,19 @@ export default function V2App() {
       if (hash === '#play') {
         setView('play');
       } else if (hash === '#study') {
-        setView(authorized ? 'study' : 'gate');
+        setView(authorized || reviewerSession ? 'study' : 'gate');
       } else if (hash === '#research') {
-        setView(authorized ? 'research' : 'gate');
+        setView(authorized && !reviewerSession ? 'research' : 'gate');
       } else if (hash === '#home' || !hash) setView('home');
     };
     route();
     window.addEventListener('hashchange', route);
-    return () => window.removeEventListener('hashchange', route);
-  }, [authorized]);
+    window.addEventListener('popstate', route);
+    return () => {
+      window.removeEventListener('hashchange', route);
+      window.removeEventListener('popstate', route);
+    };
+  }, [authorized, reviewerSession?.package.studyId]);
   useEffect(() => {
     const hash = view === 'home' || view === 'play' ? `#${view}` : '#study';
     if (location.hash !== hash && location.hash !== '#main-content')
@@ -210,7 +260,7 @@ export default function V2App() {
       const saved = await api('state', 'PUT', { expectedRevision: remote.revision, state: merged });
       remember({ state: saved, base: structuredClone(saved), dirty: false });
     } else remember({ state: remote, base: structuredClone(remote), dirty: false });
-    setStatus('Shared progress is up to date.');
+    setStatus('Saved.');
   }
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -218,7 +268,7 @@ export default function V2App() {
     setBusy(true);
     setError('');
     try {
-      if (hosting === 'hosted') {
+      if (backend) {
         await api('login', 'POST', { code });
         await refreshShared();
         const salt = crypto.randomUUID();
@@ -259,10 +309,24 @@ export default function V2App() {
     try {
       const before = cacheRef.current,
         next = structuredClone(before.state);
+      if (reviewerRef.current) {
+        const session = reviewerRef.current;
+        const state = structuredClone(session.state);
+        edit(state);
+        validateState(state, db);
+        validateTransition(session.state, state, db);
+        assert(
+          state.answers.every((a) => a.reviewer === session.package.reviewer),
+          'Wrong reviewer.',
+        );
+        rememberReviewer({ ...session, state });
+        setStatus('Saved in this browser.');
+        return true;
+      }
       edit(next);
       validateState(next, db);
       remember({ state: next, base: before.base, dirty: true });
-      if (hosting === 'hosted') {
+      if (backend) {
         try {
           let saved;
           try {
@@ -277,7 +341,7 @@ export default function V2App() {
             saved = await api('state', 'PUT', { expectedRevision: remote.revision, state: merged });
           }
           remember({ state: saved, base: structuredClone(saved), dirty: false });
-          setStatus('Saved to shared Study and this browser.');
+          setStatus('Saved.');
         } catch (e: any) {
           setStatus(
             'Saved in this browser; shared sync is pending. Use Backup / Recovery if connectivity stays unavailable.',
@@ -302,12 +366,18 @@ export default function V2App() {
     }
   }
   useEffect(() => {
-    if (!authorized || hosting !== 'hosted') return;
+    if (!authorized || !backend || reviewerSession) return;
     const sync = () => {
       if (!mutex.current) {
         mutex.current = true;
         refreshShared()
-          .catch((e) => setStatus(`Local cache retained; sync unavailable: ${String(e)}`))
+          .catch((e) => {
+            if (e.status === 401) {
+              setAuthorized(false);
+              navigate('gate');
+              setStatus('Enter the Study access code to reconnect. Your progress is saved.');
+            } else setStatus('Shared connection unavailable. Progress is saved in this browser.');
+          })
           .finally(() => {
             mutex.current = false;
           });
@@ -319,8 +389,12 @@ export default function V2App() {
       clearInterval(timer);
       window.removeEventListener('online', sync);
     };
-  }, [authorized, hosting, db]);
+  }, [authorized, backend, db, reviewerSession]);
   function backup() {
+    if (reviewerRef.current) {
+      void sendResult();
+      return;
+    }
     const current = cacheRef.current?.state;
     if (current)
       download(
@@ -342,6 +416,114 @@ export default function V2App() {
       setError(String(e));
     }
   }
+  async function receiveStudy(file: File) {
+    if (!db || busy) return;
+    setBusy(true);
+    setTransferError('');
+    try {
+      assert(file.size <= 2_000_000, 'Study file is too large.');
+      const session = await importStudy(await file.text(), db, reviewerRef.current);
+      rememberReviewer(session);
+      setReviewer(session.package.reviewer);
+      navigate('study');
+      setStatus('Study imported. Ready to start.');
+    } catch (e) {
+      setTransferError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function sendStudy(r: Reviewer) {
+    if (!s || !db) return;
+    try {
+      download(
+        JSON.stringify(await exportStudy(s, r, db), null, 2),
+        `code-choice-${r.toLowerCase()}.study.json`,
+        'application/json',
+      );
+    } catch (e) {
+      setTransferError(String(e));
+    }
+  }
+  async function sendResult() {
+    if (!reviewerRef.current) return;
+    download(
+      JSON.stringify(await exportResult(reviewerRef.current), null, 2),
+      `code-choice-${reviewerRef.current.package.reviewer.toLowerCase()}-result.json`,
+      'application/json',
+    );
+  }
+  async function receiveResult(file: File, r: Reviewer) {
+    if (!db || !cacheRef.current || busy) return;
+    setTransferError('');
+    try {
+      assert(file.size <= 2_000_000, 'Result file is too large.');
+      // Capture the file, then merge against the latest state inside the mutation lock.
+      const raw = await file.text();
+      const before = cacheRef.current.state;
+      const merged = await importResult(before, raw, file.name, r, db);
+      await change((next) => {
+        assert(
+          JSON.stringify(next) === JSON.stringify(before),
+          'Progress changed during import. Import the Result again.',
+        );
+        Object.assign(next, merged);
+      });
+      setStatus(`${r} Result imported.`);
+    } catch (e) {
+      setTransferError(e instanceof Error ? e.message : String(e));
+    }
+  }
+  const fileControl = (label: string, receive: (file: File) => void) => (
+    <label
+      className="import-button"
+      role="button"
+      tabIndex={busy || !db ? -1 : 0}
+      aria-disabled={busy || !db}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !busy && db) {
+          e.preventDefault();
+          e.currentTarget.querySelector('input')?.click();
+        }
+      }}
+    >
+      {label}
+      <input
+        type="file"
+        className="sr-only"
+        tabIndex={-1}
+        accept=".json"
+        aria-label={label}
+        disabled={busy || !db}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) receive(file);
+          e.target.value = '';
+        }}
+      />
+    </label>
+  );
+  const progress = (r: Reviewer) =>
+    s?.formal ? `${activeAnswers(s, r).length} / ${configuredWorkload[r]}` : 'Not started';
+  const reviewerCard = (r: Reviewer) => (
+    <article className="study-card" key={r} aria-label={`${r} Study`}>
+      <h2>{r}</h2>
+      <p>
+        {progress(r)}
+        {s?.formal && activeAnswers(s, r).length === configuredWorkload[r] ? ' · ✓ Complete' : ''}
+      </p>
+      <button
+        className="primary"
+        disabled={!s?.formal || busy || !!s.unblindedAt}
+        onClick={() => {
+          setReviewer(r);
+          navigate('formal');
+        }}
+      >
+        {s && activeAnswers(s, r).length ? 'Continue' : 'Start'}
+      </button>
+    </article>
+  );
   function nextPlay(filter = playlist) {
     if (!db) return;
     const contrast =
@@ -466,10 +648,12 @@ export default function V2App() {
         ? s.answers.find((a) => a.responseId === s.pending[reviewer])
         : nextUnanswered(s, reviewer)
       : view === 'calibration' && s
-        ? calReveal ||
-          s.calibration.assignments.find(
-            (a) => !s.calibration.answers.some((r) => r.pairId === a.pairId),
-          )
+        ? s.calibration.lockedAt
+          ? undefined
+          : calReveal ||
+            s.calibration.assignments.find(
+              (a) => !s.calibration.answers.some((r) => r.pairId === a.pairId),
+            )
         : view === 'play'
           ? play
           : undefined;
@@ -489,6 +673,15 @@ export default function V2App() {
         }
       : undefined;
   const count = s ? activeAnswers(s, reviewer).length : 0;
+  const transferNotice = transferError.includes('different Study')
+    ? 'This result belongs to a different Study.'
+    : /Conflicting responses|Choose a reviewer|This is |different reviewer Study|already been analysed|too large/.test(
+          transferError,
+        )
+      ? transferError
+      : /integrity|frozen pool/.test(transferError)
+        ? 'This file could not be verified. Request the original file again.'
+        : 'This file could not be imported. Check that it is the correct Study or Result file.';
   const choices = (submit: () => void) => (
     <div className="v2-vote">
       <h2>
@@ -505,7 +698,7 @@ export default function V2App() {
       </div>
       <p aria-live="polite">Selected: {choice || '—'}</p>
       <button className="primary" disabled={!choice || busy || !!error} onClick={submit}>
-        Submit choice
+        Submit
       </button>
     </div>
   );
@@ -533,7 +726,7 @@ export default function V2App() {
             <small>
               {view === 'home' || view === 'play'
                 ? 'AI code. Human preference.'
-                : 'Human Validation V2'}
+                : 'Human Validation'}
             </small>
           </span>
         </a>
@@ -558,11 +751,15 @@ export default function V2App() {
             <button
               onClick={() => {
                 setError('');
+                if (reviewerSession) {
+                  navigate('study');
+                  return;
+                }
                 setAuthorized(false);
                 navigate('gate');
               }}
             >
-              Re-enter Study
+              {reviewerSession ? 'Return to Study' : 'Re-enter Study'}
             </button>
           </div>
         )}
@@ -585,11 +782,28 @@ export default function V2App() {
             allowBothPoor={false}
           />
         )}
+        {transferError && (
+          <div className="recovery-notice" role="alert">
+            <p>{transferNotice}</p>
+            <details>
+              <summary>Technical details</summary>
+              <pre>{transferError}</pre>
+            </details>
+            <button onClick={() => setTransferError('')}>Dismiss</button>
+          </div>
+        )}
         {view === 'gate' && (
           <section className="setup-form v2-narrow">
             <div className="section-label">STUDY</div>
-            <h1>Human Validation V2</h1>
+            <h1>Human Validation</h1>
+            {hosting !== 'hosted' && (
+              <section className="study-import">
+                <h2>Received a Study file?</h2>
+                {fileControl('Import Study', (file) => void receiveStudy(file))}
+              </section>
+            )}
             <form onSubmit={login}>
+              <h2>{hosting === 'hosted' ? 'Open shared Study' : 'Open main Study'}</h2>
               <label>
                 Study access code
                 <input
@@ -604,101 +818,77 @@ export default function V2App() {
                 Enter Study
               </button>
             </form>
-            <p className="hint">
-              {hosting === 'hosted'
-                ? 'Shared progress with a browser backup.'
-                : 'Local fallback. Progress stays in this browser; backups can move between devices.'}
-            </p>
+            {hosting === 'hosted' && (
+              <details>
+                <summary>Advanced · Offline recovery</summary>
+                {fileControl('Import Study', (file) => void receiveStudy(file))}
+              </details>
+            )}
           </section>
         )}
         {s && view === 'study' && (
           <section className="v2-narrow">
-            <div className="page-title">
-              <div>
-                <div className="section-label">STUDY HOME</div>
-                <h1>Human Validation V2</h1>
-              </div>
-            </div>
-            <div className="v2-menu">
-              <button
-                disabled={!!s.calibration.lockedAt}
-                onClick={() => {
-                  setGuideline(s.calibration.guideline);
-                  navigate('calibration');
-                }}
-              >
-                Joint Calibration
-              </button>
-              {REVIEWERS.map((r) => (
-                <button
-                  key={r}
-                  disabled={!s.formal}
-                  onClick={() => {
-                    setReviewer(r);
-                    navigate('confirm');
-                  }}
-                >
-                  {r}
-                </button>
-              ))}
-              <button
-                onClick={() => {
-                  navigate('research');
-                  if (hosting === 'hosted')
-                    api('play')
-                      .then(setRemotePlay)
-                      .catch((e) => setError(String(e)));
-                }}
-              >
-                Researcher
-              </button>
-            </div>
-            <p>
-              {s.formal
-                ? 'Formal assignments are locked. Review independently without discussing comparisons.'
-                : s.calibration.lockedAt
-                  ? 'Calibration is locked. Researcher can generate Formal V2.'
-                  : `Begin with ${configuredWorkload.calibration} joint calibration comparisons.`}
-            </p>
-            <details>
-              <summary>Backup / Recovery</summary>
-              <p>Use only when shared persistence is unavailable or for reproducible backups.</p>
-              <button onClick={backup}>Export Progress</button>
-              <label className="import-button">
-                Import Progress
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void restore(file);
-                    e.target.value = '';
-                  }}
-                />
-              </label>
-              {hosting === 'hosted' && (
-                <button
-                  disabled={busy}
-                  onClick={() => refreshShared().catch((e) => setError(String(e)))}
-                >
-                  Refresh shared progress
-                </button>
-              )}
-              <a href="?v1=1#research">Historical V1 recovery</a>
-            </details>
-          </section>
-        )}
-        {s && view === 'confirm' && (
-          <section className="setup-form v2-narrow">
-            <h1>You selected: {reviewer.toUpperCase()}</h1>
-            <p>
-              Formal progress: {count} / {configuredWorkload[reviewer]}
-            </p>
-            <p>This session contains {reviewer}'s assigned comparisons.</p>
-            <button className="primary" onClick={() => navigate('formal')}>
-              Continue as {reviewer}
-            </button>
-            <button onClick={() => navigate('study')}>← Choose another reviewer</button>
+            <div className="section-label">STUDY</div>
+            <h1>Human Validation</h1>
+            {reviewerSession ? (
+              <>
+                <p>Reviewer: {reviewerSession.package.reviewer}</p>
+                {reviewerCard(reviewerSession.package.reviewer)}
+                {count === configuredWorkload[reviewer] && (
+                  <button onClick={() => void sendResult()}>Export Result</button>
+                )}
+                <details>
+                  <summary>Backup</summary>
+                  <button onClick={() => void sendResult()}>Export Result</button>
+                  {fileControl('Import Study', (file) => void receiveStudy(file))}
+                </details>
+              </>
+            ) : (
+              <>
+                <p className="study-intro">
+                  Calibrate together, review independently, then combine and analyse.
+                </p>
+                <div className="study-cards">
+                  <article className="study-card">
+                    <h2>Joint Calibration</h2>
+                    <p>
+                      {s.calibration.lockedAt
+                        ? '✓ Complete · Locked'
+                        : `${s.calibration.answers.length} / ${configuredWorkload.calibration}`}
+                    </p>
+                    <button
+                      disabled={busy}
+                      onClick={() => {
+                        setGuideline(s.calibration.guideline);
+                        navigate('calibration');
+                      }}
+                    >
+                      {s.calibration.lockedAt
+                        ? 'Open'
+                        : s.calibration.answers.length
+                          ? 'Continue'
+                          : 'Start'}
+                    </button>
+                  </article>
+                  {REVIEWERS.map(reviewerCard)}
+                  <article className="study-card">
+                    <h2>Researcher</h2>
+                    <p>Setup, progress and results</p>
+                    <button
+                      onClick={() => {
+                        navigate('research');
+                        if (backend)
+                          api('play')
+                            .then(setRemotePlay)
+                            .catch((e) => setError(String(e)));
+                      }}
+                    >
+                      Open
+                    </button>
+                  </article>
+                </div>
+              </>
+            )}
           </section>
         )}
         {s && view === 'formal' && (
@@ -707,7 +897,7 @@ export default function V2App() {
               <div>
                 <strong>Reviewer: {reviewer}</strong>
                 <p>
-                  Formal V2 · {count} / {configuredWorkload[reviewer]}
+                  {count} / {configuredWorkload[reviewer]}
                 </p>
               </div>
               <button
@@ -732,7 +922,7 @@ export default function V2App() {
             )}
             {s.pending[reviewer] ? (
               <section className="v2-vote">
-                <p role="status">Answer saved.</p>
+                <p role="status">Saved</p>
                 <div className="v2-actions">
                   <button
                     disabled={busy}
@@ -767,24 +957,29 @@ export default function V2App() {
               })
             ) : (
               <section className="completion">
-                <h1>Your Formal review is complete.</h1>
+                <h1>Study complete</h1>
                 <p>
                   Thank you, {reviewer}. Your responses are saved. Results stay hidden until both
                   reviews are complete and Researcher unblinds.
                 </p>
                 <button onClick={() => navigate('study')}>Exit Study</button>
+                {reviewerSession && (
+                  <button className="primary" onClick={() => void sendResult()}>
+                    Export Result
+                  </button>
+                )}
               </section>
             )}
           </>
         )}
-        {s && view === 'calibration' && (
+        {s && !reviewerSession && authorized && view === 'calibration' && (
           <>
             <div className="study-top">
               <div>
                 <h1>Joint Calibration</h1>
                 <p>
-                  Jacky + Conrad · {s.calibration.answers.length} / {configuredWorkload.calibration}{' '}
-                  · Separate from Formal
+                  Jacky + Conrad · {s.calibration.answers.length} /{' '}
+                  {configuredWorkload.calibration}{' '}
                 </p>
               </div>
               <button onClick={() => navigate('study')}>Exit Study</button>
@@ -814,90 +1009,241 @@ export default function V2App() {
                 }
               />
             )}
-            {calReveal ? (
-              <div className="v2-vote">
-                <p>Choice saved. Discuss the revealed conditions and refine your guideline.</p>
+            {!s.calibration.lockedAt &&
+              (calReveal ? (
+                <div className="v2-vote">
+                  <p>Choice saved. Discuss the revealed conditions and refine your guideline.</p>
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setCalReveal(undefined);
+                      setChoice(undefined);
+                    }}
+                  >
+                    Next calibration comparison
+                  </button>
+                </div>
+              ) : presentation ? (
+                choices(async () => {
+                  if (choice && presentation) {
+                    const item = presentation;
+                    if (
+                      await change((next) => {
+                        assert(!next.calibration.lockedAt, 'Calibration is locked.');
+                        next.calibration.answers.push({
+                          ...item,
+                          responseId: crypto.randomUUID(),
+                          reviewer: 'Joint',
+                          phase: 'Calibration',
+                          choice,
+                          at: date(),
+                        });
+                      })
+                    )
+                      setCalReveal(item);
+                  }
+                })
+              ) : (
+                <p>All {configuredWorkload.calibration} calibration comparisons are complete.</p>
+              ))}
+            {s.calibration.lockedAt ? (
+              <section className="completion">
+                <h2>Calibration complete</h2>
+                <p>✓ Locked</p>
                 <button
                   className="primary"
-                  onClick={() => {
-                    setCalReveal(undefined);
-                    setChoice(undefined);
+                  disabled={busy || !!s.formal}
+                  onClick={async () => {
+                    if (await change((next) => generateFormal(next, db!, date())))
+                      navigate('research');
                   }}
                 >
-                  Next calibration comparison
+                  Generate Study
                 </button>
-              </div>
-            ) : presentation ? (
-              choices(async () => {
-                if (choice && presentation) {
-                  const item = presentation;
-                  if (
-                    await change((next) => {
-                      assert(!next.calibration.lockedAt, 'Calibration is locked.');
-                      next.calibration.answers.push({
-                        ...item,
-                        responseId: crypto.randomUUID(),
-                        reviewer: 'Joint',
-                        phase: 'Calibration',
-                        choice,
-                        at: date(),
-                      });
-                    })
-                  )
-                    setCalReveal(item);
-                }
-              })
+                {s.formal && <button onClick={() => navigate('research')}>Open Researcher</button>}
+              </section>
             ) : (
-              <p>All {configuredWorkload.calibration} calibration comparisons are complete.</p>
+              <section className="setup-form">
+                <label>
+                  Reviewer guideline
+                  <textarea
+                    aria-label="Reviewer guideline"
+                    rows={4}
+                    value={guideline}
+                    disabled={!!s.calibration.lockedAt}
+                    onChange={(e) => setGuideline(e.target.value)}
+                  />
+                </label>
+                <button
+                  disabled={busy || !!s.calibration.lockedAt}
+                  onClick={() =>
+                    change((next) => {
+                      next.calibration.guideline = guideline;
+                    })
+                  }
+                >
+                  Save guideline
+                </button>
+                <button
+                  className="primary"
+                  disabled={
+                    busy ||
+                    s.calibration.answers.length !== configuredWorkload.calibration ||
+                    !!s.calibration.lockedAt
+                  }
+                  onClick={() =>
+                    change((next) => {
+                      next.calibration.guideline = guideline;
+                      lockCalibration(next, date());
+                    })
+                  }
+                >
+                  Lock Calibration
+                </button>
+              </section>
             )}
-            <section className="setup-form">
-              <label>
-                Reviewer guideline
-                <textarea
-                  rows={4}
-                  value={guideline}
-                  disabled={!!s.calibration.lockedAt}
-                  onChange={(e) => setGuideline(e.target.value)}
-                />
-              </label>
-              <button
-                disabled={busy || !!s.calibration.lockedAt}
-                onClick={() =>
-                  change((next) => {
-                    next.calibration.guideline = guideline;
-                  })
-                }
-              >
-                Save guideline
-              </button>
-              <button
-                className="primary"
-                disabled={
-                  busy ||
-                  s.calibration.answers.length !== configuredWorkload.calibration ||
-                  !!s.calibration.lockedAt
-                }
-                onClick={() =>
-                  change((next) => {
-                    next.calibration.guideline = guideline;
-                    lockCalibration(next, date());
-                  })
-                }
-              >
-                Lock Calibration
-              </button>
-            </section>
           </>
         )}
-        {s && db && view === 'research' && (
+        {s && db && authorized && !reviewerSession && view === 'research' && (
           <section>
             <div className="page-title">
               <div>
                 <div className="section-label">RESEARCHER</div>
-                <h1>Human Validation V2</h1>
+                <h1>Human Validation</h1>
               </div>
               <button onClick={() => navigate('study')}>Study Home</button>
             </div>
+            {s.formal && (
+              <section className="study-transfer" aria-labelledby="transfer-title">
+                <h2 id="transfer-title">
+                  {hosting === 'hosted' ? 'Remote Study' : 'Offline Transfer'}
+                </h2>
+                <div className="study-cards">
+                  {REVIEWERS.map((r) => (
+                    <article className="study-card" key={r}>
+                      <h3>{r}</h3>
+                      <p>
+                        {progress(r)}
+                        {activeAnswers(s, r).length === configuredWorkload[r]
+                          ? ' · ✓ Complete'
+                          : ''}
+                      </p>
+                      {hosting !== 'hosted' && (
+                        <div className="v2-actions">
+                          <button
+                            disabled={busy || !!s.unblindedAt}
+                            onClick={() => void sendStudy(r)}
+                          >
+                            Export {r} Study
+                          </button>
+                          {!s.unblindedAt &&
+                            fileControl(
+                              `Import ${r} Result`,
+                              (file) => void receiveResult(file, r),
+                            )}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+                <p>
+                  Overlap: {overlapAvailable(s)} / {configuredWorkload.overlap} available for
+                  agreement analysis
+                </p>
+                {!s.unblindedAt && (
+                  <button
+                    className="primary"
+                    disabled={
+                      busy ||
+                      configDirty ||
+                      REVIEWERS.some((r) => activeAnswers(s, r).length !== configuredWorkload[r])
+                    }
+                    onClick={() =>
+                      change((next) => {
+                        validateState(next, db, true);
+                        next.unblindedAt = date();
+                      })
+                    }
+                  >
+                    {hosting === 'hosted' ? 'Unblind & Analyse' : 'Merge & Analyse'}
+                  </button>
+                )}
+              </section>
+            )}
+            {s.unblindedAt && (
+              <section className="research-summary">
+                <h2>Summary</h2>
+                <div className="summary-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Comparison</th>
+                        <th>Unique pairs</th>
+                        <th>Ratings</th>
+                        <th>Preferences</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyse(s, db).results.map((row) => (
+                        <tr key={row.contrast}>
+                          <th>{row.contrast.replace('-', '–')}</th>
+                          <td>{row.distinctPairs}</td>
+                          <td>{row.ratings}</td>
+                          <td>
+                            {Object.entries(row.counts)
+                              .map(([label, n]) => `${label}: ${n}`)
+                              .join(' · ')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <h3>Reviewer agreement</h3>
+                <div className="summary-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Comparison</th>
+                        <th>Overlap pairs</th>
+                        <th>Agreement</th>
+                        <th>Cohen’s κ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyse(s, db).results.map((row) => (
+                        <tr key={row.contrast}>
+                          <th>{row.contrast.replace('-', '–')}</th>
+                          <td>{row.overlapPairs}</td>
+                          <td>
+                            {row.rawAgreement === null
+                              ? '—'
+                              : `${Math.round(row.rawAgreement * 100)}%`}
+                          </td>
+                          <td>{row.kappa === null ? '—' : row.kappa.toFixed(3)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="hint">
+                  Agreement compares the same pairs using revealed conditions. κ is unavailable
+                  without overlap or variation. Ratings on shared tasks are correlated.
+                </p>
+                <button
+                  className="primary"
+                  onClick={() =>
+                    download(
+                      JSON.stringify(researchExport(s, db, remotePlay), null, 2),
+                      'code-choice-final-research.json',
+                      'application/json',
+                    )
+                  }
+                >
+                  Export Final Research Data
+                </button>
+              </section>
+            )}
             <ResearcherConfiguration
               state={s}
               db={db}
@@ -906,142 +1252,50 @@ export default function V2App() {
               onSave={(config, criterion) =>
                 change((next) => configureProtocol(next, db, config, criterion, date()))
               }
+              onGenerate={(config, criterion) =>
+                change((next) => {
+                  configureProtocol(next, db, config, criterion, date());
+                  generateFormal(next, db, date());
+                })
+              }
+              onCalibration={() => {
+                setGuideline(s.calibration.guideline);
+                navigate('calibration');
+              }}
               onReset={() => change((next) => resetCalibration(next, db, date()))}
               onRegenerate={() => change((next) => regenerateFormal(next, db, date()))}
               onReplace={(reason) => change((next) => replaceProtocol(next, db, reason, date()))}
             />
-            <div className="setup-grid">
-              <section className="setup-form">
-                <h2>Calibration</h2>
-                <p>
-                  {s.calibration.answers.length} / {configuredWorkload.calibration} ·{' '}
-                  {s.calibration.lockedAt ? 'Locked' : 'Open'}
-                </p>
-                <h2>Formal</h2>
-                {REVIEWERS.map((r) => (
-                  <p key={r}>
-                    {r}: {activeAnswers(s, r).length} / {configuredWorkload[r]}
-                  </p>
-                ))}
-                <p>
-                  Protocol:{' '}
-                  {formalStarted(s)
-                    ? `Frozen · Edition ${protocolEdition(s)}`
-                    : s.formal
-                      ? 'Assignments generated · not started'
-                      : 'Not generated'}
-                </p>
-                <button
-                  disabled={busy || configDirty || !s.calibration.lockedAt || !!s.formal}
-                  onClick={() => change((next) => generateFormal(next, db, date()))}
-                >
-                  Generate / Lock Formal V2
-                </button>
-                <button
-                  disabled={
-                    busy ||
-                    !!s.unblindedAt ||
-                    !s.formal ||
-                    REVIEWERS.some((r) => activeAnswers(s, r).length !== configuredWorkload[r])
-                  }
-                  onClick={() =>
-                    change((next) => {
-                      validateState(next, db, true);
-                      next.unblindedAt = date();
-                    })
-                  }
-                >
-                  Unblind & Analyse
-                </button>
-                <button
-                  disabled={!s.unblindedAt}
-                  onClick={() =>
-                    download(
-                      JSON.stringify(researchExport(s, db, remotePlay), null, 2),
-                      'human-validation-v2-research.json',
-                      'application/json',
-                    )
-                  }
-                >
-                  Export research data
-                </button>
-                <button onClick={backup}>Export progress backup</button>
-                <h2>Play · exploratory</h2>
-                <p>
-                  {new Set(remotePlay.map((p) => p.sessionId)).size} sessions · {remotePlay.length}{' '}
-                  hosted responses
-                </p>
-                <button
-                  disabled={hosting !== 'hosted'}
-                  onClick={() =>
-                    api('play')
-                      .then(setRemotePlay)
-                      .catch((e) => setError(String(e)))
-                  }
-                >
-                  Refresh Play summary
-                </button>
-                <button
-                  onClick={() =>
-                    download(
-                      JSON.stringify(
-                        { phase: 'Play', exploratory: true, responses: remotePlay },
-                        null,
-                        2,
-                      ),
-                      'play-v2-exploratory.json',
-                      'application/json',
-                    )
-                  }
-                >
-                  Export Play data
-                </button>
-              </section>
-              <section className="instructions">
-                <h2>Frozen pool eligibility</h2>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Contrast</th>
-                      <th>Both correct</th>
-                      <th>Identical</th>
-                      <th>Eligible differing</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(db.stats).map(([c, v]) => (
-                      <tr key={c}>
-                        <td>{c}</td>
-                        <td>{v.bothCorrect}</td>
-                        <td>{v.bothCorrectIdentical}</td>
-                        <td>{v.eligible}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p>
-                  Duplicates remain recorded. Formal sampling uses only differing both-correct
-                  holdout outputs.
-                </p>
-                {db.limitations.map((l) => (
-                  <p className="hint" key={l}>
-                    {l}
-                  </p>
-                ))}
-              </section>
-            </div>
-            {s.unblindedAt && (
-              <section className="instructions">
-                <h2>Canonical overlap agreement</h2>
-                <pre className="v2-json">{JSON.stringify(analyse(s, db), null, 2)}</pre>
-              </section>
-            )}
             <details>
-              <summary>Advanced / Recovery</summary>
-              <p>
-                Invalidation retains the original response and timestamp. Unblinded evidence cannot
-                be changed.
-              </p>
+              <summary>Advanced · Backup, provenance and recovery</summary>
+              <h2>Backup</h2>
+              <div className="v2-actions">
+                <button onClick={backup}>Export Progress</button>
+                {fileControl('Import Progress', (file) => void restore(file))}
+                {backend && (
+                  <button
+                    disabled={busy}
+                    onClick={() => refreshShared().catch((e) => setError(String(e)))}
+                  >
+                    Refresh shared progress
+                  </button>
+                )}
+              </div>
+              {hosting === 'hosted' && s.formal && !s.unblindedAt && (
+                <div className="v2-actions">
+                  {REVIEWERS.map((r) => (
+                    <div key={r}>
+                      <button onClick={() => void sendStudy(r)}>Export {r} Study</button>
+                      {fileControl(`Import ${r} Result`, (file) => void receiveResult(file, r))}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <a href="?v1=1#research" target="_blank" rel="noopener">
+                Open historical V1 recovery
+              </a>
+              <h2>Response recovery</h2>
+              <p>Invalidation preserves the original response. Analysed evidence is frozen.</p>
               <label>
                 Response ID
                 <input value={recoveryId} onChange={(e) => setRecoveryId(e.target.value)} />
@@ -1061,9 +1315,7 @@ export default function V2App() {
                 <pre className="v2-json">
                   {JSON.stringify(
                     {
-                      formal: s.formal,
-                      responses: s.answers,
-                      calibration: s.calibration,
+                      protocol: s,
                       outputs: s.formal
                         ? Object.fromEntries(
                             [
@@ -1075,12 +1327,45 @@ export default function V2App() {
                             ].map((id) => [id, db.outputs[id]]),
                           )
                         : {},
+                      duplicateStats: db.stats,
+                      limitations: db.limitations,
+                      analysis: s.unblindedAt ? analyse(s, db) : undefined,
                     },
                     null,
                     2,
                   )}
                 </pre>
               </details>
+              <h2>Play · exploratory</h2>
+              <p>
+                {new Set(remotePlay.map((p) => p.sessionId)).size} sessions · {remotePlay.length}{' '}
+                responses
+              </p>
+              <button
+                disabled={!backend}
+                onClick={() =>
+                  api('play')
+                    .then(setRemotePlay)
+                    .catch((e) => setError(String(e)))
+                }
+              >
+                Refresh Play summary
+              </button>
+              <button
+                onClick={() =>
+                  download(
+                    JSON.stringify(
+                      { phase: 'Play', exploratory: true, responses: remotePlay },
+                      null,
+                      2,
+                    ),
+                    'play-v2-exploratory.json',
+                    'application/json',
+                  )
+                }
+              >
+                Export Play data
+              </button>
             </details>
           </section>
         )}

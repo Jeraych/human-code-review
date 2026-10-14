@@ -25,6 +25,10 @@ catalog.outputs = Object.fromEntries(
 validateCatalog(catalog);
 const password = process.env.STUDY_ACCESS_CODE;
 assert(
+  !process.env.STUDY_TRANSPORT || ['local', 'hosted'].includes(process.env.STUDY_TRANSPORT),
+  'STUDY_TRANSPORT must be local or hosted.',
+);
+assert(
   password && password.length >= 8,
   'Set STUDY_ACCESS_CODE (at least 8 characters) in the server environment.',
 );
@@ -93,6 +97,13 @@ const server = createServer(async (req, res) => {
       return send(200, {
         protocolVersion: catalog.protocolVersion,
         catalogHash: catalog.catalogHash,
+        // A loopback service persists the researcher's local Study. Remote origins use shared transport.
+        transport:
+          process.env.STUDY_TRANSPORT ||
+          (/^(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(req.headers.host || '')
+            ? 'local'
+            : 'hosted'),
+        appWorkflow: 'study-transfer-v2',
       });
     let body: any = {};
     if (req.method !== 'GET') {

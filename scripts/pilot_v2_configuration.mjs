@@ -18,6 +18,7 @@ const service = spawn(process.execPath, ['server/api.ts'], {
   env: {
     ...process.env,
     PORT: '18793',
+    STUDY_TRANSPORT: 'hosted',
     STUDY_ACCESS_CODE: code,
     STUDY_DB_PATH: resolve(qa, `configuration-fixture-${Date.now()}.sqlite`),
   },
@@ -44,49 +45,54 @@ try {
   await page.goto(url + '/#study');
   await page.getByLabel('Study access code').fill(code);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
-  const form = page.getByRole('region', { name: 'Protocol configuration' });
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  const form = page.getByRole('region', { name: 'Study Setup' });
   await form.getByRole('heading', { name: 'Workload preview' }).waitFor();
   check(
     'Researcher starts with official live workload',
-    /12 total/.test(await form.innerText()) &&
-      /80 distinct pairs/.test(await form.innerText()) &&
-      /16 double-rated pairs/.test(await form.innerText()) &&
-      /48 ratings/.test(await form.innerText()),
+    /Calibration: 12 pairs/.test(await form.innerText()) &&
+      /80 unique pairs/.test(await form.innerText()) &&
+      /Overlap: 16/.test(await form.innerText()) &&
+      /Jacky: 48/.test(await form.innerText()),
   );
   await form.getByRole('checkbox', { name: /^B vs C/ }).uncheck();
   await form.getByRole('checkbox', { name: /^C vs J/ }).uncheck();
-  await form.getByLabel('Calibration pairs per enabled contrast', { exact: true }).fill('1');
-  await form.getByLabel('Formal distinct pairs per enabled contrast', { exact: true }).fill('5');
-  await form.getByLabel('Overlap pairs per enabled contrast', { exact: true }).fill('2');
+  await form.getByLabel('Calibration pairs / comparison', { exact: true }).fill('1');
+  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('5');
+  await form.getByLabel('Overlap / comparison', { exact: true }).fill('2');
+  await form.getByText('Advanced', { exact: true }).click();
   await form.getByLabel('Randomisation seed', { exact: true }).fill('42');
   check(
     'Preview recalculates subset, calibration, overlap and odd workloads live',
-    /Enabled contrasts: 2/.test(await form.innerText()) &&
-      /2 total/.test(await form.innerText()) &&
-      /10 distinct pairs/.test(await form.innerText()) &&
-      /4 double-rated pairs/.test(await form.innerText()) &&
-      /7 ratings/.test(await form.innerText()),
+    /Calibration: 2 pairs/.test(await form.innerText()) &&
+      /Calibration: 2 pairs/.test(await form.innerText()) &&
+      /10 unique pairs/.test(await form.innerText()) &&
+      /Overlap: 4/.test(await form.innerText()) &&
+      /Jacky: 7/.test(await form.innerText()),
   );
-  await form.getByLabel('Overlap pairs per enabled contrast', { exact: true }).fill('6');
+  await form.getByLabel('Overlap / comparison', { exact: true }).fill('6');
   check(
     'Impossible overlap is caught before save/generation',
     (await form.getByRole('alert').isVisible()) &&
-      (await form.getByRole('button', { name: 'Save configuration', exact: true }).isDisabled()),
+      (await form.getByRole('button', { name: 'Save Setup', exact: true }).isDisabled()),
   );
-  await form.getByLabel('Overlap pairs per enabled contrast', { exact: true }).fill('2');
+  await form.getByLabel('Overlap / comparison', { exact: true }).fill('2');
   await form.getByRole('checkbox', { name: /^C vs S/ }).uncheck();
   await form.getByRole('checkbox', { name: /^S vs SJ/ }).uncheck();
   check(
     'Empty contrast subset is rejected',
     (await form.getByRole('alert').isVisible()) &&
-      (await form.getByRole('button', { name: 'Save configuration', exact: true }).isDisabled()),
+      (await form.getByRole('button', { name: 'Save Setup', exact: true }).isDisabled()),
   );
   await form.getByRole('checkbox', { name: /^C vs S/ }).check();
   await form.getByRole('checkbox', { name: /^S vs SJ/ }).check();
-  await form.getByLabel('Formal distinct pairs per enabled contrast', { exact: true }).fill('1000');
+  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('1000');
   check('Requested pool overflow is rejected', await form.getByRole('alert').isVisible());
-  await form.getByLabel('Formal distinct pairs per enabled contrast', { exact: true }).fill('5');
+  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('5');
   await form
     .getByLabel('Reviewer criterion / guideline', { exact: true })
     .fill(
@@ -99,7 +105,7 @@ try {
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
   );
   await page.screenshot({ path: resolve(qa, 'researcher-config-mobile.png'), fullPage: true });
-  await form.getByRole('button', { name: 'Save configuration', exact: true }).click();
+  await form.getByRole('button', { name: 'Save Setup', exact: true }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.edition === 2,
   );
@@ -113,11 +119,15 @@ try {
       state.calibration.answers.length === 0,
   );
   await page.getByRole('button', { name: 'Study Home', exact: true }).click();
-  await page.getByRole('button', { name: 'Joint Calibration', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+    .getByRole('button')
+    .click();
   for (let i = 0; i < state.calibration.assignments.length; i++) {
     if (i) await page.getByRole('button', { name: 'Next calibration comparison' }).click();
     await page.getByRole('button', { name: 'Equal', exact: true }).click();
-    await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+    await page.getByRole('button', { name: 'Submit', exact: true }).click();
     await page.getByRole('button', { name: 'Next calibration comparison' }).waitFor();
   }
   await page.getByRole('button', { name: 'Lock Calibration', exact: true }).click();
@@ -127,18 +137,23 @@ try {
         .lockedAt,
   );
   await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  await form.getByText('Advanced', { exact: true }).click();
   await form.getByLabel('Randomisation seed', { exact: true }).fill('43');
   check(
-    'Unsaved configuration blocks Formal generation',
-    await page.getByRole('button', { name: 'Generate / Lock Formal V2' }).isDisabled(),
+    'Valid seed edit can be saved before generation',
+    await page.getByRole('button', { name: 'Generate Study' }).isEnabled(),
   );
   page.once('dialog', (d) => d.accept());
-  await form.getByRole('button', { name: 'Save configuration', exact: true }).click();
+  await form.getByRole('button', { name: 'Save Setup', exact: true }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.edition === 3,
   );
-  await page.getByRole('button', { name: 'Generate / Lock Formal V2' }).click();
+  await page.getByRole('button', { name: 'Generate Study' }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.formal,
   );
@@ -154,7 +169,7 @@ try {
   );
   const originalFormal = structuredClone(state.formal);
   page.once('dialog', (d) => d.accept());
-  await form.getByRole('button', { name: 'Regenerate unstarted Formal', exact: true }).click();
+  await form.getByRole('button', { name: 'Regenerate unstarted Study', exact: true }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.edition === 4,
   );
@@ -165,31 +180,36 @@ try {
       state.answers.length === 0,
   );
   await page.getByRole('button', { name: 'Study Home', exact: true }).click();
-  await page.getByRole('button', { name: 'Jacky', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Jacky', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
-    'Reviewer confirmation derives workload from configuration',
-    await page.getByText('Formal progress: 0 / 7', { exact: true }).isVisible(),
+    'Reviewer enters configured workload without a confirmation page',
+    await page.getByText('0 / 7', { exact: true }).isVisible(),
   );
-  await page.getByRole('button', { name: 'Continue as Jacky' }).click();
   check(
     'Reviewer questions contain no research configuration',
     (await page.getByRole('checkbox').count()) === 0 &&
       (await page.getByRole('spinbutton').count()) === 0 &&
-      !/Protocol configuration|Randomisation seed|Conrad/.test(
-        await page.locator('main').innerText(),
-      ),
+      !/Study Setup|Randomisation seed|Conrad/.test(await page.locator('main').innerText()),
   );
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+  await page.getByRole('button', { name: 'Submit', exact: true }).click();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Submit', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'First response freezes settings even after immediate Undo',
     (await form.getByLabel('Randomisation seed', { exact: true }).isDisabled()) &&
       (await form.getByLabel('Reviewer criterion / guideline', { exact: true }).isDisabled()) &&
-      (await form.getByRole('button', { name: 'Save configuration', exact: true }).count()) === 0,
+      (await form.getByRole('button', { name: 'Save Setup', exact: true }).count()) === 0,
   );
   state = await context.request.get(url + '/api/state').then((r) => r.json());
   const tampered = structuredClone(state);
@@ -203,14 +223,9 @@ try {
       })
     ).status() === 400,
   );
-  await form.getByText('Advanced / Recovery — protocol replacement', { exact: true }).click();
-  await form
-    .getByLabel('Protocol replacement reason', { exact: true })
-    .fill('Fixture explicit protocol replacement for configuration QA');
+  await form.getByText('Advanced', { exact: true }).click();
   page.once('dialog', (d) => d.accept());
-  await form
-    .getByRole('button', { name: 'Invalidate active protocol & create replacement', exact: true })
-    .click();
+  await form.getByRole('button', { name: 'Reset Study', exact: true }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.edition === 5,
   );
@@ -227,11 +242,16 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(code);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  await form.getByText('Advanced', { exact: true }).click();
   check(
     'Refresh preserves active configuration and archive history',
     (await form.getByLabel('Randomisation seed', { exact: true }).inputValue()) === '43' &&
-      (await form.getByText('Protocol history · 4 archived editions', { exact: true }).isVisible()),
+      (await form.getByText('Protocol edition: 5 · 4 archived', { exact: true }).isVisible()),
   );
   // Complete the tiny isolated fixture edition to verify config-derived unblinding/export.
   state = await context.request.get(url + '/api/state').then((r) => r.json());
@@ -264,15 +284,19 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(code);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
   await page.getByRole('button', { name: 'Unblind & Analyse', exact: true }).click();
-  await page.getByRole('heading', { name: 'Canonical overlap agreement' }).waitFor();
+  await page.getByRole('heading', { name: 'Summary' }).waitFor();
   check(
     'Analysis derives contrasts/counts without fixed official totals',
-    await page.getByText(/10 distinct pairs; 14 correlated ratings/).isVisible(),
+    (await page.locator('.research-summary tbody tr').count()) === 4,
   );
   const exporting = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export research data', exact: true }).click();
+  await page.getByRole('button', { name: 'Export Final Research Data', exact: true }).click();
   const file = await exporting;
   await file.saveAs(resolve(qa, 'configuration-fixture-research.json'));
   const exported = JSON.parse(
@@ -296,5 +320,3 @@ try {
   await browser?.close();
   service.kill();
 }
-
-

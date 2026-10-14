@@ -67,7 +67,11 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Joint Calibration', exact: true }).waitFor();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+    .getByRole('button')
+    .waitFor();
   check('Subdirectory login/cookie/API work without root-path rewrites', true);
   const requests = page.context().request,
     state = await requests.get('http://127.0.0.1:18788/demo/api/state').then((r) => r.json());
@@ -147,6 +151,8 @@ try {
       '18791',
       '-EnvironmentFile',
       'qa/v2/fixture-launch.env',
+      '-RuntimeDirectory',
+      'qa/v2/launcher-runtime',
     ],
     { cwd: root, windowsHide: true, encoding: 'utf8', stdio: 'ignore', timeout: 15000 },
   );
@@ -168,7 +174,9 @@ try {
     { cwd: root, windowsHide: true, encoding: 'utf8', stdio: 'ignore', timeout: 15000 },
   );
   check('Launcher reuses verified V2 service', reuse.status === 0);
-  const launchedPid = Number(readFileSync(resolve(root, '.runtime/server.pid'), 'utf8').trim());
+  const launchedPid = Number(
+    readFileSync(resolve(root, 'qa/v2/launcher-runtime/server.pid'), 'utf8').trim(),
+  );
   process.kill(launchedPid);
   occupied = createServer((req, res) => res.end('unrelated application'));
   await new Promise((r) => occupied.listen(18792, '127.0.0.1', r));
@@ -187,6 +195,30 @@ try {
     { cwd: root, windowsHide: true, encoding: 'utf8', stdio: 'ignore', timeout: 15000 },
   );
   check('Launcher refuses occupied unrelated port', refusal.status !== 0);
+  await new Promise((r) => occupied.close(r));
+  occupied = createServer((req, res) => {
+    if (req.url === '/api/health') {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ protocolVersion: 'human-validation-v2' }));
+    } else res.end('<meta name="application-name" content="Human Code Evaluation">');
+  });
+  await new Promise((r) => occupied.listen(18792, '127.0.0.1', r));
+  const stale = spawnSync(
+    'powershell',
+    [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      'scripts/launch.ps1',
+      '-CheckOnly',
+      '-NoBrowser',
+      '-Port',
+      '18792',
+    ],
+    { cwd: root, windowsHide: true, stdio: 'ignore', timeout: 15000 },
+  );
+  check('Launcher refuses an older V2 workflow service without replacing it', stale.status !== 0);
   check('Integration has no browser runtime errors', errors.length === 0);
   writeFileSync(
     resolve(qa, 'integration-verification.json'),

@@ -13,7 +13,7 @@ npm.cmd ci
 npm.cmd run build
 ```
 
-Double-click **Launch app.cmd**. On first launch it asks you to choose one Study access code, stores it only in ignored `.env.local`, starts the local Node/SQLite service in a hidden process and opens `http://127.0.0.1:5173/`. Share that code with Conrad. It refuses to take over an occupied port. Stop an older preview/dev server first. It starts no ratings. Normal Study data lives in ignored `.runtime/study-v2.sqlite`; keep that database, its WAL files and exported backups private.
+Double-click **Launch app.cmd**. On first launch it asks you to choose one Study access code, stores it only in ignored `.env.local`, starts the local Node/SQLite service in a hidden process and opens `http://127.0.0.1:5173/`. The code opens the main Study. Offline reviewers receive their own Study file and do not need the code. It refuses to take over an occupied port. Stop an older preview/dev server first. It starts no ratings. Normal Study data lives in ignored `.runtime/study-v2.sqlite`; keep that database, its WAL files and exported backups private.
 
 For an explicit terminal process, create `.env.local` with your own code:
 
@@ -55,64 +55,50 @@ The normal workflow requires the small Node service, not a static-only host. Run
 | `PORT` | Default `8787`; host-assigned port supported |
 | `COOKIE_SECURE` | Set `1` behind production HTTPS |
 | `APP_ORIGIN` | Exact public origin when proxy forwarding changes the Host header |
+| `STUDY_TRANSPORT` | Optional `hosted` or `local`; defaults to local on localhost/127.0.0.1 and hosted on remote origins. Set `hosted` explicitly behind a proxy or for shared local-network QA |
 | `APP_BASE_PATH` | Optional prefix such as `/demo`; serve at `/demo/` |
 
 Use one service instance and SQLite database. Serve frontend and API on the same public origin; proxy `<base>/api/*` to this service when a separate static frontend is needed. An ephemeral/serverless filesystem loses shared progress and is unsuitable. Hash routes and relative Vite assets support root/subdirectory hosting without SPA rewrites. Back up the database using SQLite backup tools or stop the service before copying the database and associated WAL files.
 
 No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
-## Researcher protocol configuration
+## Study workflow
 
-Study → Researcher → **Protocol configuration** edits the existing V2 study; there is no separate Custom/Pilot mode. The researcher is trusted to choose the criterion and sample size. Reviewer screens contain no configuration controls.
+We calibrate together, generate the Study, each reviewer completes their assigned comparisons, then we combine and analyse.
 
-| Setting | Official default |
-|---|---|
-| Enabled contrasts | B–C, C–S, C–J, S–SJ; any non-empty subset is supported |
-| Calibration pairs per enabled contrast | 3 |
-| Formal distinct pairs per enabled contrast | 20 |
-| Overlap pairs per enabled contrast | 4 |
-| Randomisation seed | 7002026; explicitly editable |
-| Criterion / guideline | Current readability/maintainability wording; editable and non-empty |
+**Local / offline**
 
-The live preview shows Calibration total, Formal distinct pairs, double-rated overlaps and each reviewer's workload. Official defaults still give 12 Calibration pairs, 80 Formal pairs, 16 overlaps and 48 ratings each. Remaining non-overlap pairs are divided evenly; when odd, the extra alternates between reviewers across contrasts. Task breadth, approximately balanced source seeds and balanced A/B positions are automatic. Zero Calibration or overlap is allowed; Formal must have at least one pair per enabled contrast. With no overlaps, agreement/kappa are null rather than NaN.
+1. **Launch app.cmd** → Study → enter the main Study code → Researcher. Check **Study Setup**. Its official defaults remain B–C / C–S / C–J / S–SJ, Calibration 3 / comparison, Formal 20 / comparison and overlap 4 / comparison. The live preview derives 12 Calibration pairs, 80 unique Formal pairs, 16 overlaps and 48 ratings each. Any non-empty subset and feasible integer counts are supported. Use **Save Setup** when editing counts/comparisons.
+2. **Joint Calibration → Start/Continue**. Sit together or screen-share; select A/Equal/B → **Submit** → discuss the reveal → Next. Finalise the guideline, then **Lock Calibration**. The completed screen offers **Generate Study** directly.
+3. Researcher → **Offline Transfer → Export Jacky Study / Export Conrad Study**. Send each reviewer their one file (`code-choice-jacky.study.json` / `code-choice-conrad.study.json`). Packages contain identity, criterion, exact pair IDs/order/A/B mappings, progress, prompts/code and compatibility checks.
+4. On each reviewer's computer, run the same app/build locally (a static preview also works). **Study → Import Study**, select the received file, then **Start**. Identity comes from the file. No access code or researcher settings are needed for an imported reviewer Study. Read independently: A/Equal/B → Submit → Saved → Undo or Next. Undo is available only until Next; the original answer remains audited. **Exit Study** preserves progress; reopen Study → **Continue**. Use the same browser/origin and avoid concurrent tabs for one reviewer.
+5. **Study complete → Export Result** creates `code-choice-jacky-result.json` or `code-choice-conrad-result.json`.
+6. On the main computer, Researcher → **Import Jacky Result / Import Conrad Result**. Counts and overlap update after compatible imports. Duplicate files are idempotent; stale files cannot erase newer progress; conflicting responses stop without overwrite. A result for another generation says **This result belongs to a different Study.**
+7. When both are complete, **Merge & Analyse → Summary → Export Final Research Data**. The final JSON preserves both imported source files and their SHA-256 hashes, original invalidated responses, protocol history, Calibration, Formal, source provenance, canonical agreement and separate exploratory Play data.
 
-**Save configuration** applies the preview and archives the prior edition. Unsaved or impossible settings block generation. Counts must be integers, overlap cannot exceed Formal count, and the requested eligible sample must fit the frozen pool after Calibration exclusions. The 32-bit seed accepts 0–4294967295. Eligibility stays fixed: holdout only, both correctness-pass, exact-identical code excluded from the displayed sample but retained in research counts.
+**Hosted**
 
-Before any Formal response is recorded:
+Use one shared website with the Node/SQLite service and persistent disk configured above. Study → code → Joint Calibration → Lock → Generate Study. Each reviewer chooses their own **Start / Continue** card and reviews independently. Progress saves automatically to the shared service and browser cache. Researcher sees both counts under **Remote Study**; when complete, **Unblind & Analyse → Summary → Export Final Research Data**. Normal hosted screens do not require file transfer. A restarted service retains SQLite progress; its expired session asks for the code again.
 
-- Changing contrasts or Calibration count starts fresh Calibration; previous assignments/responses are archived.
-- Criterion, Formal count, overlap or seed edits preserve Calibration and clear any unstarted Formal assignment. Save explicitly confirms this when progress already exists.
-- **Reset / regenerate Calibration** and **Regenerate unstarted Formal** are deliberate actions with confirmation. Earlier Calibration assignments remain excluded from future Formal samples, including after resets.
+Local and hosted transport use the same frozen protocol engine, assignments and response format. A localhost service persists the main offline Study, while remote origins default to shared transport. `STUDY_TRANSPORT=hosted` overrides detection where necessary; this is deployment configuration, not an additional app mode. No remote/public host is configured or deployed by this implementation.
 
-After the first Formal response is recorded, the active configuration, criterion and assignments are frozen, even if Undo/invalidation subsequently leaves zero active answers. Researcher displays the active frozen values. To change it, open **Advanced / Recovery — protocol replacement**, enter a reason and explicitly **Invalidate active protocol & create replacement**. The new edition returns to Calibration; the old configuration, assignments, responses, invalidation records and completion/unblinding state remain immutable in Protocol history and progress backups. Research exports include active configuration, edition and archived protocols. No reset silently deletes evidence.
+## Setup, locking and Advanced
 
-Saved V2 data without configuration/edition fields is read as the original official defaults in edition 1, without rewriting or reshuffling assignments. V1 and the canonical V2 pools/provenance are unchanged. Pending offline editions/imports retain history; conflicting edits fail closed.
+Setup shows comparisons, three per-comparison counts and live workload. Non-overlap pairs are divided evenly, alternating odd extras between reviewers across comparisons. Task breadth, seed balance, A/B balance and eligibility remain automatic. Holdout only, both correctness-pass and differing code remain the Formal defaults; exact-identical pairs remain in research counts. Formal count must be positive; Calibration/overlap may be zero. Invalid or oversized requests are rejected before generation.
 
-## Tomorrow's Study workflow
+Seed (default `7002026`) and session criterion are editable under **Study Setup → Advanced** before Formal starts; the guideline can also be finalised during Calibration. Changing comparisons/Calibration count restarts Calibration; other setup edits retain it and clear unstarted assignments. A valid seed/criterion edit may be saved when generating. **Regenerate unstarted Study** requires deliberate confirmation.
 
-1. Start the service (or visit a configured hosted installation), select Study and enter the shared access code. Open Researcher to verify the official default configuration or deliberately configure a different workload before Calibration.
-2. At one computer with Conrad, choose **Joint Calibration**. Discuss each pair, select A/Equal/B, then Submit. Reveal follows the choice. Complete the configured Calibration workload (12 with official defaults), finalise the editable guideline and click **Lock Calibration**.
-3. Choose Exit Study → Researcher → **Generate / Lock Formal V2**. This freezes the saved configuration, pair IDs, reviewer assignments, order and A/B mappings (80 distinct pairs, 16 overlaps, 48 assignments each with official defaults). Unstarted assignments can only regenerate deliberately through Researcher; after the first response they are immutable. Calibration pairs cannot enter Formal.
-4. Exit to Study Home → **Jacky** → check the identity/progress confirmation → Continue as Jacky. Read independently; select A/Equal/B and **Submit choice**. Undo is available only before Next. No results are revealed.
-5. Conrad independently follows Study → code → **Conrad** → Continue as Conrad. His overlap answers are separate from Jacky's. Do not discuss Formal comparisons or inspect Play/provenance before reviewing.
-6. After browser close, reopen the same site, enter Study/code, select your reviewer and confirm. Hosted state resumes on another device without manual files. Exit Study preserves progress. Avoid simultaneous tabs for the same reviewer.
-7. When both reviewers complete their configured workload (48/48 each with official defaults), Researcher → **Unblind & Analyse** → **Export research data**. Completion/version/assignment/mapping checks must pass first. JSON contains separate Calibration, Formal and Play sections, original invalidated records, source/code hashes and canonical agreement results.
-8. If an answer used the wrong reviewer, Researcher → Advanced / Recovery → find its response ID under Assignments, mappings and provenance → enter ID/reason → **Invalidate response**. The original is retained. Resume that reviewer to answer the newly unanswered pair. Do this before unblinding.
+The first Formal response freezes the active setup and assignment, even after Undo/invalidation. **Advanced → Reset Study** uses one confirmation and preserves the old protocol, configuration, assignments, responses, source files and unblinding state in immutable history before returning to Calibration. Earlier Calibration assignments stay excluded from Formal. No history is deleted. Existing V2 states without configuration fields retain the official defaults and existing assignments without migration/reshuffling.
 
-## Backup and local fallback
+Researcher **Advanced · Backup, provenance and recovery** contains generic progress export/import, shared refresh, emergency hosted reviewer packages/results, IDs/mappings/source metadata and response invalidation. To recover a wrong-reviewer answer, enter its ID and a reason and **Invalidate response**, then resume the correct reviewer. Analysed evidence stays frozen. Play exports are exploratory and separate.
 
-Study saves immediately in the browser before sending to the service. Hosted failures show pending-sync status; reconnecting/re-entering Study retries safely. Independent reviewer edits can merge; contradictory edits are reported without overwriting.
+Browser-first save preserves progress during API outages. Reconnecting/re-entering Study retries compatible changes; conflicts stop for researcher review. A reviewer file can also be exported before completion under **Backup**. Keep Study, Result and research exports private; the files contain code, mapping and research evidence. Back up before clearing browser data or changing origin. Fresh static-only researcher setup can use `VITE_STUDY_ACCESS_CODE` at build time (only a client convenience gate); imported reviewers need no code. Static files need a local web server: this is not a PWA or a file:// application.
 
-Backup controls live under **Study Home → Backup / Recovery**. Export Progress is an emergency/reproducibility backup, not the normal hosted workflow. Import Progress accepts matching protocol/pool/hash backups and compatible cumulative histories. Conflicts fail closed. Export before changing origin or clearing browser data.
+## V1 / V2 routing
 
-If hosting fails, use the same checked-out app locally:
+V2 is the default for normal navigation, hashes and saved sessions. V1 loads only with the deliberate `?v1=1` request. Presence-only/false flags (`?v1`, `?v1=0`, `?v1=false`) stay V2. Historical recovery opens in a separate tab under Advanced; V1 also has a **Return to Code / Choice V2** link that clears the legacy query. Back/Forward handles explicit app selection. V1 saved data and historical pools remain untouched.
 
-1. On the original browser, Export Progress if available.
-2. Run `npm.cmd ci`, `npm.cmd run build`, then **Launch app.cmd** locally. Choose a local code if needed.
-3. Study → local code → Backup / Recovery → Import Progress. The exact saved assignment/order/mapping resumes; answered pairs do not repeat.
-4. Keep collecting backups; when the shared service returns, import/sync the compatible backup there. Incompatible histories need researcher recovery, not silent replacement.
-
-A browser that previously logged into the service can use its salted local code verifier during an API outage. A fresh static-only fallback can instead set `VITE_STUDY_ACCESS_CODE` in ignored `.env.local` before `npm.cmd run build` (or before dev), then run preview. That value is present in client bundles and is an access convenience, not authentication. Browser storage/cache/backups are inspectable; Formal blinding assumes non-adversarial reviewers. A new device without cache cannot recover unknown hosted answers while the backend is offline. The app is not a PWA and does not support `file://` execution.
+The browser requests a restart when it detects an older Study service and keeps browser progress locally. The launcher always opens the clean root URL and rejects an older running V2 service. Stop that service deliberately, rebuild and relaunch when updating. HTML revalidates, built JS/CSS assets use content hashes, and a stale-chunk error requests recovery/reload without resetting progress or falling back to V1.
 
 ## Play and privacy
 
@@ -145,7 +131,7 @@ Another machine can use its Python 3.10+ executable. The builder refuses changed
 Browser QA (requires an existing Playwright module and Chrome executable):
 
 ```powershell
-node scripts/pilot_v2.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node scripts/pilot_v2_transport.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 ```
 
 This uses only ignored `qa/v2/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [VERIFICATION.md](VERIFICATION.md). Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.

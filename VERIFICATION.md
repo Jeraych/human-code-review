@@ -1,3 +1,34 @@
+# Simplified V2 Study workflow verification — 14 October 2026
+
+Baseline: clean PRIVATE main at ff1a585. The study engine, official defaults, canonical pools/provenance and historical V1 data remain intact; only protocol transport metadata is added to saved V2 state.
+
+| Check | Result |
+|---|---|
+| Strict TypeScript / production build | Passed; existing app/Shiki chunk-size warnings remain |
+| TypeScript tests | 69 passed: prior V1/V2 safeguards plus reviewer package identity, checksum/content tamper rejection, cumulative merge/conflicts, stale malformed files, Undo/finalized pending state, source-file hashes and archived replacement |
+| Python historical merge/download checks | 7 passed |
+| Exact offline + hosted journeys / routing | 43 browser checks passed |
+| Researcher configuration pilot | 20 passed |
+| Existing official V2 safeguards pilot | 36 passed |
+| API / subdirectory / dev / preview / launcher | 14 passed |
+| Repository credential/artifact audit | Zero findings |
+
+Offline QA exercised Joint Calibration → guideline lock → Generate Study → both reviewer exports → clean-browser imports with automatic identity → several answers / Undo → Exit → reload / Continue → completion / Result export → matching reviewer imports → overlap readiness → conflict rejection → Merge & Analyse → readable summary → final export. The final export retained both original result files, their SHA-256 hashes, original invalidated responses and configured workload. Reset preserved completed evidence and sources in immutable history. Reviewer recovery exported that reviewer's Result and returned without a code/identity step.
+
+Hosted QA used independent reviewer contexts and one isolated SQLite database. Both reviewers answered, closed and reopened, resumed their own exact progress, and the researcher received both counts automatically. A real service restart preserved identical responses and frozen assignments; expired sessions requested the code without losing the local cache. Both reviewers completed synthetic assignments; shared unblinding, summary and final export passed with no normal file transfer.
+
+Routing regressions cover explicit `v1=1`, false/presence-only query flags, ordinary hashes, legacy exit, browser Back/Forward, same-document history and persisted V1 state. A stale workflow service requests restart and cannot write through the old backend or select V1; the launcher rejects stale V2/unrelated services without taking them over. HTML revalidates and built assets use content hashes; stale chunk handling preserves browser progress.
+
+Screenshots inspected at 1440×1000 and 390×844: generated Studies lead with prominent transfer/progress actions, setup and Advanced follow below, fields remain within the viewport, and Formal code stays symmetric/blinded. File controls support keyboard Enter/Space and use descriptive accessible names. Browser pilots reported zero runtime errors.
+
+All new answers came from synthetic fixtures in ignored `qa/v2/*-fixture*.sqlite` / `transport-*.sqlite` files and isolated browser contexts. No actual research ratings or public Play records were started. A read-only operational DB check found revision 15, one Calibration answer and four Formal records; the user explicitly confirmed these are existing manual QA answers. Those records and their archived protocol were preserved. Before real Calibration, deliberately Reset Study to archive this manual test and check the intended setup.
+
+No remote host was configured/deployed. Evidence is localhost browser emulation, not physical-device/screen-reader QA. No sampling pools or generated model code were changed/executed. Historical verification below is retained as dated evidence.
+
+Re-run: `node scripts/pilot_v2_transport.mjs <existing-Playwright-module-path> <Chrome-executable-path>`. QA databases, source files, screenshots and `transport-verification.json` remain ignored under `qa/v2`; no browser dependency was added to the app.
+
+---
+
 # Researcher-configurable V2 verification — 14 October 2026
 
 Scoped evolution from a5356af: configuration lives in the existing Researcher workflow, with original official values as defaults. V1 modules/assets, all canonical V2 pools and provenance, and actual research storage are untouched.

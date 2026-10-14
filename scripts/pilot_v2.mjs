@@ -32,6 +32,7 @@ const child = spawn(process.execPath, ['server/api.ts'], {
   env: {
     ...process.env,
     PORT: String(port),
+    STUDY_TRANSPORT: 'hosted',
     STUDY_ACCESS_CODE: access,
     STUDY_DB_PATH: resolve(qa, `fixture-${Date.now()}.sqlite`),
   },
@@ -110,27 +111,39 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Joint Calibration', exact: true }).waitFor();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+    .getByRole('button')
+    .waitFor();
   check(
     'Study unlocks without account or manual JSON',
-    await page.getByRole('button', { name: 'Joint Calibration', exact: true }).isEnabled(),
+    await page
+      .locator('.study-card')
+      .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+      .getByRole('button')
+      .isEnabled(),
   );
-  await page.getByRole('button', { name: 'Joint Calibration', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+    .getByRole('button')
+    .click();
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
   check(
     'Calibration selection alone does not submit',
     await page
-      .getByText(`Jacky + Conrad · 0 / ${official.calibration} · Separate from Formal`, {
+      .getByText(`Jacky + Conrad · 0 / ${official.calibration}`, {
         exact: true,
       })
       .isVisible(),
   );
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+  await page.getByRole('button', { name: 'Submit', exact: true }).click();
   await page.getByRole('button', { name: 'Next calibration comparison' }).waitFor();
   for (let i = 1; i < official.calibration; i++) {
     await page.getByRole('button', { name: 'Next calibration comparison' }).click();
     await page.getByRole('button', { name: 'Equal', exact: true }).click();
-    await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+    await page.getByRole('button', { name: 'Submit', exact: true }).click();
     await page.getByRole('button', { name: 'Next calibration comparison' }).waitFor();
   }
   await page
@@ -146,8 +159,12 @@ try {
   );
   check('Calibration locks guideline after exactly 12 fixture responses', true);
   await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
-  await page.getByRole('button', { name: 'Generate / Lock Formal V2' }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  await page.getByRole('button', { name: 'Generate Study' }).click();
   await page.waitForFunction(
     () => JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.formal,
   );
@@ -163,19 +180,26 @@ try {
     await page.getByRole('button', { name: 'Unblind & Analyse' }).isDisabled(),
   );
   await page.getByRole('button', { name: 'Study Home', exact: true }).click();
-  await page.getByRole('button', { name: 'Conrad', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Conrad', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'Wrong reviewer can reverse before submitting',
-    await page.getByRole('button', { name: '← Choose another reviewer' }).isVisible(),
+    await page.getByText('Reviewer: Conrad', { exact: true }).isVisible(),
   );
-  await page.getByRole('button', { name: '← Choose another reviewer' }).click();
+  await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
   const unchanged = await context.request.get(url + '/api/state').then((r) => r.json());
   check(
     'Selecting/backing out of reviewer has no persistence side effect',
     unchanged.revision === protocol.revision,
   );
-  await page.getByRole('button', { name: 'Jacky', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue as Jacky' }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Jacky', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'Formal identity always visible',
     await page.getByText('Reviewer: Jacky', { exact: true }).isVisible(),
@@ -198,18 +222,18 @@ try {
   await page.getByRole('button', { name: 'B', exact: true }).click();
   check(
     'Formal choice waits for Submit',
-    await page.getByText(`Formal V2 · 0 / ${official.Jacky}`, { exact: true }).isVisible(),
+    await page.getByText(`0 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+  await page.getByRole('button', { name: 'Submit', exact: true }).click();
   await page.getByRole('button', { name: 'Undo', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Submit', exact: true }).waitFor();
   check(
     'Undo retains audit and removes active completion',
-    await page.getByText(`Formal V2 · 0 / ${official.Jacky}`, { exact: true }).isVisible(),
+    await page.getByText(`0 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+  await page.getByRole('button', { name: 'Submit', exact: true }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   check(
     'Older answer has no normal edit control',
@@ -221,10 +245,14 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Jacky', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Jacky', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'Browser refresh resumes own exact completion',
-    await page.getByText(`Formal progress: 1 / ${official.Jacky}`, { exact: true }).isVisible(),
+    await page.getByText(`1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   // A fresh isolated browser models a reasonable device change via the shared backend.
   const other = await browser.newContext();
@@ -232,10 +260,14 @@ try {
   await second.goto(url + '/#study');
   await second.getByLabel('Study access code').fill(access);
   await second.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await second.getByRole('button', { name: 'Jacky', exact: true }).click();
+  await second
+    .locator('.study-card')
+    .filter({ has: second.getByRole('heading', { name: 'Jacky', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'Fresh device resumes without JSON transfer',
-    await second.getByText(`Formal progress: 1 / ${official.Jacky}`, { exact: true }).isVisible(),
+    await second.getByText(`1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   const stale = await context.request.put(url + '/api/state', {
     data: { expectedRevision: 0, state: saved },
@@ -254,17 +286,25 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Jacky', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue as Jacky' }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Jacky', exact: true }) })
+    .getByRole('button')
+    .click();
   check(
     'Hosted outage resumes browser-local assignment',
-    await page.getByText(`Formal V2 · 1 / ${official.Jacky}`, { exact: true }).isVisible(),
+    await page.getByText(`1 / ${official.Jacky}`, { exact: true }).isVisible(),
   );
   await page.getByRole('button', { name: 'Equal', exact: true }).click();
-  await page.getByRole('button', { name: 'Submit choice', exact: true }).click();
+  await page.getByRole('button', { name: 'Submit', exact: true }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
-  await page.locator('summary').filter({ hasText: 'Backup / Recovery' }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  await page.getByText('Advanced · Backup, provenance and recovery', { exact: true }).click();
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export Progress', exact: true }).click();
   const file = await downloading;
@@ -279,14 +319,22 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Joint Calibration', exact: true }).waitFor();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Joint Calibration', exact: true }) })
+    .getByRole('button')
+    .waitFor();
   let synced = await context.request.get(url + '/api/state').then((r) => r.json());
   check(
     'Pending offline answers sync on hosted re-entry',
     synced.answers.filter((a) => a.reviewer === 'Jacky' && !a.invalidated).length === 2,
   );
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
-  await page.getByText('Advanced / Recovery', { exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
+  await page.getByText('Advanced · Backup, provenance and recovery', { exact: true }).click();
   const wrongReviewer = synced.answers.find((a) => a.reviewer === 'Jacky' && !a.invalidated);
   await page.getByLabel('Response ID', { exact: true }).fill(wrongReviewer.responseId);
   await page.getByLabel('Reason', { exact: true }).fill('wrong reviewer — isolated QA fixture');
@@ -331,11 +379,15 @@ try {
   await page.getByRole('button', { name: 'Study', exact: true }).click();
   await page.getByLabel('Study access code').fill(access);
   await page.getByRole('button', { name: 'Enter Study', exact: true }).click();
-  await page.getByRole('button', { name: 'Researcher', exact: true }).click();
+  await page
+    .locator('.study-card')
+    .filter({ has: page.getByRole('heading', { name: 'Researcher', exact: true }) })
+    .getByRole('button')
+    .click();
   await page.getByRole('button', { name: 'Unblind & Analyse' }).click();
-  await page.getByRole('heading', { name: 'Canonical overlap agreement' }).waitFor();
+  await page.getByRole('heading', { name: 'Summary' }).waitFor();
   const exporting = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export research data' }).click();
+  await page.getByRole('button', { name: 'Export Final Research Data' }).click();
   await (await exporting).saveAs(resolve(qa, 'fixture-research-export.json'));
   const exported = JSON.parse(readFileSync(resolve(qa, 'fixture-research-export.json'), 'utf8'));
   check(

@@ -9,3 +9,5 @@ export function viewFromHash(hash: string): View | undefined {
 }
 export const hashForView = (view: View) => (view === 'setup' ? '#research' : `#${view}`);
 export const assetUrl = (path: string) => import.meta.env.BASE_URL + path.replace(/^\//, '');
+// Only this deliberate request opens historical V1. Hashes and saved sessions never select it.
+export const isLegacyRequest = (search: string) => new URLSearchParams(search).get('v1') === '1';

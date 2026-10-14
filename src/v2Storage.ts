@@ -75,6 +75,7 @@ export function reconcile(
     config: field(base.config, local.config, remote.config),
     edition: field(base.edition, local.edition, remote.edition),
     archives: field(base.archives, local.archives, remote.archives),
+    resultImports: field(base.resultImports, local.resultImports, remote.resultImports),
     calibration: field(base.calibration, local.calibration, remote.calibration),
     formal: field(base.formal, local.formal, remote.formal),
     unblindedAt: field(base.unblindedAt, local.unblindedAt, remote.unblindedAt),
