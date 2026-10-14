@@ -62,37 +62,44 @@ Use one service instance and SQLite database. Serve frontend and API on the same
 
 No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
-## Study workflow
+## Study workflow and setup
 
-We calibrate together, generate the Study, each reviewer completes their assigned comparisons, then we combine and analyse.
+Keep the same Study/Researcher workflow: **Joint Calibration → lock guideline → Generate Study → Joint Consensus Review + Independent Formal → Summary / Export**.
 
-**Local / offline**
+Researcher → **Study Setup** has comparison checkboxes (B–C / C–S / C–J / S–SJ) and four simple totals:
 
-1. **Launch app.cmd** → Study → enter the main Study code → Researcher. Check **Study Setup**. Its official defaults remain B–C / C–S / C–J / S–SJ, Calibration 3 / comparison, Formal 20 / comparison and overlap 4 / comparison. The live preview derives 12 Calibration pairs, 80 unique Formal pairs, 16 overlaps and 48 ratings each. Any non-empty subset and feasible integer counts are supported. Use **Save Setup** when editing counts/comparisons.
-2. **Joint Calibration → Start/Continue**. Sit together or screen-share; select A/Equal/B → **Submit** → discuss the reveal → Next. Finalise the guideline, then **Lock Calibration**. The completed screen offers **Generate Study** directly.
-3. Researcher → **Offline Transfer → Export Jacky Study / Export Conrad Study**. Send each reviewer their one file (`code-choice-jacky.study.json` / `code-choice-conrad.study.json`). Packages contain identity, criterion, exact pair IDs/order/A/B mappings, progress, prompts/code and compatibility checks.
-4. On each reviewer's computer, run the same app/build locally (a static preview also works). **Study → Import Study**, select the received file, then **Start**. Identity comes from the file. No access code or researcher settings are needed for an imported reviewer Study. Read independently: A/Equal/B → Submit → Saved → Undo or Next. Undo is available only until Next; the original answer remains audited. **Exit Study** preserves progress; reopen Study → **Continue**. Use the same browser/origin and avoid concurrent tabs for one reviewer.
-5. **Study complete → Export Result** creates `code-choice-jacky-result.json` or `code-choice-conrad-result.json`.
-6. On the main computer, Researcher → **Import Jacky Result / Import Conrad Result**. Counts and overlap update after compatible imports. Duplicate files are idempotent; stale files cannot erase newer progress; conflicting responses stop without overwrite. A result for another generation says **This result belongs to a different Study.**
-7. When both are complete, **Merge & Analyse → Summary → Export Final Research Data**. The final JSON preserves both imported source files and their SHA-256 hashes, original invalidated responses, protocol history, Calibration, Formal, source provenance, canonical agreement and separate exploratory Play data.
+| Setting | Recommended default for new studies |
+|---|---:|
+| Calibration pairs | 10 |
+| Joint Consensus Formal pairs | 50 |
+| Independent Formal pairs per reviewer | 50 |
+| Independent overlap pairs | 10 |
 
-**Hosted**
+These are editable defaults. The live preview derives 50 Joint + 50 Jacky + 50 Conrad = **150 Formal ratings**, on **140 distinct Formal pairs** (the 10 Independent overlaps are counted once for distinctness). Calibration is separate. Totals are distributed deterministically as evenly as possible across selected comparisons, including remainders; source task breadth, seed and A/B balance stay automatic. Requested counts never silently shrink. Invalid integers, overlap greater than Independent count and insufficient eligible pools block saving/generation with the affected comparison, requested count and available count.
 
-Use one shared website with the Node/SQLite service and persistent disk configured above. Study → code → Joint Calibration → Lock → Generate Study. Each reviewer chooses their own **Start / Continue** card and reviews independently. Progress saves automatically to the shared service and browser cache. Researcher sees both counts under **Remote Study**; when complete, **Unblind & Analyse → Summary → Export Final Research Data**. Normal hosted screens do not require file transfer. A restarted service retains SQLite progress; its expired session asks for the code again.
+**Calibration:** sit together or screen-share; A/Equal/B → Submit → discuss the existing reveal → Next. Finalise the guideline and **Lock Calibration**. Calibration responses never enter Formal results.
 
-Local and hosted transport use the same frozen protocol engine, assignments and response format. A localhost service persists the main offline Study, while remote origins default to shared transport. `STUDY_TRANSPORT=hosted` overrides detection where necessary; this is deployment configuration, not an additional app mode. No remote/public host is configured or deployed by this implementation.
+**Joint Consensus Review:** choose its Study Home card. Jacky and Conrad discuss the blinded pair and submit **one shared** A/Equal/B answer. It uses the frozen guideline and the same Submit → Undo/Next → Exit/resume controls as Independent Formal. Conditions, metrics and rewards stay hidden; there is no reveal. Joint pairs are excluded from both Independent assignments, and previously archived Joint pairs remain excluded on replacement.
 
-## Setup, locking and Advanced
+**Independent Formal:** each reviewer chooses their own Start/Continue card and answers independently. Intentional overlap remains double-rated in separate reviewer namespaces. Agreement/raw agreement and Cohen's kappa use **Independent overlap only**, never consensus answers.
 
-Setup shows comparisons, three per-comparison counts and live workload. Non-overlap pairs are divided evenly, alternating odd extras between reviewers across comparisons. Task breadth, seed balance, A/B balance and eligibility remain automatic. Holdout only, both correctness-pass and differing code remain the Formal defaults; exact-identical pairs remain in research counts. Formal count must be positive; Calibration/overlap may be zero. Invalid or oversized requests are rejected before generation.
+**Offline:** Researcher → Offline Transfer → Export Jacky Study / Export Conrad Study. Reviewers run the same app/build locally, Study → Import Study → Start/Continue; identity comes from the file and no code/configuration is needed to review. Completion → Export Result. Researcher imports matching Results, then **Merge & Analyse → Export Final Research Data**. Joint Consensus also supports its own Study/Result file if transfer is needed; it remains one shared response namespace. Result imports preserve original source files/checksums and stop on incompatible or conflicting evidence.
 
-Seed (default `7002026`) and session criterion are editable under **Study Setup → Advanced** before Formal starts; the guideline can also be finalised during Calibration. Changing comparisons/Calibration count restarts Calibration; other setup edits retain it and clear unstarted assignments. A valid seed/criterion edit may be saved when generating. **Regenerate unstarted Study** requires deliberate confirmation.
+**Hosted:** the same Node/SQLite service persists all three phases and shows shared progress automatically. Reviewers choose their cards; normal file transfer is unnecessary. Researcher → **Unblind & Analyse** after every configured Formal phase is complete. SQLite progress survives service restart; a restarted session requests the Study code again. Localhost defaults to file transport with persistent main Study storage; remote origins default to shared transport, overridable by `STUDY_TRANSPORT`.
 
-The first Formal response freezes the active setup and assignment, even after Undo/invalidation. **Advanced → Reset Study** uses one confirmation and preserves the old protocol, configuration, assignments, responses, source files and unblinding state in immutable history before returning to Calibration. Earlier Calibration assignments stay excluded from Formal. No history is deleted. Existing V2 states without configuration fields retain the official defaults and existing assignments without migration/reshuffling.
+Summary/export separates Joint Consensus, Jacky Independent, Conrad Independent, combined Formal, and Independent overlap agreement/kappa. New saved responses use `joint_calibration`, `joint_consensus_formal`, or `independent_formal`. Old V2 response labels and protocols remain unchanged in original audit/history; exported analysis rows normalize their phase labels. Play stays separate and exploratory.
 
-Researcher **Advanced · Backup, provenance and recovery** contains generic progress export/import, shared refresh, emergency hosted reviewer packages/results, IDs/mappings/source metadata and response invalidation. To recover a wrong-reviewer answer, enter its ID and a reason and **Invalidate response**, then resume the correct reviewer. Analysed evidence stays frozen. Play exports are exploratory and separate.
+## Start screen, reset and history
 
-Browser-first save preserves progress during API outages. Reconnecting/re-entering Study retries compatible changes; conflicts stop for researcher review. A reviewer file can also be exported before completion under **Backup**. Keep Study, Result and research exports private; the files contain code, mapping and research evidence. Back up before clearing browser data or changing origin. Fresh static-only researcher setup can use `VITE_STUDY_ACCESS_CODE` at build time (only a client convenience gate); imported reviewers need no code. Static files need a local web server: this is not a PWA or a file:// application.
+**Start screen** is available in the header at any time, including after importing/completing a reviewer package. It returns to the main Study/access screen and retains the entire imported package/progress as a paused browser backup. **Resume imported Study** restores it without losing answers. On the main computer, unlock Study to return to Calibration/Researcher and import the completed Result files.
+
+**Reset / Start over** in the header asks once for confirmation. Resetting the main protocol archives its assignments, responses, imported sources and unblinding state before returning to the starter screen; imported reviewer progress remains saved. Main Study access is still required to reset research data. Reset retains the chosen setup, so check/change totals and selected comparisons before the next Calibration.
+
+The first Joint Consensus or Independent Formal response freezes configuration, criterion and assignments, even after Undo/invalidation. Counts/selected comparisons may change beforehand; Calibration changes restart it while other changes preserve Calibration and clear unstarted Formal. Seed/criterion, exact pool capacity, history, regeneration and recovery stay under Advanced. Holdout-only / both correctness-pass / exact-identical exclusion rules remain unchanged.
+
+Existing V1/V2 studies are not migrated, relabelled in-place or reshuffled. Saved per-comparison configurations retain their allocations; editing the new totals explicitly creates a new setup. New studies default to 10/50/50/10. Use Reset before replacing the existing manual QA protocol, then choose your intended totals/criterion before Calibration with Conrad. No real ratings, hosting/deployment or model generation are started by an app update.
+
+Backups and response invalidation remain under Researcher Advanced. Export before clearing browser data/changing origin, and avoid concurrent tabs for the same reviewer. A static reviewer installation needs a local web server; it is not a PWA or file:// application. A fresh static-only researcher gate can use `VITE_STUDY_ACCESS_CODE` at build time; imported reviewers need no code.
 
 ## V1 / V2 routing
 

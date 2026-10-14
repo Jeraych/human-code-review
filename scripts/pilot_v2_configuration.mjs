@@ -54,33 +54,34 @@ try {
   await form.getByRole('heading', { name: 'Workload preview' }).waitFor();
   check(
     'Researcher starts with official live workload',
-    /Calibration: 12 pairs/.test(await form.innerText()) &&
-      /80 unique pairs/.test(await form.innerText()) &&
-      /Overlap: 16/.test(await form.innerText()) &&
-      /Jacky: 48/.test(await form.innerText()),
+    /Calibration: 10 pairs/.test(await form.innerText()) &&
+      /Formal distinct pairs: 140/.test(await form.innerText()) &&
+      /Overlap: 10/.test(await form.innerText()) &&
+      /Jacky independent: 50/.test(await form.innerText()),
   );
   await form.getByRole('checkbox', { name: /^B vs C/ }).uncheck();
   await form.getByRole('checkbox', { name: /^C vs J/ }).uncheck();
-  await form.getByLabel('Calibration pairs / comparison', { exact: true }).fill('1');
-  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('5');
-  await form.getByLabel('Overlap / comparison', { exact: true }).fill('2');
+  await form.getByLabel('Joint Consensus Formal pairs', { exact: true }).fill('0');
+  await form.getByLabel('Calibration pairs', { exact: true }).fill('2');
+  await form.getByLabel('Independent Formal pairs per reviewer', { exact: true }).fill('7');
+  await form.getByLabel('Independent overlap pairs', { exact: true }).fill('4');
   await form.getByText('Advanced', { exact: true }).click();
   await form.getByLabel('Randomisation seed', { exact: true }).fill('42');
   check(
     'Preview recalculates subset, calibration, overlap and odd workloads live',
     /Calibration: 2 pairs/.test(await form.innerText()) &&
       /Calibration: 2 pairs/.test(await form.innerText()) &&
-      /10 unique pairs/.test(await form.innerText()) &&
+      /Formal distinct pairs: 10/.test(await form.innerText()) &&
       /Overlap: 4/.test(await form.innerText()) &&
-      /Jacky: 7/.test(await form.innerText()),
+      /Jacky independent: 7/.test(await form.innerText()),
   );
-  await form.getByLabel('Overlap / comparison', { exact: true }).fill('6');
+  await form.getByLabel('Independent overlap pairs', { exact: true }).fill('8');
   check(
     'Impossible overlap is caught before save/generation',
     (await form.getByRole('alert').isVisible()) &&
       (await form.getByRole('button', { name: 'Save Setup', exact: true }).isDisabled()),
   );
-  await form.getByLabel('Overlap / comparison', { exact: true }).fill('2');
+  await form.getByLabel('Independent overlap pairs', { exact: true }).fill('4');
   await form.getByRole('checkbox', { name: /^C vs S/ }).uncheck();
   await form.getByRole('checkbox', { name: /^S vs SJ/ }).uncheck();
   check(
@@ -90,9 +91,9 @@ try {
   );
   await form.getByRole('checkbox', { name: /^C vs S/ }).check();
   await form.getByRole('checkbox', { name: /^S vs SJ/ }).check();
-  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('1000');
+  await form.getByLabel('Independent Formal pairs per reviewer', { exact: true }).fill('1000');
   check('Requested pool overflow is rejected', await form.getByRole('alert').isVisible());
-  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('5');
+  await form.getByLabel('Independent Formal pairs per reviewer', { exact: true }).fill('7');
   await form
     .getByLabel('Reviewer criterion / guideline', { exact: true })
     .fill(
@@ -293,7 +294,7 @@ try {
   await page.getByRole('heading', { name: 'Summary' }).waitFor();
   check(
     'Analysis derives contrasts/counts without fixed official totals',
-    (await page.locator('.research-summary tbody tr').count()) === 4,
+    (await page.locator('.research-summary tbody tr').count()) === 10,
   );
   const exporting = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export Final Research Data', exact: true }).click();

@@ -60,12 +60,14 @@ async function setup(page) {
   const form = page.getByRole('region', { name: 'Study Setup' });
   await form.getByRole('checkbox', { name: 'C vs J', exact: true }).uncheck();
   await form.getByRole('checkbox', { name: 'S vs SJ', exact: true }).uncheck();
-  await form.getByLabel('Calibration pairs / comparison', { exact: true }).fill('1');
-  await form.getByLabel('Formal pairs / comparison', { exact: true }).fill('5');
-  await form.getByLabel('Overlap / comparison', { exact: true }).fill('2');
+  await form.getByLabel('Joint Consensus Formal pairs', { exact: true }).fill('0');
+  await form.getByLabel('Calibration pairs', { exact: true }).fill('2');
+  await form.getByLabel('Independent Formal pairs per reviewer', { exact: true }).fill('7');
+  await form.getByLabel('Independent overlap pairs', { exact: true }).fill('4');
   check(
     'Live preview derives tiny fixture workload',
-    /Calibration: 2 pairs/.test(await form.innerText()) && /Jacky: 7/.test(await form.innerText()),
+    /Calibration: 2 pairs/.test(await form.innerText()) &&
+      /Jacky independent: 7/.test(await form.innerText()),
   );
   await form.getByRole('button', { name: 'Save Setup', exact: true }).click();
   await page.getByRole('button', { name: 'Start Joint Calibration', exact: true }).click();

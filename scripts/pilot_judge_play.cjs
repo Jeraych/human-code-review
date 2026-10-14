@@ -29,7 +29,7 @@ const start = async () => {
   });
   page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173/?v1=1');
+  await page.goto((process.argv[4] || 'http://127.0.0.1:5173') + '/?v1=1');
 };
 const card = (side) =>
   page.getByRole('button', { name: `Choose implementation ${side}`, exact: true });

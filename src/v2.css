@@ -2,6 +2,16 @@
   max-width: 720px;
   margin: 50px auto;
 }
+.v2-app .app-header {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.v2-app .app-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+}
 .study-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

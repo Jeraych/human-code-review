@@ -8,7 +8,7 @@ import {
   CONTRASTS,
   configuration,
   configureProtocol,
-  DEFAULT_CONFIG,
+  LEGACY_CONFIG as DEFAULT_CONFIG,
   formalStarted,
   workload,
   resetCalibration,
@@ -302,7 +302,7 @@ describe('Researcher-configurable V2', () => {
     });
   });
   it('trusts a concise non-empty Researcher criterion and rejects only empty wording', () => {
-    const s = initialProtocol(db);
+    const s = initialProtocol(db, DEFAULT_CONFIG);
     configureProtocol(s, db, DEFAULT_CONFIG, 'Clarity', at);
     calibration(s);
     generateFormal(s, db, at);
@@ -421,7 +421,7 @@ describe('Researcher-configurable V2', () => {
       expect(() => validateConfiguration(config, db)).toThrow();
   });
   it('archives deliberate Calibration resets and excludes all previously assigned Calibration pairs', () => {
-    const before = initialProtocol(db);
+    const before = initialProtocol(db, DEFAULT_CONFIG);
     before.calibration.answers.push({
       ...before.calibration.assignments[0],
       responseId: 'fixture-before-reset',

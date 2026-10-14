@@ -6,6 +6,7 @@ import {
   formalStarted,
   protocolEdition,
   workload,
+  calibrationExclusions,
 } from '../v2';
 import type { Catalog, ProtocolConfig, ProtocolState } from '../v2';
 export default function ResearcherConfiguration({
@@ -56,26 +57,31 @@ export default function ResearcherConfiguration({
     [dirty, problem, frozen, onDraftChange],
   );
   const amount = (n: number) => (Number.isFinite(n) && n >= 0 ? n : '—');
-  const numberControl = (
-    label: string,
-    key: 'calibrationPerContrast' | 'formalPerContrast' | 'overlapPerContrast' | 'seed',
-    min: number,
-  ) => (
+  const totals = shown.totals ?? {
+    calibration: preview.calibration,
+    joint: 0,
+    independent: Math.max(preview.Jacky, preview.Conrad),
+    overlap: preview.overlap,
+  };
+  const totalControl = (label: string, key: keyof typeof totals) => (
     <label>
       {label}
       <input
         type="number"
-        min={min}
+        min={0}
         step={1}
-        max={key === 'seed' ? 4294967295 : undefined}
         disabled={frozen || busy}
-        value={Number.isFinite(shown[key]) ? shown[key] : ''}
+        value={Number.isFinite(totals[key]) ? totals[key] : ''}
         onChange={(e) =>
-          setDraft({ ...draft, [key]: e.target.value === '' ? NaN : Number(e.target.value) })
+          setDraft({
+            ...draft,
+            totals: { ...totals, [key]: e.target.value === '' ? NaN : Number(e.target.value) },
+          })
         }
       />
     </label>
   );
+  const excluded = calibrationExclusions(state);
   async function save() {
     if (
       (state.calibration.answers.length || state.calibration.lockedAt || state.formal) &&
@@ -112,18 +118,21 @@ export default function ResearcherConfiguration({
           ))}
         </div>
         <div className="protocol-numbers">
-          {numberControl('Calibration pairs / comparison', 'calibrationPerContrast', 0)}
-          {numberControl('Formal pairs / comparison', 'formalPerContrast', 1)}
-          {numberControl('Overlap / comparison', 'overlapPerContrast', 0)}
+          {totalControl('Calibration pairs', 'calibration')}
+          {totalControl('Joint Consensus Formal pairs', 'joint')}
+          {totalControl('Independent Formal pairs per reviewer', 'independent')}
+          {totalControl('Independent overlap pairs', 'overlap')}
         </div>
       </fieldset>
       <div className="protocol-preview" aria-live="polite">
         <h3>Workload preview</h3>
         <p>Calibration: {amount(preview.calibration)} pairs</p>
-        <p>Formal: {amount(preview.distinct)} unique pairs</p>
+        <p>Joint formal ratings: {amount(preview.joint)}</p>
+        <p>Formal ratings total: {amount(preview.ratings)}</p>
+        <p>Formal distinct pairs: {amount(preview.distinct)}</p>
         <div className="workload-line">
-          <span>Jacky: {amount(preview.Jacky)}</span>
-          <span>Conrad: {amount(preview.Conrad)}</span>
+          <span>Jacky independent: {amount(preview.Jacky)}</span>
+          <span>Conrad independent: {amount(preview.Conrad)}</span>
           <span>Overlap: {amount(preview.overlap)}</span>
         </div>
       </div>
@@ -159,7 +168,53 @@ export default function ResearcherConfiguration({
       {state.calibration.lockedAt && <p>Calibration complete ✓ Locked</p>}
       <details>
         <summary>Advanced</summary>
-        {numberControl('Randomisation seed', 'seed', 0)}
+        <label>
+          Randomisation seed
+          <input
+            type="number"
+            min={0}
+            max={4294967295}
+            step={1}
+            disabled={frozen || busy}
+            value={shown.seed}
+            onChange={(e) =>
+              setDraft({ ...draft, seed: e.target.value === '' ? NaN : Number(e.target.value) })
+            }
+          />
+        </label>
+        {!shown.totals && (
+          <p>
+            Historical per-comparison setup retained. Editing totals explicitly replaces this setup;
+            existing responses stay archived.
+          </p>
+        )}
+        <div className="summary-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Comparison</th>
+                <th>Eligible pool</th>
+                <th>After Calibration/history</th>
+                <th>Available for Independent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CONTRASTS.map((c) => {
+                const pool = db.pairs.filter((p) => p.eligible && p.contrast === c),
+                  unused = pool.filter((p) => !excluded.has(p.pairId)),
+                  jointIds = new Set(state.formal?.joint?.map((p) => p.pairId));
+                return (
+                  <tr key={c}>
+                    <td>{c}</td>
+                    <td>{pool.length}</td>
+                    <td>{unused.length}</td>
+                    <td>{unused.filter((p) => !jointIds.has(p.pairId)).length}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         <label htmlFor="researcher-criterion">Reviewer criterion / guideline</label>
         <textarea
           id="researcher-criterion"

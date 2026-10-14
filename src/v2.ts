@@ -9,16 +9,24 @@ export interface ProtocolConfig {
   formalPerContrast: number;
   overlapPerContrast: number;
   seed: number;
+  totals?: { calibration: number; joint: number; independent: number; overlap: number };
 }
-export const DEFAULT_CONFIG: ProtocolConfig = {
+export const LEGACY_CONFIG: ProtocolConfig = {
   contrasts: [...CONTRASTS],
   calibrationPerContrast: 3,
   formalPerContrast: 20,
   overlapPerContrast: 4,
   seed: SEED,
 };
+export const DEFAULT_CONFIG: ProtocolConfig = {
+  ...LEGACY_CONFIG,
+  totals: { calibration: 10, joint: 50, independent: 50, overlap: 10 },
+};
 export const REVIEWERS = ['Jacky', 'Conrad'] as const;
 export type Reviewer = (typeof REVIEWERS)[number];
+export const FORMAL_REVIEWERS = ['Joint', ...REVIEWERS] as const;
+export type FormalReviewer = (typeof FORMAL_REVIEWERS)[number];
+export type ResearchPhase = 'joint_calibration' | 'joint_consensus_formal' | 'independent_formal';
 export type Preference = 'A' | 'Equal' | 'B';
 export type Condition = 'B' | 'C' | 'S' | 'J' | 'SJ';
 export interface Output {
@@ -81,7 +89,7 @@ export interface Presentation {
 export interface Answer extends Presentation {
   responseId: string;
   reviewer: Reviewer | 'Joint';
-  phase: 'Formal' | 'Calibration';
+  phase: 'Formal' | 'Calibration' | ResearchPhase;
   choice: Preference;
   at: string;
   invalidated?: { at: string; reason: string; kind: 'recovery' | 'undo' };
@@ -101,7 +109,7 @@ export interface ProtocolState {
     raw: string;
     sha256: string;
     at: string;
-    reviewer: Reviewer;
+    reviewer: FormalReviewer;
     studyId: string;
   }[];
   calibration: {
@@ -118,10 +126,11 @@ export interface ProtocolState {
     createdAt: string;
     criterionVersion: string;
     assignments: Record<Reviewer, Presentation[]>;
+    joint?: Presentation[];
     overlap: string[];
   };
   answers: Answer[];
-  pending: Partial<Record<Reviewer, string>>;
+  pending: Partial<Record<FormalReviewer, string>>;
   unblindedAt?: string;
 }
 export interface ProtocolArchive {
@@ -130,10 +139,66 @@ export interface ProtocolArchive {
   disposition: 'superseded' | 'invalidated';
   state: Omit<ProtocolState, 'archives'>;
 }
-export const configuration = (s: ProtocolState): ProtocolConfig => s.config ?? DEFAULT_CONFIG;
+export const configuration = (s: ProtocolState): ProtocolConfig => s.config ?? LEGACY_CONFIG;
+export const responsePhase = (a: Answer): ResearchPhase =>
+  a.phase === 'Calibration'
+    ? 'joint_calibration'
+    : a.phase === 'Formal'
+      ? 'independent_formal'
+      : a.phase;
+export const formalAssignments = (s: ProtocolState, r: FormalReviewer) =>
+  r === 'Joint' ? (s.formal?.joint ?? []) : (s.formal?.assignments[r] ?? []);
 export const protocolEdition = (s: ProtocolState) => s.edition ?? 1;
 export const formalStarted = (s: ProtocolState) => s.answers.length > 0 || !!s.unblindedAt;
 export function workload(config: ProtocolConfig) {
+  if (config.totals) {
+    const { calibration, joint, independent, overlap } = config.totals,
+      n = config.contrasts.length;
+    const spread = (count: number) =>
+      config.contrasts.map((_, i) => Math.floor(count / n) + (i < count % n ? 1 : 0));
+    const jacky = spread(independent),
+      common = spread(overlap),
+      conrad = config.contrasts.map(() => Math.floor(independent / n));
+    // Equal reviewer workloads, with overlap membership first. Place remainder slots where
+    // they balance distinct coverage, while keeping each phase within one pair per contrast.
+    for (let i = 0; i < n; i++) if (common[i] > conrad[i]) conrad[i]++;
+    const extra = independent - conrad.reduce((a, b) => a + b, 0);
+    for (let k = 0; k < extra && k < n; k++) {
+      const i = conrad
+        .map((v, i) => ({ v, i, d: jacky[i] + v - common[i] }))
+        .filter((x) => x.v === Math.floor(independent / n))
+        .sort((a, b) => a.d - b.d || a.i - b.i)[0]?.i;
+      if (i !== undefined) conrad[i]++;
+    }
+    const joints = config.contrasts.map(() => Math.floor(joint / n));
+    const order = config.contrasts
+      .map((_, i) => i)
+      .sort(
+        (a, b) => jacky[a] + conrad[a] - common[a] - (jacky[b] + conrad[b] - common[b]) || a - b,
+      );
+    for (let k = 0; k < joint % n; k++) joints[order[k]]++;
+    const cals = spread(calibration);
+    const perContrast = config.contrasts.map((contrast, i) => ({
+      contrast,
+      Jacky: jacky[i],
+      Conrad: conrad[i],
+      calibration: cals[i],
+      joint: joints[i],
+      overlap: common[i],
+      distinct: joints[i] + jacky[i] + conrad[i] - common[i],
+    }));
+    return {
+      calibration,
+      joint,
+      Joint: joint,
+      Jacky: independent,
+      Conrad: independent,
+      overlap,
+      distinct: joint + 2 * independent - overlap,
+      ratings: joint + 2 * independent,
+      perContrast,
+    };
+  }
   const remaining = config.formalPerContrast - config.overlapPerContrast;
   const perContrast = config.contrasts.map((contrast, i) => ({
     contrast,
@@ -141,9 +206,16 @@ export function workload(config: ProtocolConfig) {
       config.overlapPerContrast + Math.floor(remaining / 2) + (i % 2 === 0 ? remaining % 2 : 0),
     Conrad:
       config.overlapPerContrast + Math.floor(remaining / 2) + (i % 2 === 1 ? remaining % 2 : 0),
+    calibration: config.calibrationPerContrast,
+    joint: 0,
+    overlap: config.overlapPerContrast,
+    distinct: config.formalPerContrast,
   }));
   return {
     calibration: config.contrasts.length * config.calibrationPerContrast,
+    joint: 0,
+    Joint: 0,
+    ratings: config.contrasts.length * (config.formalPerContrast + config.overlapPerContrast),
     distinct: config.contrasts.length * config.formalPerContrast,
     overlap: config.contrasts.length * config.overlapPerContrast,
     Jacky: perContrast.reduce((n, c) => n + c.Jacky, 0),
@@ -153,7 +225,9 @@ export function workload(config: ProtocolConfig) {
 }
 function pastCalibration(s?: ProtocolState) {
   return new Set(
-    s?.archives?.flatMap((a) => a.state.calibration.assignments.map((p) => p.pairId)) ?? [],
+    s?.archives?.flatMap((a) =>
+      [...a.state.calibration.assignments, ...(a.state.formal?.joint ?? [])].map((p) => p.pairId),
+    ) ?? [],
   );
 }
 export function calibrationExclusions(s: ProtocolState) {
@@ -172,25 +246,43 @@ export function validateConfiguration(
       config.contrasts.every((c) => CONTRASTS.includes(c)),
     'Enable at least one supported contrast, without duplicates.',
   );
-  for (const [key, value] of Object.entries(config).filter(([key]) => key !== 'contrasts'))
+  for (const [key, value] of Object.entries(config).filter(
+    ([key]) => !['contrasts', 'totals'].includes(key),
+  ))
     assert(
       Number.isInteger(value) && (value as number) >= 0,
       `${key} must be a non-negative integer.`,
     );
-  assert(config.formalPerContrast >= 1, 'Formal pairs per contrast must be at least 1.');
-  assert(
-    config.overlapPerContrast <= config.formalPerContrast,
-    'Overlap cannot exceed Formal pairs per contrast.',
-  );
+  if (config.totals) {
+    for (const [key, value] of Object.entries(config.totals))
+      assert(
+        Number.isSafeInteger(value) && value >= 0,
+        `${key} must be a non-negative safe integer.`,
+      );
+    assert(
+      config.totals.overlap <= config.totals.independent,
+      'Independent overlap cannot exceed Independent count per reviewer.',
+    );
+    assert(
+      config.totals.joint + config.totals.independent > 0,
+      'Request at least one Formal pair.',
+    );
+  } else {
+    assert(config.formalPerContrast >= 1, 'Formal pairs per contrast must be at least 1.');
+    assert(
+      config.overlapPerContrast <= config.formalPerContrast,
+      'Overlap cannot exceed Formal pairs per contrast.',
+    );
+  }
   assert(config.seed <= 0xffffffff, 'Randomisation seed must be between 0 and 4294967295.');
-  for (const c of config.contrasts) {
+  for (const allocation of workload(config).perContrast) {
+    const c = allocation.contrast;
     const available = db.pairs.filter(
       (p) => p.contrast === c && p.eligible && !excluded.has(p.pairId),
     ).length;
     assert(
-      (reserveCalibration ? config.calibrationPerContrast : 0) + config.formalPerContrast <=
-        available,
-      `${c}: requested ${config.calibrationPerContrast} Calibration + ${config.formalPerContrast} Formal pairs, but only ${available} eligible pairs are available after archived Calibration exclusions.`,
+      (reserveCalibration ? allocation.calibration : 0) + allocation.distinct <= available,
+      `${c}: requested ${reserveCalibration ? allocation.calibration : 0} Calibration + ${allocation.joint} Joint + ${allocation.Jacky + allocation.Conrad - allocation.overlap} distinct Independent = ${(reserveCalibration ? allocation.calibration : 0) + allocation.distinct} pairs; ${available} eligible unused pairs available.`,
     );
   }
 }
@@ -265,8 +357,8 @@ export function initialProtocol(
 ): ProtocolState {
   validateConfiguration(config, db, excluded);
   const next = random(config.seed);
-  const assignments = config.contrasts.flatMap((c) =>
-    orientBalanced(sample(db, c, config.calibrationPerContrast, excluded, next), next),
+  const assignments = workload(config).perContrast.flatMap((a) =>
+    orientBalanced(sample(db, a.contrast, a.calibration, excluded, next), next),
   );
   return {
     schemaVersion: 2,
@@ -286,12 +378,12 @@ export function initialProtocol(
     pending: {},
   };
 }
-export function activeAnswers(s: ProtocolState, r: Reviewer) {
+export function activeAnswers(s: ProtocolState, r: FormalReviewer) {
   return s.answers.filter((a) => a.reviewer === r && !a.invalidated);
 }
-export function nextUnanswered(s: ProtocolState, r: Reviewer) {
+export function nextUnanswered(s: ProtocolState, r: FormalReviewer) {
   const answered = new Set(activeAnswers(s, r).map((a) => a.pairId));
-  return s.formal?.assignments[r].find((a) => !answered.has(a.pairId));
+  return formalAssignments(s, r).find((a) => !answered.has(a.pairId));
 }
 export function lockCalibration(s: ProtocolState, at: string) {
   assert(!s.calibration.lockedAt && !s.formal, 'Calibration is already frozen.');
@@ -314,15 +406,27 @@ export function generateFormal(s: ProtocolState, db: Catalog, at: string) {
     excluded = calibrationExclusions(s);
   validateConfiguration(config, db, excluded, false);
   const assignments: Record<Reviewer, Presentation[]> = { Jacky: [], Conrad: [] },
-    overlap: string[] = [];
+    overlap: string[] = [],
+    joint: Presentation[] = [];
   for (const allocation of workload(config).perContrast) {
-    const pairs = sample(db, allocation.contrast, config.formalPerContrast, excluded, next);
+    const jointPairs = allocation.joint
+      ? sample(db, allocation.contrast, allocation.joint, excluded, next)
+      : [];
+    joint.push(...orientBalanced(jointPairs, next));
+    jointPairs.forEach((p) => excluded.add(p.pairId));
+    const pairs = sample(
+      db,
+      allocation.contrast,
+      allocation.Jacky + allocation.Conrad - allocation.overlap,
+      excluded,
+      next,
+    );
     // Membership and orientation are frozen independently per reviewer.
-    const common = pairs.slice(0, config.overlapPerContrast);
+    const common = pairs.slice(0, allocation.overlap);
     const split = allocation.Jacky;
     overlap.push(...common.map((p) => p.pairId));
     assignments.Jacky.push(
-      ...orientBalanced([...common, ...pairs.slice(config.overlapPerContrast, split)], next),
+      ...orientBalanced([...common, ...pairs.slice(allocation.overlap, split)], next),
     );
     assignments.Conrad.push(...orientBalanced([...common, ...pairs.slice(split)], next));
   }
@@ -336,6 +440,7 @@ export function generateFormal(s: ProtocolState, db: Catalog, at: string) {
       Conrad: shuffle(assignments.Conrad, next),
     },
     overlap,
+    ...(config.totals ? { joint: shuffle(joint, next) } : {}),
   };
 }
 function archive(
@@ -371,7 +476,8 @@ export function configureProtocol(
     return;
   const old = configuration(s);
   const keepCalibration =
-    old.calibrationPerContrast === config.calibrationPerContrast &&
+    JSON.stringify(workload(old).perContrast.map((a) => a.calibration)) ===
+      JSON.stringify(workload(config).perContrast.map((a) => a.calibration)) &&
     JSON.stringify(old.contrasts) === JSON.stringify(config.contrasts);
   archive(
     s,
@@ -423,7 +529,7 @@ export function replaceProtocol(s: ProtocolState, db: Catalog, reason: string, a
 }
 export function submitFormal(
   s: ProtocolState,
-  reviewer: Reviewer,
+  reviewer: FormalReviewer,
   choice: Preference,
   at: string,
   id: string,
@@ -432,10 +538,17 @@ export function submitFormal(
   assert(['A', 'Equal', 'B'].includes(choice), 'Invalid choice.');
   const p = nextUnanswered(s, reviewer);
   assert(p, 'No unanswered assignment.');
-  s.answers.push({ ...p, responseId: id, reviewer, phase: 'Formal', choice, at });
+  s.answers.push({
+    ...p,
+    responseId: id,
+    reviewer,
+    phase: reviewer === 'Joint' ? 'joint_consensus_formal' : 'independent_formal',
+    choice,
+    at,
+  });
   s.pending[reviewer] = id;
 }
-export function undoFormal(s: ProtocolState, r: Reviewer, at: string) {
+export function undoFormal(s: ProtocolState, r: FormalReviewer, at: string) {
   const answer = s.answers.find((a) => a.responseId === s.pending[r]);
   assert(
     answer && !answer.invalidated && !s.unblindedAt,
@@ -449,7 +562,8 @@ export function invalidate(s: ProtocolState, id: string, reason: string, at: str
   const a = s.answers.find((a) => a.responseId === id);
   assert(a && !a.invalidated, 'Active response not found.');
   a.invalidated = { at, reason, kind: 'recovery' };
-  if (s.pending[a.reviewer as Reviewer] === id) delete s.pending[a.reviewer as Reviewer];
+  if (s.pending[a.reviewer as FormalReviewer] === id)
+    delete s.pending[a.reviewer as FormalReviewer];
 }
 export function canonical(
   answer: Presentation & { choice: Preference },
@@ -521,7 +635,7 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
             typeof r.raw === 'string' &&
             /^[a-f0-9]{64}$/.test(r.sha256) &&
             /^[a-f0-9]{64}$/.test(r.studyId) &&
-            REVIEWERS.includes(r.reviewer) &&
+            FORMAL_REVIEWERS.includes(r.reviewer) &&
             !isNaN(Date.parse(r.at)),
         )),
     'Invalid result import provenance.',
@@ -546,16 +660,16 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
   for (const c of CONTRASTS)
     assert(
       s.calibration.assignments.filter((p) => byId.get(p.pairId)!.contrast === c).length ===
-        (config.contrasts.includes(c) ? config.calibrationPerContrast : 0),
+        (expected.perContrast.find((a) => a.contrast === c)?.calibration ?? 0),
       'Calibration contrasts/counts disagree with configuration.',
     );
   assert(
     new Set(s.calibration.answers.map((a) => a.pairId)).size === s.calibration.answers.length,
     'Duplicate calibration answers.',
   );
-  const checkAnswer = (a: Answer, phase: Answer['phase'], presentations: Presentation[]) => {
+  const checkAnswer = (a: Answer, phase: ResearchPhase, presentations: Presentation[]) => {
     assert(
-      a.phase === phase &&
+      responsePhase(a) === phase &&
         ['A', 'Equal', 'B'].includes(a.choice) &&
         typeof a.responseId === 'string' &&
         !isNaN(Date.parse(a.at)),
@@ -573,7 +687,7 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
   };
   for (const a of s.calibration.answers) {
     assert(a.reviewer === 'Joint' && !a.invalidated, 'Invalid joint calibration response.');
-    checkAnswer(a, 'Calibration', s.calibration.assignments);
+    checkAnswer(a, 'joint_calibration', s.calibration.assignments);
   }
   if (s.calibration.lockedAt)
     assert(
@@ -596,14 +710,42 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
   );
   const ids: Record<Reviewer, Set<string>> = { Jacky: new Set(), Conrad: new Set() };
   const calibration = calibrationExclusions(s);
+  const joint = s.formal.joint ?? [],
+    jointIds = new Set(joint.map((p) => p.pairId));
+  assert(
+    joint.length === expected.joint && jointIds.size === joint.length,
+    'Joint assignment count disagrees with configuration.',
+  );
+  for (const p of joint) {
+    checkPresentation(p);
+    assert(!calibration.has(p.pairId), 'Calibration entered Joint Formal.');
+  }
+  for (const c of CONTRASTS)
+    assert(
+      joint.filter((p) => byId.get(p.pairId)!.contrast === c).length ===
+        (expected.perContrast.find((a) => a.contrast === c)?.joint ?? 0),
+      'Joint contrasts/counts disagree with configuration.',
+    );
+  const activeJoint = activeAnswers(s, 'Joint');
+  assert(
+    new Set(activeJoint.map((a) => a.pairId)).size === activeJoint.length,
+    'Duplicate Joint responses.',
+  );
+  if (requireComplete)
+    assert(activeJoint.length === expected.joint, 'Joint Consensus Review is incomplete.');
+  if (s.pending.Joint)
+    assert(
+      activeJoint.some((a) => a.responseId === s.pending.Joint),
+      'Invalid Joint pending answer.',
+    );
   for (const r of REVIEWERS) {
     const list = s.formal.assignments[r];
     assert(list.length === expected[r], `Expected ${expected[r]} assignments for ${r}.`);
     for (const p of list) {
       checkPresentation(p);
       assert(
-        !calibration.has(p.pairId) && !ids[r].has(p.pairId),
-        'Calibration leak or duplicate assignment.',
+        !calibration.has(p.pairId) && !jointIds.has(p.pairId) && !ids[r].has(p.pairId),
+        'Calibration/Joint leak or duplicate assignment.',
       );
       ids[r].add(p.pairId);
     }
@@ -628,7 +770,7 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
   const union = new Set([...ids.Jacky, ...ids.Conrad]),
     common = [...ids.Jacky].filter((id) => ids.Conrad.has(id));
   assert(
-    union.size === expected.distinct &&
+    union.size + joint.length === expected.distinct &&
       common.length === expected.overlap &&
       new Set(s.formal.overlap).size === expected.overlap &&
       common.every((id) => s.formal!.overlap.includes(id)),
@@ -637,9 +779,12 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
   for (const c of CONTRASTS)
     assert(
       [...union].filter((id) => byId.get(id)!.contrast === c).length ===
-        (config.contrasts.includes(c) ? config.formalPerContrast : 0) &&
+        (expected.perContrast.find((a) => a.contrast === c)
+          ? expected.perContrast.find((a) => a.contrast === c)!.distinct -
+            expected.perContrast.find((a) => a.contrast === c)!.joint
+          : 0) &&
         common.filter((id) => byId.get(id)!.contrast === c).length ===
-          (config.contrasts.includes(c) ? config.overlapPerContrast : 0),
+          (expected.perContrast.find((a) => a.contrast === c)?.overlap ?? 0),
       'Wrong per-contrast membership.',
     );
   assert(
@@ -647,8 +792,12 @@ function validateActiveState(s: ProtocolState, db: Catalog, requireComplete = fa
     'Duplicate response IDs.',
   );
   for (const a of s.answers) {
-    assert(REVIEWERS.includes(a.reviewer as Reviewer), 'Invalid reviewer.');
-    checkAnswer(a, 'Formal', s.formal.assignments[a.reviewer as Reviewer]);
+    assert(FORMAL_REVIEWERS.includes(a.reviewer), 'Invalid reviewer.');
+    checkAnswer(
+      a,
+      a.reviewer === 'Joint' ? 'joint_consensus_formal' : 'independent_formal',
+      formalAssignments(s, a.reviewer),
+    );
   }
   if (s.unblindedAt && !requireComplete) validateActiveState(s, db, true);
 }
@@ -755,7 +904,7 @@ export function validateTransition(before: ProtocolState, after: ProtocolState, 
         'Invalidation changed.',
       );
     if (!a.invalidated && b.invalidated?.kind === 'undo')
-      assert(before.pending[a.reviewer as Reviewer] === a.responseId, 'Older answer cannot Undo.');
+      assert(before.pending[a.reviewer] === a.responseId, 'Older answer cannot Undo.');
   }
   if (after.unblindedAt) validateState(after, db, true);
 }
@@ -794,10 +943,11 @@ export function analyse(s: ProtocolState, db: DatabaseV2) {
       (id) => db.pairs.find((p) => p.pairId === id)!.contrast === contrast,
     );
     const labels = [contrast.split('-')[0], 'Equal', contrast.split('-')[1]];
+    const independentResponses = responses.filter((a) => responsePhase(a) === 'independent_formal');
     const paired = overlaps.map((id) =>
       REVIEWERS.map((r) =>
         canonical(
-          responses.find((a) => a.pairId === id && a.reviewer === r)!,
+          independentResponses.find((a) => a.pairId === id && a.reviewer === r)!,
           db,
         ),
       ),
@@ -841,13 +991,57 @@ export function analyse(s: ProtocolState, db: DatabaseV2) {
       ruffAndMeasuredJudgeTiedPreferences: metricTied.filter((a) => a.choice !== 'Equal').length,
     };
   });
+  const summarize = (selected: Answer[]) =>
+    configuration(s).contrasts.map((contrast) => {
+      const responses = selected.filter(
+        (a) => !a.invalidated && db.pairs.find((p) => p.pairId === a.pairId)!.contrast === contrast,
+      );
+      return {
+        contrast,
+        ratings: responses.length,
+        distinctPairs: new Set(responses.map((a) => a.pairId)).size,
+        counts: Object.fromEntries(
+          [contrast.split('-')[0], 'Equal', contrast.split('-')[1]].map((label) => [
+            label,
+            responses.filter((a) => canonical(a, db) === label).length,
+          ]),
+        ),
+      };
+    });
   return {
-    note: `${workload(configuration(s)).distinct} distinct pairs; ${workload(configuration(s)).Jacky + workload(configuration(s)).Conrad} correlated ratings. No treatment of ratings as independent tasks. Missing Judge measurements are not metric ties.`,
+    note: `${workload(configuration(s)).distinct} distinct pairs; ${workload(configuration(s)).ratings} correlated ratings. Agreement/kappa use Independent overlap only. No treatment of ratings as independent tasks. Missing Judge measurements are not metric ties.`,
     results,
+    jointConsensus: summarize(
+      s.answers.filter((a) => responsePhase(a) === 'joint_consensus_formal'),
+    ),
+    independent: {
+      Jacky: summarize(s.answers.filter((a) => a.reviewer === 'Jacky')),
+      Conrad: summarize(s.answers.filter((a) => a.reviewer === 'Conrad')),
+    },
+    combinedFormal: results,
   };
 }
 export function researchExport(s: ProtocolState, db: DatabaseV2, play: unknown[] = []) {
   assert(s.unblindedAt, 'Research results remain blinded until both reviewers complete.');
+  const formal = s.answers.map((a) => {
+    const p = db.pairs.find((p) => p.pairId === a.pairId)!;
+    return {
+      ...a,
+      phase: responsePhase(a),
+      protocolVersion: s.protocolVersion,
+      protocolEdition: protocolEdition(s),
+      poolVersion: s.poolVersion,
+      assignmentVersion: s.formal!.assignmentVersion,
+      criterion: s.calibration.guideline,
+      criterionVersion: s.formal!.criterionVersion,
+      contrast: p.contrast,
+      taskId: p.taskId,
+      canonicalPreference: canonical(a, db),
+      eligibility: p,
+      aOutput: db.outputs[a.a],
+      bOutput: db.outputs[a.b],
+    };
+  });
   return {
     protocol: s,
     configuration: structuredClone(configuration(s)),
@@ -856,25 +1050,14 @@ export function researchExport(s: ProtocolState, db: DatabaseV2, play: unknown[]
     analysis: analyse(s, db),
     duplicateStats: db.stats,
     limitations: db.limitations,
-    calibration: s.calibration.answers,
-    formal: s.answers.map((a) => {
-      const p = db.pairs.find((p) => p.pairId === a.pairId)!;
-      return {
-        ...a,
-        protocolVersion: s.protocolVersion,
-        protocolEdition: protocolEdition(s),
-        poolVersion: s.poolVersion,
-        assignmentVersion: s.formal!.assignmentVersion,
-        criterion: s.calibration.guideline,
-        criterionVersion: s.formal!.criterionVersion,
-        contrast: p.contrast,
-        taskId: p.taskId,
-        canonicalPreference: canonical(a, db),
-        eligibility: p,
-        aOutput: db.outputs[a.a],
-        bOutput: db.outputs[a.b],
-      };
-    }),
+    calibration: s.calibration.answers.map((a) => ({ ...a, phase: responsePhase(a) })),
+    formal,
+    jointConsensusFormal: formal.filter((a) => a.phase === 'joint_consensus_formal'),
+    independentFormal: {
+      Jacky: formal.filter((a) => a.reviewer === 'Jacky'),
+      Conrad: formal.filter((a) => a.reviewer === 'Conrad'),
+    },
+    combinedFormal: formal,
     play,
   };
 }

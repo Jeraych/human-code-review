@@ -6,16 +6,19 @@ import {
   configuration,
   protocolEdition,
   REVIEWERS,
+  FORMAL_REVIEWERS,
+  formalAssignments,
+  responsePhase,
   validateState,
   validateTransition,
 } from './v2.ts';
-import type { Answer, DatabaseV2, ProtocolState, Reviewer } from './v2.ts';
+import type { Answer, DatabaseV2, ProtocolState, FormalReviewer } from './v2.ts';
 
 export const REVIEWER_KEY = 'code-choice.v2-reviewer-package';
 export interface StudyPackage {
   format: 'code-choice-v2-reviewer-study';
   studyId: string;
-  reviewer: Reviewer;
+  reviewer: FormalReviewer;
   state: ProtocolState;
   comparisons: {
     pairId: string;
@@ -30,11 +33,12 @@ export interface StudyPackage {
 export interface ReviewerSession {
   package: StudyPackage;
   state: ProtocolState;
+  paused?: boolean;
 }
 export interface ReviewerResult {
   format: 'code-choice-v2-reviewer-result';
   studyId: string;
-  reviewer: Reviewer;
+  reviewer: FormalReviewer;
   answers: Answer[];
   pending?: string;
   exportedAt: string;
@@ -75,7 +79,7 @@ export async function studyId(s: ProtocolState) {
     excluded: [...calibrationExclusions(s)].sort(),
   });
 }
-function onlyReviewer(s: ProtocolState, reviewer: Reviewer) {
+function onlyReviewer(s: ProtocolState, reviewer: FormalReviewer) {
   const state = structuredClone(s);
   state.answers = state.answers.filter((a) => a.reviewer === reviewer);
   state.pending = state.pending[reviewer] ? { [reviewer]: state.pending[reviewer] } : {};
@@ -93,7 +97,7 @@ function onlyReviewer(s: ProtocolState, reviewer: Reviewer) {
 }
 export async function exportStudy(
   s: ProtocolState,
-  reviewer: Reviewer,
+  reviewer: FormalReviewer,
   db: DatabaseV2,
 ): Promise<StudyPackage> {
   validateState(s, db);
@@ -104,7 +108,7 @@ export async function exportStudy(
     studyId: await studyId(s),
     reviewer,
     state,
-    comparisons: s.formal.assignments[reviewer].map((p) => {
+    comparisons: formalAssignments(s, reviewer).map((p) => {
       const pair = db.pairs.find((x) => x.pairId === p.pairId)!;
       return {
         ...p,
@@ -130,7 +134,7 @@ export async function importStudy(
 ): Promise<ReviewerSession> {
   const value = JSON.parse(raw) as StudyPackage;
   assert(
-    value.format === 'code-choice-v2-reviewer-study' && REVIEWERS.includes(value.reviewer),
+    value.format === 'code-choice-v2-reviewer-study' && FORMAL_REVIEWERS.includes(value.reviewer),
     'Choose a reviewer Study file.',
   );
   await checkChecksum(value);
@@ -183,12 +187,17 @@ function mergeReviewer(
   current: ProtocolState,
   incoming: Answer[],
   pending: string | undefined,
-  reviewer: Reviewer,
+  reviewer: FormalReviewer,
   db: DatabaseV2,
 ) {
   assert(
     Array.isArray(incoming) &&
-      incoming.every((a) => a.reviewer === reviewer && a.phase === 'Formal'),
+      incoming.every(
+        (a) =>
+          a.reviewer === reviewer &&
+          responsePhase(a) ===
+            (reviewer === 'Joint' ? 'joint_consensus_formal' : 'independent_formal'),
+      ),
     'Result contains another reviewer’s responses.',
   );
   const next = structuredClone(current);
@@ -241,7 +250,7 @@ export async function importResult(
   current: ProtocolState,
   raw: string,
   filename: string,
-  reviewer: Reviewer,
+  reviewer: FormalReviewer,
   db: DatabaseV2,
 ): Promise<ProtocolState> {
   const value = JSON.parse(raw) as ReviewerResult;

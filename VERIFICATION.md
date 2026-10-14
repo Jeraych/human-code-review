@@ -1,3 +1,32 @@
+# Joint Consensus / total-count / starter navigation verification — 14 October 2026
+
+Baseline: PRIVATE main d3d842a. No source outputs, pools/provenance, V1 app modules, dependency lockfile, or operational responses were modified. New research responses were created only as synthetic fixtures in ignored QA storage. No deployment or model-output generation occurred.
+
+| Check | Result |
+|---|---|
+| TypeScript unit tests | 78 passed (69 prior regressions + 9 new consensus/totals tests) |
+| Python merge/download checks | All 7 passed |
+| Strict TypeScript / production build | Passed; existing app/Shiki chunk-size warnings remain |
+| V2 existing workflow / configuration / transport / integration | 36 / 20 / 43 / 14 passed |
+| New consensus + starter/reset browser suite | 22 passed |
+| Every historical V1 browser suite | Base 26, Judge/Play 37, release 15, touch 8, static subdirectory 11 passed |
+| Total browser checks | 232 passed, zero runtime errors |
+| Repository credential/artifact audit | Zero findings |
+
+New unit coverage verifies the 10/50/50/10 defaults and exact 150 ratings/140 distinct pairs, subset/remainder allocation grids, per-phase balance, disjoint pair sets, eligible/balanced presentations, infeasible counts and exact capacity errors, zero-Calibration/zero-Joint/zero-Independent/all-overlap boundaries, Joint Submit/Undo/freeze/history, old Joint exclusions after replacement, phase-normalized exports, shared file identity and safe merge, and unchanged kappa when only Joint choices change. Historical V2 invariant fixtures explicitly retain the legacy configuration rather than assuming the new defaults rewrite old saved studies.
+
+New browser coverage completes Calibration/lock/generation, blinded consensus Submit/Undo, shared Joint resume on a clean context, actual offline Joint Study/Result transfer, Independent reviewer packages/results, paused starter escape/reload/resume after completion, separate summaries/exports, Independent-only agreement and reset from the header. Reset preserved 14 raw Formal records (13 active ratings plus an original undone consensus response) and all three imported source files. Exact default preview and mobile layouts were inspected at 1440×1000 and 390×844.
+
+Existing V2 pilots retained their checks with totals-based setup; the official workflow now derives 10 Calibration, 50/50 Independent, 10 overlaps and all 150 active Formal ratings when completed. All legacy V1 pilots use isolated static preview/browser profiles; their optional URL argument prevents touching the user's normal service. The release brand selector was scoped to the original brand link to distinguish it from the existing explicit V1 exit link. Python checks verified freshly produced legacy browser downloads.
+
+Operational Study DB was opened read-only: revision 19 and logical-state SHA-256 9315da7485fe9536aa831fbe5b4efc4860dc24643cee0b41105d5a58e1780a14 remained unchanged during implementation. Existing manual QA and V1/V2 history were preserved. Verification is local browser emulation, not a deployed remote host or physical-device/screen-reader test.
+
+Frozen capacities are 354 / 380 / 332 / 226 eligible distinct pairs. Default fresh Calibration leaves 351 / 377 / 330 / 224; currently preserved Calibration/history leaves 351 / 377 / 327 / 223. These are capacity limits before subtracting Joint reservations for Independent, not independent additive quotas for each phase. Diagnostics report the actual configuration-dependent pool.
+
+Re-run new suite: `node scripts/pilot_v2_consensus.mjs <Playwright-module-path> <Chrome-executable-path>`; all historical suites: `node scripts/pilot_legacy_all.cjs <Playwright-module-path> <Chrome-executable-path>`. QA fixtures/reports/screenshots stay ignored under qa; no dependency was added.
+
+---
+
 # Simplified V2 Study workflow verification — 14 October 2026
 
 Baseline: clean PRIVATE main at ff1a585. The study engine, official defaults, canonical pools/provenance and historical V1 data remain intact; only protocol transport metadata is added to saved V2 state.

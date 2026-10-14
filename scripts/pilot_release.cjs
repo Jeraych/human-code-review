@@ -17,7 +17,7 @@ function check(label, ok) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173/?v1=1');
+  await page.goto((process.argv[4] || 'http://127.0.0.1:5173') + '/?v1=1');
   await page.locator('.home-play').waitFor({ state: 'visible' });
   await page.waitForFunction(() => !document.querySelector('.home-play').disabled);
   check(
@@ -84,7 +84,7 @@ function check(label, ok) {
     'Phone reveal remains readable without horizontal overflow',
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
   );
-  await page.getByRole('link', { name: /Code \/ Choice/ }).click();
+  await page.locator('a.brand').click();
   await page.getByRole('button', { name: /Enter Study/ }).click();
   await page.getByLabel('Evaluator ID', { exact: true }).fill('release-pilot-only');
   page.once('dialog', (d) => d.accept());

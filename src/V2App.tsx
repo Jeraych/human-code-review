@@ -7,6 +7,8 @@ import { assetUrl } from './navigation';
 import {
   PROTOCOL,
   REVIEWERS,
+  FORMAL_REVIEWERS,
+  formalStarted,
   activeAnswers,
   configuration,
   configureProtocol,
@@ -32,7 +34,7 @@ import {
   validateTransition,
   workload,
 } from './v2';
-import type { DatabaseV2, Preference, Presentation, ProtocolState, Reviewer } from './v2';
+import type { DatabaseV2, Preference, Presentation, ProtocolState, FormalReviewer } from './v2';
 import { api, importProgress, loadCache, reconcile, V2_KEY, writeCache } from './v2Storage';
 import type { Cache } from './v2Storage';
 import type { Choice } from './types';
@@ -80,6 +82,8 @@ export default function V2App() {
   const [hosting, setHosting] = useState<'checking' | 'hosted' | 'local'>('checking');
   const [backend, setBackend] = useState(false);
   const [reviewerSession, setReviewerSession] = useState<ReviewerSession>();
+  const [savedReviewer, setSavedReviewer] = useState<ReviewerSession>();
+  const [resetAfterLogin, setResetAfterLogin] = useState(false);
   const reviewerRaw = useRef<string | null>(null);
   const reviewerRef = useRef<ReviewerSession | undefined>(undefined);
   const [transferError, setTransferError] = useState('');
@@ -88,7 +92,7 @@ export default function V2App() {
   const [busy, setBusy] = useState(false);
   const mutex = useRef(false);
   const [code, setCode] = useState('');
-  const [reviewer, setReviewer] = useState<Reviewer>('Jacky');
+  const [reviewer, setReviewer] = useState<FormalReviewer>('Jacky');
   const [choice, setChoice] = useState<Preference>();
   const [guideline, setGuideline] = useState('');
   const [configDirty, setConfigDirty] = useState(false);
@@ -123,7 +127,8 @@ export default function V2App() {
     cacheRef.current = next;
     setCache(next);
   }
-  function rememberReviewer(session: ReviewerSession) {
+  function rememberReviewer(session: ReviewerSession, active = true) {
+    session = { ...session, paused: !active };
     assert(
       localStorage.getItem(REVIEWER_KEY) === reviewerRaw.current,
       'Reviewer progress changed in another tab. Reload before continuing.',
@@ -132,8 +137,9 @@ export default function V2App() {
     localStorage.setItem(REVIEWER_KEY, raw);
     assert(localStorage.getItem(REVIEWER_KEY) === raw, 'Reviewer progress could not be saved.');
     reviewerRaw.current = raw;
-    reviewerRef.current = session;
-    setReviewerSession(session);
+    setSavedReviewer(session);
+    reviewerRef.current = active ? session : undefined;
+    setReviewerSession(active ? session : undefined);
   }
   useEffect(() => {
     let alive = true;
@@ -171,8 +177,11 @@ export default function V2App() {
           'Reviewer cache contains another reviewer.',
         );
         reviewerRaw.current = reviewerSaved;
-        reviewerRef.current = session;
-        setReviewerSession(session);
+        setSavedReviewer(session);
+        if (!session.paused) {
+          reviewerRef.current = session;
+          setReviewerSession(session);
+        }
         setReviewer(session.package.reviewer);
       }
       try {
@@ -181,7 +190,7 @@ export default function V2App() {
           health.catalogHash === database.catalogHash,
           'Hosted catalog differs from this browser build.',
         );
-        if (health.appWorkflow !== 'study-transfer-v2') {
+        if (health.appWorkflow !== 'joint-consensus-v2') {
           setHosting('local');
           setStatus(
             'Restart the Study service to use this update. Your browser progress is preserved.',
@@ -219,6 +228,36 @@ export default function V2App() {
   }
   function study() {
     navigate(authorized || reviewerSession ? 'study' : 'gate');
+  }
+  function starter(reset = false) {
+    if (busy || !db) return;
+    if (
+      reset &&
+      !confirm(
+        'Reset the main Study and return to the starter screen? Previous protocols and responses will be archived. Imported reviewer progress will remain saved.',
+      )
+    )
+      return;
+    if (reviewerRef.current) rememberReviewer(reviewerRef.current, false);
+    setError('');
+    setTransferError('');
+    setStatus('');
+    if (reset && authorized) {
+      void change((next) =>
+        formalStarted(next)
+          ? replaceProtocol(next, db, 'Researcher reset from starter navigation', date())
+          : resetCalibration(next, db, date()),
+      ).then((ok) => {
+        if (ok) navigate('study');
+      });
+    } else {
+      setResetAfterLogin(reset);
+      navigate(authorized ? 'study' : 'gate');
+      if (reset)
+        setStatus(
+          'Enter the main Study access code to finish resetting. Imported reviewer progress is preserved.',
+        );
+    }
   }
   useEffect(() => {
     const route = () => {
@@ -294,6 +333,17 @@ export default function V2App() {
       }
       setCode('');
       setAuthorized(true);
+      if (resetAfterLogin) {
+        assert(
+          await change((next) =>
+            formalStarted(next)
+              ? replaceProtocol(next, db, 'Researcher reset from starter navigation', date())
+              : resetCalibration(next, db, date()),
+          ),
+          'Study reset could not be saved.',
+        );
+        setResetAfterLogin(false);
+      }
       navigate('study');
     } catch (e) {
       setError(String(e));
@@ -422,7 +472,11 @@ export default function V2App() {
     setTransferError('');
     try {
       assert(file.size <= 2_000_000, 'Study file is too large.');
-      const session = await importStudy(await file.text(), db, reviewerRef.current);
+      const session = await importStudy(
+        await file.text(),
+        db,
+        reviewerRef.current ?? savedReviewer,
+      );
       rememberReviewer(session);
       setReviewer(session.package.reviewer);
       navigate('study');
@@ -433,12 +487,12 @@ export default function V2App() {
       setBusy(false);
     }
   }
-  async function sendStudy(r: Reviewer) {
+  async function sendStudy(r: FormalReviewer) {
     if (!s || !db) return;
     try {
       download(
         JSON.stringify(await exportStudy(s, r, db), null, 2),
-        `code-choice-${r.toLowerCase()}.study.json`,
+        `code-choice-${r === 'Joint' ? 'joint-consensus' : r.toLowerCase()}.study.json`,
         'application/json',
       );
     } catch (e) {
@@ -449,11 +503,11 @@ export default function V2App() {
     if (!reviewerRef.current) return;
     download(
       JSON.stringify(await exportResult(reviewerRef.current), null, 2),
-      `code-choice-${reviewerRef.current.package.reviewer.toLowerCase()}-result.json`,
+      `code-choice-${reviewerRef.current.package.reviewer === 'Joint' ? 'joint-consensus' : reviewerRef.current.package.reviewer.toLowerCase()}-result.json`,
       'application/json',
     );
   }
-  async function receiveResult(file: File, r: Reviewer) {
+  async function receiveResult(file: File, r: FormalReviewer) {
     if (!db || !cacheRef.current || busy) return;
     setTransferError('');
     try {
@@ -503,11 +557,12 @@ export default function V2App() {
       />
     </label>
   );
-  const progress = (r: Reviewer) =>
+  const progress = (r: FormalReviewer) =>
     s?.formal ? `${activeAnswers(s, r).length} / ${configuredWorkload[r]}` : 'Not started';
-  const reviewerCard = (r: Reviewer) => (
+  const displayReviewer = (r: FormalReviewer) => (r === 'Joint' ? 'Joint Consensus Review' : r);
+  const reviewerCard = (r: FormalReviewer) => (
     <article className="study-card" key={r} aria-label={`${r} Study`}>
-      <h2>{r}</h2>
+      <h2>{displayReviewer(r)}</h2>
       <p>
         {progress(r)}
         {s?.formal && activeAnswers(s, r).length === configuredWorkload[r] ? ' · ✓ Complete' : ''}
@@ -731,6 +786,12 @@ export default function V2App() {
           </span>
         </a>
         <nav aria-label="Application mode">
+          <button disabled={busy || !db} onClick={() => starter()}>
+            Start screen
+          </button>
+          <button disabled={busy || !db} onClick={() => starter(true)}>
+            Reset / Start over
+          </button>
           <button onClick={study}>Study</button>
           <button
             onClick={() => {
@@ -824,6 +885,21 @@ export default function V2App() {
                 {fileControl('Import Study', (file) => void receiveStudy(file))}
               </details>
             )}
+            {savedReviewer && !reviewerSession && (
+              <button
+                onClick={() => {
+                  rememberReviewer(savedReviewer);
+                  setReviewer(savedReviewer.package.reviewer);
+                  navigate('study');
+                  setStatus('');
+                }}
+              >
+                Resume imported Study ·{' '}
+                {savedReviewer.package.reviewer === 'Joint'
+                  ? 'Joint Consensus'
+                  : savedReviewer.package.reviewer}
+              </button>
+            )}
           </section>
         )}
         {s && view === 'study' && (
@@ -832,7 +908,12 @@ export default function V2App() {
             <h1>Human Validation</h1>
             {reviewerSession ? (
               <>
-                <p>Reviewer: {reviewerSession.package.reviewer}</p>
+                <p>
+                  Reviewer:{' '}
+                  {reviewerSession.package.reviewer === 'Joint'
+                    ? 'Jacky + Conrad'
+                    : reviewerSession.package.reviewer}
+                </p>
                 {reviewerCard(reviewerSession.package.reviewer)}
                 {count === configuredWorkload[reviewer] && (
                   <button onClick={() => void sendResult()}>Export Result</button>
@@ -870,6 +951,7 @@ export default function V2App() {
                           : 'Start'}
                     </button>
                   </article>
+                  {configuredWorkload.joint > 0 && reviewerCard('Joint')}
                   {REVIEWERS.map(reviewerCard)}
                   <article className="study-card">
                     <h2>Researcher</h2>
@@ -895,7 +977,10 @@ export default function V2App() {
           <>
             <div className="study-top">
               <div>
-                <strong>Reviewer: {reviewer}</strong>
+                <strong>
+                  Reviewer:{' '}
+                  {reviewer === 'Joint' ? 'Jacky + Conrad · Joint Consensus Review' : reviewer}
+                </strong>
                 <p>
                   {count} / {configuredWorkload[reviewer]}
                 </p>
@@ -1034,7 +1119,7 @@ export default function V2App() {
                           ...item,
                           responseId: crypto.randomUUID(),
                           reviewer: 'Joint',
-                          phase: 'Calibration',
+                          phase: 'joint_calibration',
                           choice,
                           at: date(),
                         });
@@ -1119,9 +1204,9 @@ export default function V2App() {
                   {hosting === 'hosted' ? 'Remote Study' : 'Offline Transfer'}
                 </h2>
                 <div className="study-cards">
-                  {REVIEWERS.map((r) => (
+                  {(configuredWorkload.joint > 0 ? FORMAL_REVIEWERS : REVIEWERS).map((r) => (
                     <article className="study-card" key={r}>
-                      <h3>{r}</h3>
+                      <h3>{displayReviewer(r)}</h3>
                       <p>
                         {progress(r)}
                         {activeAnswers(s, r).length === configuredWorkload[r]
@@ -1134,11 +1219,11 @@ export default function V2App() {
                             disabled={busy || !!s.unblindedAt}
                             onClick={() => void sendStudy(r)}
                           >
-                            Export {r} Study
+                            Export {r === 'Joint' ? 'Joint Consensus' : r} Study
                           </button>
                           {!s.unblindedAt &&
                             fileControl(
-                              `Import ${r} Result`,
+                              `Import ${r === 'Joint' ? 'Joint Consensus' : r} Result`,
                               (file) => void receiveResult(file, r),
                             )}
                         </div>
@@ -1156,7 +1241,9 @@ export default function V2App() {
                     disabled={
                       busy ||
                       configDirty ||
-                      REVIEWERS.some((r) => activeAnswers(s, r).length !== configuredWorkload[r])
+                      FORMAL_REVIEWERS.some(
+                        (r) => activeAnswers(s, r).length !== configuredWorkload[r],
+                      )
                     }
                     onClick={() =>
                       change((next) => {
@@ -1173,6 +1260,40 @@ export default function V2App() {
             {s.unblindedAt && (
               <section className="research-summary">
                 <h2>Summary</h2>
+                {Object.entries({
+                  'Joint Consensus results': analyse(s, db).jointConsensus,
+                  'Jacky independent results': analyse(s, db).independent.Jacky,
+                  'Conrad independent results': analyse(s, db).independent.Conrad,
+                }).map(([title, rows]) => (
+                  <section key={title}>
+                    <h3>{title}</h3>
+                    <div className="summary-scroll">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Comparison</th>
+                            <th>Ratings</th>
+                            <th>Preferences</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((row) => (
+                            <tr key={row.contrast}>
+                              <th>{row.contrast}</th>
+                              <td>{row.ratings}</td>
+                              <td>
+                                {Object.entries(row.counts)
+                                  .map(([label, n]) => `${label}: ${n}`)
+                                  .join(' · ')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                ))}
+                <h3>Combined Formal results</h3>
                 <div className="summary-scroll">
                   <table>
                     <thead>
@@ -1199,7 +1320,7 @@ export default function V2App() {
                     </tbody>
                   </table>
                 </div>
-                <h3>Reviewer agreement</h3>
+                <h3>Independent overlap agreement</h3>
                 <div className="summary-scroll">
                   <table>
                     <thead>
@@ -1283,10 +1404,15 @@ export default function V2App() {
               </div>
               {hosting === 'hosted' && s.formal && !s.unblindedAt && (
                 <div className="v2-actions">
-                  {REVIEWERS.map((r) => (
+                  {(configuredWorkload.joint > 0 ? FORMAL_REVIEWERS : REVIEWERS).map((r) => (
                     <div key={r}>
-                      <button onClick={() => void sendStudy(r)}>Export {r} Study</button>
-                      {fileControl(`Import ${r} Result`, (file) => void receiveResult(file, r))}
+                      <button onClick={() => void sendStudy(r)}>
+                        Export {r === 'Joint' ? 'Joint Consensus' : r} Study
+                      </button>
+                      {fileControl(
+                        `Import ${r === 'Joint' ? 'Joint Consensus' : r} Result`,
+                        (file) => void receiveResult(file, r),
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1320,9 +1446,10 @@ export default function V2App() {
                         ? Object.fromEntries(
                             [
                               ...new Set(
-                                Object.values(s.formal.assignments)
-                                  .flat()
-                                  .flatMap((a) => [a.a, a.b]),
+                                [
+                                  ...Object.values(s.formal.assignments).flat(),
+                                  ...(s.formal.joint ?? []),
+                                ].flatMap((a) => [a.a, a.b]),
                               ),
                             ].map((id) => [id, db.outputs[id]]),
                           )

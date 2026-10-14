@@ -83,6 +83,7 @@ export function reconcile(
       .map((id) => field(bm[id], lm[id], rm[id]))
       .filter(Boolean),
     pending: {
+      Joint: field(base.pending.Joint, local.pending.Joint, remote.pending.Joint),
       Jacky: field(base.pending.Jacky, local.pending.Jacky, remote.pending.Jacky),
       Conrad: field(base.pending.Conrad, local.pending.Conrad, remote.pending.Conrad),
     },

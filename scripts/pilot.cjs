@@ -22,7 +22,7 @@ const start = async () => {
   const page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('request', (r) => requests.push(r.url()));
-  await page.goto('http://127.0.0.1:5173/?v1=1');
+  await page.goto((process.argv[4] || 'http://127.0.0.1:5173') + '/?v1=1');
   return page;
 };
 const state = async (page) => JSON.parse(await page.evaluate((k) => localStorage.getItem(k), key));

@@ -103,7 +103,7 @@ const server = createServer(async (req, res) => {
           (/^(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(req.headers.host || '')
             ? 'local'
             : 'hosted'),
-        appWorkflow: 'study-transfer-v2',
+        appWorkflow: 'joint-consensus-v2',
       });
     let body: any = {};
     if (req.method !== 'GET') {

@@ -11,6 +11,7 @@ import {
   submitFormal,
   DEFAULT_CONFIG,
   workload,
+  formalAssignments,
 } from '../src/v2.ts';
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.argv[2] || 'playwright');
@@ -157,7 +158,7 @@ try {
       JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).state.calibration
         .lockedAt,
   );
-  check('Calibration locks guideline after exactly 12 fixture responses', true);
+  check(`Calibration locks guideline after ${official.calibration} fixture responses`, true);
   await page.getByRole('button', { name: 'Exit Study', exact: true }).click();
   await page
     .locator('.study-card')
@@ -170,7 +171,7 @@ try {
   );
   const protocol = await context.request.get(url + '/api/state').then((r) => r.json());
   check(
-    'Hosted Formal assignments are 48/48 and 16 overlap',
+    `Hosted Independent assignments are ${official.Jacky}/${official.Conrad} with ${official.overlap} overlaps`,
     protocol.formal.assignments.Jacky.length === official.Jacky &&
       protocol.formal.assignments.Conrad.length === official.Conrad &&
       protocol.formal.overlap.length === official.overlap,
@@ -355,11 +356,11 @@ try {
         'recovery',
   );
   // Fill the remaining isolated fixture protocol to exercise completeness/unblinding.
-  for (const r of ['Jacky', 'Conrad']) {
+  for (const r of ['Joint', 'Jacky', 'Conrad']) {
     delete synced.pending[r];
     while (
       synced.answers.filter((a) => a.reviewer === r && !a.invalidated).length <
-      synced.formal.assignments[r].length
+      formalAssignments(synced, r).length
     ) {
       submitFormal(
         synced,
@@ -391,8 +392,8 @@ try {
   await (await exporting).saveAs(resolve(qa, 'fixture-research-export.json'));
   const exported = JSON.parse(readFileSync(resolve(qa, 'fixture-research-export.json'), 'utf8'));
   check(
-    'Unblinded export separates 96 active ratings, Calibration and Play',
-    exported.formal.filter((a) => !a.invalidated).length === official.Jacky + official.Conrad &&
+    `Unblinded export separates ${official.ratings} active Formal ratings, Calibration and Play`,
+    exported.formal.filter((a) => !a.invalidated).length === official.ratings &&
       exported.calibration.length === official.calibration &&
       exported.play.length === 0,
   );

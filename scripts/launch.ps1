@@ -10,7 +10,7 @@ function Test-AppServer {
         }
         $health = Invoke-RestMethod -Uri ($appUrl + 'api/health') -TimeoutSec 2
         if ($health.protocolVersion -ne 'human-validation-v2') { throw 'This app server does not provide V2 persistence. Use npm.cmd run serve or stop the preview before launching V2.' }
-        if ($health.appWorkflow -ne 'study-transfer-v2') { throw 'This app server is running an older V2 build. Stop it deliberately, rebuild, and launch again.' }
+        if ($health.appWorkflow -ne 'joint-consensus-v2') { throw 'This app server is running an older V2 build. Stop it deliberately, rebuild, and launch again.' }
         return $true
     } catch {
         if ($_.Exception.Message -like 'Port *' -or $_.Exception.Message -like 'This app server*') { throw }
