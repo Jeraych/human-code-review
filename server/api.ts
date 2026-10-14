@@ -12,6 +12,7 @@ import {
   assert,
 } from '../src/v2.ts';
 import type { DatabaseV2, ProtocolState, Presentation, Preference } from '../src/v2.ts';
+import { aggregatePlay } from '../src/playV2.ts';
 
 const root = resolve(import.meta.dirname, '..');
 const catalog: DatabaseV2 = JSON.parse(
@@ -105,6 +106,26 @@ const server = createServer(async (req, res) => {
             : 'hosted'),
         appWorkflow: 'joint-consensus-v2',
       });
+    if (route === '/api/play/stats' && req.method === 'GET') {
+      const query = new URL(req.url || '/', 'http://localhost').searchParams;
+      assert(query.get('catalogHash') === catalog.catalogHash, 'Incompatible Play catalog.');
+      const pairId = query.get('pairId') || '';
+      assert(
+        catalog.pairs.some((p) => p.pairId === pairId),
+        'Unknown Play pair.',
+      );
+      return send(
+        200,
+        aggregatePlay(
+          db
+            .prepare('SELECT data FROM play')
+            .all()
+            .map((r) => JSON.parse(r.data as string)),
+          catalog,
+          pairId,
+        ),
+      );
+    }
     let body: any = {};
     if (req.method !== 'GET') {
       let bytes = 0,
@@ -145,7 +166,8 @@ const server = createServer(async (req, res) => {
         p &&
           p.eligible &&
           body.playPoolVersion === catalog.playPoolVersion &&
-          body.protocolVersion === catalog.protocolVersion,
+          body.protocolVersion === catalog.protocolVersion &&
+          (body.catalogHash === undefined || body.catalogHash === catalog.catalogHash),
         'Invalid Play pair/version.',
       );
       assert(
@@ -155,8 +177,10 @@ const server = createServer(async (req, res) => {
       assert(
         ['A', 'Equal', 'B'].includes(body.choice) &&
           typeof body.sessionId === 'string' &&
+          body.sessionId.length > 0 &&
           body.sessionId.length <= 80 &&
           typeof body.responseId === 'string' &&
+          body.responseId.length > 0 &&
           body.responseId.length <= 80 &&
           !isNaN(Date.parse(body.at)),
         'Invalid Play response.',
@@ -172,9 +196,10 @@ const server = createServer(async (req, res) => {
         at: body.at,
         playPoolVersion: catalog.playPoolVersion,
         protocolVersion: catalog.protocolVersion,
-        appVersion: '2.0.0',
+        appVersion: body.catalogHash === undefined ? '2.0.0' : '2.1.0',
         phase: 'Play',
         exploratory: true,
+        ...(body.catalogHash === undefined ? {} : { catalogHash: catalog.catalogHash }),
       };
       const previous = db.prepare('SELECT data FROM play WHERE id=?').get(data.responseId) as
         { data: string } | undefined;

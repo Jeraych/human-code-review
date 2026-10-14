@@ -60,7 +60,7 @@ The normal workflow requires the small Node service, not a static-only host. Run
 
 Use one service instance and SQLite database. Serve frontend and API on the same public origin; proxy `<base>/api/*` to this service when a separate static frontend is needed. An ephemeral/serverless filesystem loses shared progress and is unsuitable. Hash routes and relative Vite assets support root/subdirectory hosting without SPA rewrites. Back up the database using SQLite backup tools or stop the service before copying the database and associated WAL files.
 
-No host has been provisioned or publicly deployed. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
+At the previous V2 checkpoint, no host had been provisioned or publicly deployed. This update was verified locally and was not pushed or deployed; existing remote provider settings were not inspected. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
 ## Human review
 
@@ -71,7 +71,7 @@ Open **Study**. The start screen follows the actual workflow:
 3. **Review independently** — Jacky and Conrad click **Review on this device** or **Continue** beside their own name. Intentional overlap remains independent; agreement and Cohen’s kappa use only these overlapping Independent responses.
 4. When everyone is finished, click **View results**, then **Export research data**. Results combine the three review streams, with separate reviewer summaries in **Results by reviewer**. The research export retains the original sources, mappings and audit history.
 
-While reviewing, the page contains the reviewer/phase and count, task, Code A/Code B, A / Equal / B, and Submit. The frozen guideline is one disclosure away. Submit saves explicitly; Undo is available before Next. **Exit** returns directly to the Study start screen. Progress remains when exiting, refreshing or closing the browser.
+While reviewing, the page contains the reviewer/phase and count, task, Code A/Code B, and A / Equal / B. One click saves and advances in Formal; Calibration saves and reveals, then keeps Next for discussion. The frozen guideline is one disclosure away. Submit and Undo are removed from the V2 interface. A failed save retains the comparison and the chosen response for Retry save; hosted saves must be acknowledged before continuing. Existing pending answers from the previous interface retain a Continue/Next action without Undo. **Exit** returns directly to the Study start screen. Progress remains when exiting, refreshing or closing the browser.
 
 **Edit setup** is a small action on the main Study start screen. It contains comparison checkboxes and four totals. Recommended defaults are unchanged:
 
@@ -110,11 +110,11 @@ Back up/export results before clearing browser storage or changing origin. Avoid
 
 ## Play and privacy
 
-Play needs no login or reviewer identity. A/Equal/B gives immediate reveal and Next. Read A/Read B, safe scrolling/text selection and native keyboard controls are retained. Play never consumes Study completion. Playlists share the canonical pair database; a recap is visit-local.
+Play needs no login or reviewer identity. A/Equal/B gives immediate reveal and Next. Read A/Read B, safe scrolling/text selection and native keyboard controls are retained. Play never consumes Study completion. Playlists share the canonical pair database; a recap is visit-local. The curated pool contains 883 comparisons (272 B–C, 243 C–S, 235 C–J, 133 S–SJ), excluding invisible-equal and repeated visible comparisons within each task/contrast. Session history prevents pair repeats across refresh; a 12-round window prefers fresh task prompts and implementations, relaxing oldest history only when necessary. All contrasts balances the least-used available contrast. Exhaustion offers explicit replay; returning visits retain recent avoidance. See [PLAY_POOL_AUDIT.md](PLAY_POOL_AUDIT.md).
 
-By default, opted-in anonymous Play responses are queued locally and sent to the hosted service with idempotent response IDs. They contain anonymous session ID, pair ID, displayed mapping/choice, canonical preference, timestamp and app/pool versions. No name, email or student ID is requested. **Play without storing new responses** opts out for subsequent choices; it does not retract previously opted-in responses. External responses remain exploratory pending ethics/course confirmation.
+By default, opted-in anonymous Play responses are queued locally and sent to the hosted service with idempotent response IDs. They contain anonymous session ID, pair ID, displayed mapping/choice, canonical preference, timestamp and app/pool versions. No name, email or student ID is requested. **Play without storing new responses** opts out for subsequent choices; it does not retract previously opted-in responses. These are exploratory community preferences. Opt-out persists across refresh; already opted-in pending responses retain their original consent and may still retry.
 
-Optional build setting `VITE_PLAY_NOTICE` customises the concise collection notice. Researcher can refresh/export exploratory Play summaries separately, even before Formal unblinding. No fake anonymous users were added during verification; browser Play QA used opt-out.
+Optional build setting `VITE_PLAY_NOTICE` customises the concise collection notice. Researcher can refresh/export exploratory Play summaries separately, even before Formal unblinding. After voting, community bars show the current pair sample size, condition-normalized preference percentages, Equal, and overall counts by contrast. Public `GET /api/play/stats?pairId=...&catalogHash=...` returns aggregate counts only. Matching legacy V2 votes are retained; incompatible versions, malformed mappings, and non-Play records are excluded. Offline/error states keep Next usable. Synthetic verification votes exist only in isolated ignored QA databases, never the operational database.
 
 ## Frozen data and verification
 
@@ -139,10 +139,10 @@ Another machine can use its Python 3.10+ executable. The builder refuses changed
 Browser QA (requires an existing Playwright module and Chrome executable):
 
 ```powershell
-node scripts/pilot_v2_guided.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node scripts/pilot_play_polish.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 ```
 
-This uses only ignored `qa/v2/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [VERIFICATION.md](VERIFICATION.md). Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.
+This uses only ignored `qa/play-polish/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [PLAY_POLISH_VERIFICATION.md](PLAY_POLISH_VERIFICATION.md) for this update and [VERIFICATION.md](VERIFICATION.md) for historical checks. Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.
 
 ---
 

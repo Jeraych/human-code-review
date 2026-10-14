@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Home from './components/Home';
+import Community from './components/Community';
+import { curatePlay, newPlayHistory, selectPlay, rememberPlay } from './playV2';
+import type { PlayHistory, CommunityStats } from './playV2';
 import Comparison from './components/Comparison';
 import ResearcherConfiguration from './components/ResearcherConfiguration';
 import { download } from './export';
@@ -27,7 +30,6 @@ import {
   researchExport,
   ruffTied,
   submitFormal,
-  undoFormal,
   validateCatalog,
   validateState,
   validateTransition,
@@ -94,11 +96,42 @@ export default function V2App() {
   const [recoveryId, setRecoveryId] = useState(''),
     [reason, setReason] = useState('wrong reviewer');
   const [play, setPlay] = useState<Presentation>();
+  const playHistory = useRef<PlayHistory | undefined>(undefined);
+  const [playProgress, setPlayProgress] = useState(0);
+  const [playTotal, setPlayTotal] = useState(0);
+  const [community, setCommunity] = useState<CommunityStats>();
+  const [communityState, setCommunityState] = useState('loading');
+  const statsRequest = useRef(0);
+  const voteCooldown = useRef(0);
+  type DraftVote = Presentation & {
+    choice: Preference;
+    responseId: string;
+    at: string;
+    reviewer: FormalReviewer;
+    kind: 'formal' | 'calibration';
+  };
+  const [draftVote, setDraftVote] = useState<DraftVote>();
+  const draftRef = useRef<DraftVote | undefined>(undefined);
+  const retainedDrafts = useRef<Record<string, DraftVote>>({});
   const [playChoice, setPlayChoice] = useState<Preference>();
   const playLock = useRef(false);
-  const [playSession] = useState(() => crypto.randomUUID());
+  const [playSession] = useState(() => {
+    try {
+      const id = sessionStorage.getItem('code-choice.play-session') || crypto.randomUUID();
+      sessionStorage.setItem('code-choice.play-session', id);
+      return id;
+    } catch {
+      return crypto.randomUUID();
+    }
+  });
   const [playResponses, setPlayResponses] = useState<any[]>([]);
-  const [optOut, setOptOut] = useState(false);
+  const [optOut, setOptOut] = useState(() => {
+    try {
+      return localStorage.getItem('code-choice.play-optout') === '1';
+    } catch {
+      return true;
+    }
+  });
   const [playlist, setPlaylist] = useState('All contrasts');
   const [playQueue, setPlayQueue] = useState<any[]>([]);
   const playSyncing = useRef(false);
@@ -211,7 +244,9 @@ export default function V2App() {
           if (e.status !== 401) setStatus('Shared connection unavailable. Your progress is saved.');
         }
       } catch {
-        setHosting('local');
+        setHosting(
+          /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ? 'local' : 'hosted',
+        );
       }
     })().catch((e) => {
       if (alive) setError(String(e));
@@ -318,6 +353,7 @@ export default function V2App() {
       const saved = await api('state', 'PUT', { expectedRevision: remote.revision, state: merged });
       remember({ state: saved, base: structuredClone(saved), dirty: false });
     } else remember({ state: remote, base: structuredClone(remote), dirty: false });
+    setBackend(true);
     setStatus('Saved.');
   }
   async function login(e: React.FormEvent) {
@@ -412,7 +448,7 @@ export default function V2App() {
           remember({ state: saved, base: structuredClone(saved), dirty: false });
           setStatus('Saved.');
         } catch (e: any) {
-          setStatus('Saved on this device. It will sync when the connection returns.');
+          setStatus('Saved on this device. Retry to confirm the shared save before continuing.');
           if (e.status === 401)
             setError(
               'The hosted session expired. Exit Study and re-enter the access code to sync; your local progress is preserved.',
@@ -421,8 +457,15 @@ export default function V2App() {
             setError(String(e));
             return false;
           }
+          return false;
         }
-      } else setStatus('Saved in this browser.');
+      } else {
+        assert(
+          hosting !== 'hosted',
+          'Shared service unavailable. Retry when connected; your answer is backed up on this device.',
+        );
+        setStatus('Saved in this browser.');
+      }
       return true;
     } catch (e) {
       setError(String(e));
@@ -594,10 +637,15 @@ export default function V2App() {
   const displayReviewer = (r: FormalReviewer) => (r === 'Joint' ? 'Joint review' : r);
   const reviewTitle = (r: FormalReviewer) => (r === 'Joint' ? 'Review together' : `${r}’s review`);
   const reviewDone = (r: FormalReviewer) =>
-    !!s?.formal && activeAnswers(s, r).length === configuredWorkload[r] && !s.pending[r];
+    !!s?.formal &&
+    activeAnswers(s, r).length === configuredWorkload[r] &&
+    !s.pending[r] &&
+    !(cache?.dirty && !reviewerSession && (backend || hosting === 'hosted'));
   const allReviewsDone = FORMAL_REVIEWERS.every(reviewDone);
   const independentReady = !!s?.formal && (!configuredWorkload.joint || reviewDone('Joint'));
   function openReview(r: FormalReviewer) {
+    draftRef.current = retainedDrafts.current[r];
+    setDraftVote(draftRef.current);
     setReviewer(r);
     navigate('formal');
   }
@@ -637,24 +685,85 @@ export default function V2App() {
           .catch(() => {});
     }
   }
-  function nextPlay(filter = playlist) {
+  function nextPlay(filter = playlist, replay = false) {
     if (!db) return;
-    const contrast =
-      filter === 'All contrasts'
-        ? ['B-C', 'C-S', 'C-J', 'S-SJ'][crypto.getRandomValues(new Uint32Array(1))[0] % 4]
-        : filter;
-    const candidates = db.pairs.filter((p) => p.eligible && p.contrast === contrast);
-    assert(candidates.length, 'Playlist is unavailable.');
+    const pool = curatePlay(db);
+    if (!playHistory.current) {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('code-choice.play-history') || 'null');
+        const recent = JSON.parse(localStorage.getItem('code-choice.play-recent') || 'null');
+        playHistory.current =
+          saved?.catalogHash === db.catalogHash &&
+          Array.isArray(saved.seen) &&
+          Array.isArray(saved.recent) &&
+          saved.contrasts &&
+          Number.isInteger(saved.round)
+            ? saved
+            : newPlayHistory(
+                db,
+                recent?.catalogHash === db.catalogHash && Array.isArray(recent.recent)
+                  ? recent.recent
+                  : [],
+              );
+      } catch {
+        playHistory.current = newPlayHistory(db);
+      }
+    }
+    playHistory.current ??= newPlayHistory(db);
+    if (replay) playHistory.current = newPlayHistory(db, playHistory.current.recent);
     const seed = crypto.getRandomValues(new Uint32Array(2));
-    const pair = candidates[Math.floor((seed[0] / 4294967296) * candidates.length)];
-    setPlay({
-      pairId: pair.pairId,
-      a: seed[1] % 2 ? pair.left : pair.right,
-      b: seed[1] % 2 ? pair.right : pair.left,
-    });
+    const pair = selectPlay(db, pool, playHistory.current, filter, seed[0] / 4294967296);
+    setPlayTotal(pool.filter((p) => filter === 'All contrasts' || p.contrast === filter).length);
+    if (pair) {
+      playHistory.current = rememberPlay(playHistory.current, pair);
+      try {
+        sessionStorage.setItem('code-choice.play-history', JSON.stringify(playHistory.current));
+        localStorage.setItem(
+          'code-choice.play-recent',
+          JSON.stringify({ catalogHash: db.catalogHash, recent: playHistory.current.recent }),
+        );
+      } catch {
+        /* Visit memory still prevents repeats when browser storage is blocked. */
+      }
+      setPlay({
+        pairId: pair.pairId,
+        a: seed[1] % 2 ? pair.left : pair.right,
+        b: seed[1] % 2 ? pair.right : pair.left,
+      });
+    } else setPlay(undefined);
+    setPlayProgress(
+      playHistory.current.seen.filter((id) =>
+        pool.some((p) => p.pairId === id && (filter === 'All contrasts' || p.contrast === filter)),
+      ).length,
+    );
+    statsRequest.current++;
+    setCommunity(undefined);
     setPlayChoice(undefined);
     playLock.current = false;
     window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  async function loadCommunity(item = play) {
+    if (!item || !db) return;
+    const request = ++statsRequest.current;
+    setCommunityState('loading');
+    try {
+      const stats = await api(
+        `play/stats?pairId=${encodeURIComponent(item.pairId)}&catalogHash=${encodeURIComponent(db.catalogHash)}`,
+      );
+      assert(
+        stats.catalogHash === db.catalogHash && stats.playPoolVersion === db.playPoolVersion,
+        'Community version mismatch.',
+      );
+      if (request === statsRequest.current) {
+        setCommunity(stats);
+        setCommunityState('ready');
+      }
+    } catch {
+      if (request === statsRequest.current) {
+        setCommunity(undefined);
+        setCommunityState('error');
+      }
+    }
   }
   useEffect(() => {
     if (view === 'play' && db && !play) nextPlay();
@@ -673,7 +782,8 @@ export default function V2App() {
       canonicalPreference: canonical({ ...play, choice: chosen }, db),
       playPoolVersion: db.playPoolVersion,
       protocolVersion: PROTOCOL,
-      appVersion: '2.0.0',
+      appVersion: '2.1.0',
+      catalogHash: db.catalogHash,
       phase: 'Play',
       exploratory: true,
     };
@@ -698,7 +808,7 @@ export default function V2App() {
     }
   }, []);
   useEffect(() => {
-    if (hosting !== 'hosted' || !playQueue.length) return;
+    if (!backend || !playQueue.length) return;
     const flush = async () => {
       if (playSyncing.current) return;
       playSyncing.current = true;
@@ -733,7 +843,10 @@ export default function V2App() {
       clearInterval(timer);
       window.removeEventListener('online', flush);
     };
-  }, [hosting, playQueue]);
+  }, [backend, playQueue]);
+  useEffect(() => {
+    if (view === 'play' && playChoice) void loadCommunity();
+  }, [playChoice, playQueue.length]);
   useEffect(() => {
     if (view === 'play' && playChoice) document.getElementById('reveal-title')?.focus();
   }, [view, playChoice, play?.pairId]);
@@ -741,6 +854,7 @@ export default function V2App() {
     if (view !== 'play' || !playChoice) return;
     const advance = (e: KeyboardEvent) => {
       if (
+        !e.repeat &&
         e.key.toLowerCase() === 'n' &&
         !e.ctrlKey &&
         !e.metaKey &&
@@ -757,13 +871,16 @@ export default function V2App() {
   }, [view, playChoice, playlist]);
   const presentation =
     view === 'formal' && s
-      ? s.pending[reviewer]
-        ? s.answers.find((a) => a.responseId === s.pending[reviewer])
-        : nextUnanswered(s, reviewer)
+      ? draftVote?.kind === 'formal' && draftVote.reviewer === reviewer
+        ? draftVote
+        : s.pending[reviewer]
+          ? s.answers.find((a) => a.responseId === s.pending[reviewer])
+          : nextUnanswered(s, reviewer)
       : view === 'calibration' && s
         ? s.calibration.lockedAt
           ? undefined
-          : calReveal ||
+          : (draftVote?.kind === 'calibration' ? draftVote : undefined) ||
+            calReveal ||
             s.calibration.assignments.find(
               (a) => !s.calibration.answers.some((r) => r.pairId === a.pairId),
             )
@@ -795,20 +912,144 @@ export default function V2App() {
       : /integrity|frozen pool/.test(transferError)
         ? 'This file could not be verified. Request the original file again.'
         : 'This file could not be imported. Check that it is the correct Study or Result file.';
-  const choices = (submit: () => void) => (
-    <div className="v2-vote">
-      <h2>Which code would you prefer to work with?</h2>
+  useEffect(() => {
+    if (!cache?.dirty || reviewerSession || !(backend || hosting === 'hosted') || draftRef.current)
+      return;
+    const answer =
+      view === 'formal'
+        ? cache.state.answers.find(
+            (a) =>
+              a.reviewer === reviewer &&
+              !cache.base.answers.some((b) => b.responseId === a.responseId),
+          )
+        : view === 'calibration'
+          ? cache.state.calibration.answers.find(
+              (a) => !cache.base.calibration.answers.some((b) => b.responseId === a.responseId),
+            )
+          : undefined;
+    if (answer) {
+      const draft: DraftVote = { ...answer, kind: view === 'formal' ? 'formal' : 'calibration' };
+      retainedDrafts.current[draft.kind === 'formal' ? draft.reviewer : 'calibration'] = draft;
+      draftRef.current = draft;
+      setDraftVote(draft);
+      setChoice(draft.choice);
+    }
+  }, [view, cache, backend, hosting, reviewer, reviewerSession]);
+  async function voteStudy(selected: Preference, retry = false) {
+    if (
+      !presentation ||
+      !db ||
+      mutex.current ||
+      (!retry && (draftRef.current || Date.now() < voteCooldown.current))
+    )
+      return;
+    const item: DraftVote = draftRef.current || {
+      ...presentation,
+      choice: selected,
+      responseId: crypto.randomUUID(),
+      at: date(),
+      reviewer: view === 'formal' ? reviewer : 'Joint',
+      kind: view === 'formal' ? 'formal' : 'calibration',
+    };
+    retainedDrafts.current[item.kind === 'formal' ? item.reviewer : 'calibration'] = item;
+    draftRef.current = item;
+    setDraftVote(item);
+    setChoice(item.choice);
+    const savedState = reviewerRef.current?.state ?? cacheRef.current?.state;
+    const exists =
+      item.kind === 'formal'
+        ? savedState?.answers.some((a) => a.responseId === item.responseId)
+        : savedState?.calibration.answers.some((a) => a.responseId === item.responseId);
+    let ok = false;
+    if (exists && cacheRef.current?.dirty && !reviewerRef.current) {
+      mutex.current = true;
+      setBusy(true);
+      setError('');
+      try {
+        await refreshShared();
+        ok = true;
+      } catch (e) {
+        setError(String(e));
+      } finally {
+        mutex.current = false;
+        setBusy(false);
+      }
+    } else if (exists) ok = true;
+    else
+      ok = await change((next) => {
+        if (item.kind === 'formal') {
+          assert(
+            nextUnanswered(next, reviewer)?.pairId === item.pairId,
+            'Comparison changed. Reload before continuing.',
+          );
+          submitFormal(next, reviewer, item.choice, item.at, item.responseId);
+          delete next.pending[reviewer];
+        } else {
+          assert(!next.calibration.lockedAt, 'Calibration is locked.');
+          next.calibration.answers.push({
+            pairId: item.pairId,
+            a: item.a,
+            b: item.b,
+            responseId: item.responseId,
+            reviewer: 'Joint',
+            phase: 'joint_calibration',
+            choice: item.choice,
+            at: item.at,
+          });
+        }
+      });
+    if (ok) {
+      delete retainedDrafts.current[item.kind === 'formal' ? item.reviewer : 'calibration'];
+      draftRef.current = undefined;
+      setDraftVote(undefined);
+      setChoice(undefined);
+      voteCooldown.current = Date.now() + 400;
+      if (item.kind === 'calibration') setCalReveal(item);
+      else {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.getElementById('study-vote-title')?.focus();
+      }
+    }
+  }
+  const choices = () => (
+    <div className="v2-vote" aria-busy={busy}>
+      <h2 id="study-vote-title" tabIndex={-1}>
+        Which code would you prefer to work with?
+      </h2>
       <div className="v2-actions">
         {(['A', 'Equal', 'B'] as const).map((c) => (
-          <button key={c} aria-pressed={choice === c} onClick={() => setChoice(c)} disabled={busy}>
+          <button
+            key={c}
+            aria-pressed={choice === c}
+            onKeyDown={(e) => {
+              if (e.repeat) e.preventDefault();
+            }}
+            onClick={(e) => {
+              if (e.detail < 2) void voteStudy(c);
+            }}
+            disabled={busy || !!draftVote}
+          >
             {c}
           </button>
         ))}
       </div>
-      <p aria-live="polite">Selected: {choice || '—'}</p>
-      <button className="primary" disabled={!choice || busy || !!error} onClick={submit}>
-        Submit
-      </button>
+      {draftVote ? (
+        <p role="status">
+          {busy
+            ? 'Saving your answer...'
+            : `Your ${draftVote.choice} answer is retained. Confirm the save to continue.`}
+        </p>
+      ) : (
+        <p className="hint">
+          Choose once to save{' '}
+          {view === 'calibration' ? 'and reveal for discussion.' : 'and continue.'}
+        </p>
+      )}
+      {draftVote && !busy && (
+        <button className="primary" onClick={() => void voteStudy(draftVote.choice, true)}>
+          Retry save
+        </button>
+      )}
     </div>
   );
   return (
@@ -1233,12 +1474,6 @@ export default function V2App() {
                 <p role="status">Saved</p>
                 <div className="v2-actions">
                   <button
-                    disabled={busy}
-                    onClick={() => change((next) => undoFormal(next, reviewer, date()))}
-                  >
-                    Undo
-                  </button>
-                  <button
                     className="primary"
                     disabled={busy}
                     onClick={async () => {
@@ -1257,12 +1492,7 @@ export default function V2App() {
                 </div>
               </section>
             ) : presentation ? (
-              choices(() => {
-                if (choice)
-                  void change((next) =>
-                    submitFormal(next, reviewer, choice, date(), crypto.randomUUID()),
-                  );
-              })
+              choices()
             ) : (
               <section className="completion">
                 <h2>You’re finished.</h2>
@@ -1337,25 +1567,7 @@ export default function V2App() {
                   </button>
                 </div>
               ) : presentation ? (
-                choices(async () => {
-                  if (choice && presentation) {
-                    const item = presentation;
-                    if (
-                      await change((next) => {
-                        assert(!next.calibration.lockedAt, 'Calibration is locked.');
-                        next.calibration.answers.push({
-                          ...item,
-                          responseId: crypto.randomUUID(),
-                          reviewer: 'Joint',
-                          phase: 'joint_calibration',
-                          choice,
-                          at: date(),
-                        });
-                      })
-                    )
-                      setCalReveal(item);
-                  }
-                })
+                choices()
               ) : (
                 <p>All {configuredWorkload.calibration} calibration comparisons are complete.</p>
               ))}
@@ -1639,6 +1851,10 @@ export default function V2App() {
               <div>
                 <div className="section-label">PLAY</div>
                 <h1>Which code would you rather work with?</h1>
+                <p className="play-progress">
+                  {playProgress} / {playTotal} fresh comparisons - Choose A, Equal or B, then see
+                  the reveal.
+                </p>
               </div>
             </div>
             <div className="pool-switch" aria-label="Playlist">
@@ -1662,7 +1878,7 @@ export default function V2App() {
             </div>
             <p className="hint">
               {import.meta.env.VITE_PLAY_NOTICE ||
-                'Anonymous responses may be analysed in aggregate for this student research project.'}{' '}
+                'Anonymous Play votes contribute to community statistics. No name or account is needed.'}{' '}
               Exploratory only.
             </p>
             <label className="v2-optout">
@@ -1671,6 +1887,11 @@ export default function V2App() {
                 checked={optOut}
                 onChange={(e) => {
                   setOptOut(e.target.checked);
+                  try {
+                    localStorage.setItem('code-choice.play-optout', e.target.checked ? '1' : '0');
+                  } catch {
+                    /* Preference remains visit-local. */
+                  }
                 }}
               />
               Play without storing new responses
@@ -1698,25 +1919,40 @@ export default function V2App() {
                 }
               />
             )}
-            {!playChoice ? (
+            {!play && (
+              <section className="completion">
+                <h2>{playTotal ? 'Playlist complete.' : 'No comparisons available.'}</h2>
+                <p>
+                  {playTotal
+                    ? `You have seen all ${playTotal} comparisons in this playlist. Try another contrast or start a fresh replay.`
+                    : 'Try another playlist.'}
+                </p>
+                {playTotal > 0 && (
+                  <button className="primary" onClick={() => nextPlay(playlist, true)}>
+                    Play again
+                  </button>
+                )}
+              </section>
+            )}
+            {play && !playChoice ? (
               <div className="v2-vote">
                 <button onClick={() => playVote('tie')}>Equal</button>
               </div>
-            ) : (
-              <section className="play-reveal">
+            ) : playChoice ? (
+              <section className="play-reveal v2-play-reveal">
                 <div>
                   <h2 id="reveal-title" tabIndex={-1}>
                     The reveal
                   </h2>
                   <p>
                     {playChoice === 'Equal'
-                      ? 'You rated these implementations equally. For you, this training difference did not create a meaningful preference on this example.'
+                      ? 'You chose Equal. Both implementations worked equally well for you on this example.'
                       : presentation &&
                           ruffTied(db.outputs[presentation.a], db.outputs[presentation.b])
                         ? 'Both passed correctness tests and received the same Ruff results. Your preference was not captured by those checks.'
-                        : rendered?.contrast === 'S-SJ'
-                          ? 'These conditions achieved very similar aggregate automated style results. This example explores qualitative differences those results may not capture.'
-                          : 'Your preference describes this example. Automated results are another view of the code.'}
+                        : 'You chose implementation ' +
+                          playChoice +
+                          '. There is no right answer: this is your code preference.'}
                   </p>
                   {presentation &&
                     [presentation.a, presentation.b].map((id, i) => {
@@ -1738,10 +1974,25 @@ export default function V2App() {
                       );
                     })}
                 </div>
-                <button className="primary" onClick={() => nextPlay()}>
+                <button
+                  className="primary"
+                  onClick={(e) => {
+                    if (e.detail < 2) nextPlay();
+                  }}
+                >
                   Next round →
                 </button>
               </section>
+            ) : null}
+            {play && playChoice && (
+              <Community
+                stats={community}
+                state={communityState}
+                play={play}
+                choice={playChoice}
+                db={db}
+                retry={() => void loadCommunity()}
+              />
             )}
             <details className="v2-recap">
               <summary>Your recap · {playResponses.length} comparisons</summary>

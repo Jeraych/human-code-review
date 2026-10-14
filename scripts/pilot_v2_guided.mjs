@@ -73,9 +73,15 @@ async function openFile(p, name) {
   await p.getByLabel('Open reviewer file', { exact: true }).setInputFiles(resolve(qa, name));
 }
 async function vote(p, choice = 'Equal') {
+  await p.waitForTimeout(420);
   await p.getByRole('button', { name: choice, exact: true }).click();
-  await p.getByRole('button', { name: 'Submit', exact: true }).click();
-  await p.getByRole('button', { name: 'Next', exact: true }).click();
+  await p.waitForFunction(() => {
+    const reviewer = JSON.parse(localStorage.getItem('code-choice.v2-reviewer-package') || 'null');
+    const main = JSON.parse(localStorage.getItem('code-choice.human-validation-v2') || 'null');
+    return (
+      !document.querySelector('.v2-vote[aria-busy="true"]') && (reviewer || (main && !main.dirty))
+    );
+  });
 }
 async function setup(p, boundary = false) {
   await p.getByRole('button', { name: 'Edit setup', exact: true }).click();
@@ -133,8 +139,8 @@ async function calibrate(p) {
       !(await p.getByRole('button', { name: /Lock|Generate|Save guideline/ }).count()),
   );
   for (let i = 0; i < 2; i++) {
+    await p.waitForTimeout(420);
     await p.getByRole('button', { name: 'Equal', exact: true }).click();
-    await p.getByRole('button', { name: 'Submit', exact: true }).click();
     await p
       .getByText('Choice saved. Discuss the revealed conditions and refine your guideline.', {
         exact: true,
@@ -206,15 +212,13 @@ try {
       !(await p.getByRole('button', { name: /Reveal|Unblind|Start over/ }).count()),
   );
   const before = await main.request.get(local + '/api/state').then((r) => r.json());
-  await p.getByRole('button', { name: 'A', exact: true }).click();
+  await vote(p, 'A');
   check(
-    'Selecting A does not save before Submit',
-    JSON.stringify((await main.request.get(local + '/api/state').then((r) => r.json())).answers) ===
-      JSON.stringify(before.answers),
+    'One-click A saves and advances without Submit or Undo',
+    (await main.request.get(local + '/api/state').then((r) => r.json())).answers.length ===
+      before.answers.length + 1 &&
+      !(await p.getByRole('button', { name: /^(Submit|Undo|Next)$/ }).count()),
   );
-  await p.getByRole('button', { name: 'Submit', exact: true }).click();
-  await p.getByRole('button', { name: 'Undo', exact: true }).click();
-  await vote(p);
   await p.getByRole('button', { name: 'Exit', exact: true }).click();
   await p.getByRole('button', { name: 'Continue together', exact: true }).waitFor();
   await p.reload();
@@ -404,9 +408,8 @@ try {
   await p.getByRole('heading', { name: 'Results', exact: true }).waitFor();
   const final = await download(p, 'Export research data', 'guided-final.json');
   check(
-    'Final export retains Joint/Independent phases, Undo and sources',
+    'Final export retains Joint/Independent phases and source files',
     final.formal.filter((a) => !a.invalidated).length === 9 &&
-      final.formal.some((a) => a.invalidated?.kind === 'undo') &&
       final.protocol.resultImports.length === 2 &&
       final.formal.every((a) => ['joint_consensus_formal', 'independent_formal'].includes(a.phase)),
   );
@@ -440,7 +443,7 @@ try {
   check(
     'Start over keeps responses, sources and analysis in audit history',
     !reset.formal &&
-      reset.archives.at(-1).state.answers.length === 10 &&
+      reset.archives.at(-1).state.answers.length === final.formal.length &&
       reset.archives.at(-1).state.resultImports.length === 2 &&
       !!reset.archives.at(-1).state.unblindedAt,
   );
@@ -511,7 +514,9 @@ try {
   );
   await hp.route('**/api/**', (route) => route.abort());
   await reviewer(hp, 'Jacky').getByRole('button', { name: 'Continue', exact: true }).click();
-  await vote(hp, 'B');
+  await hp.waitForTimeout(420);
+  await hp.getByRole('button', { name: 'B', exact: true }).click();
+  await hp.getByRole('button', { name: 'Retry save', exact: true }).waitFor();
   check(
     'Offline answer persists locally without losing frozen assignments',
     await hp.evaluate(
@@ -519,13 +524,10 @@ try {
     ),
   );
   await hp.unroute('**/api/**');
-  await hp.getByRole('button', { name: 'Exit', exact: true }).click();
+  await hp.getByRole('button', { name: 'Retry save', exact: true }).click();
   await hp.waitForFunction(
     () => !JSON.parse(localStorage.getItem('code-choice.human-validation-v2')).dirty,
-    null,
-    { timeout: 25000 },
   );
-  await reviewer(hp, 'Jacky').getByRole('button', { name: 'Continue', exact: true }).click();
   await vote(hp);
   await hp.getByRole('button', { name: 'Back to study', exact: true }).click();
   await hq2.reload();
