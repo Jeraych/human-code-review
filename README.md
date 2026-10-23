@@ -1,6 +1,10 @@
-# Code / Choice — Human Validation V2
+# Code / Choice
 
-One React/Vite application for hosted Study, local fallback and public Play. V2 evolves the existing application; historical V1 remains available at `/?v1=1#home` with unchanged assets, storage and exports. The repository stays private. **No public deployment is authorized or performed.**
+Compare two Python implementations, choose A / Equal / B, then reveal their sources and community preferences. [Play the live game](https://human-code-review-production.up.railway.app/).
+
+One React/Vite application provides public Play and a separate access-code-protected research Study. Play has 883 curated comparisons across four training contrasts. Historical V1 remains available at `/?v1=1#home` with unchanged assets, storage and exports.
+
+This repository publishes application source, frozen benchmark/model-output assets and their provenance. Study responses, reviewer files, production databases, access codes and raw Play records stay private. Public source does not grant access to the hosted Study. See [SECURITY.md](SECURITY.md) for reporting and data boundaries, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for benchmark licenses and reuse scope. Making the repository public adds no blanket license for original application code or generated outputs.
 
 The full implementation/provenance/counts report is [V2_IMPLEMENTATION.md](V2_IMPLEMENTATION.md).
 
@@ -60,7 +64,7 @@ The normal workflow requires the small Node service, not a static-only host. Run
 
 Use one service instance and SQLite database. Serve frontend and API on the same public origin; proxy `<base>/api/*` to this service when a separate static frontend is needed. An ephemeral/serverless filesystem loses shared progress and is unsuitable. Hash routes and relative Vite assets support root/subdirectory hosting without SPA rewrites. Back up the database using SQLite backup tools or stop the service before copying the database and associated WAL files.
 
-At the previous V2 checkpoint, no host had been provisioned or publicly deployed. This update was verified locally and was not pushed or deployed; existing remote provider settings were not inspected. Backend/device-resume verification used localhost and isolated browser contexts, not a live remote deployment. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
+The live deployment uses the existing Railway GitHub `main` workflow, one Node service and its persistent `/data` volume, with `STUDY_DB_PATH=/data/formal-study.sqlite`. Preserve that volume and path across releases; never replace the database with a local fixture. Set production secrets only in Railway, and keep `COOKIE_SECURE=1`, `STUDY_TRANSPORT=hosted` and `APP_ORIGIN` set to the live origin. A normal source deployment needs no Study reset or data migration. Built-in [Node SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html) avoids an additional database package; it is experimental in the tested Node version.
 
 ## Human review
 
@@ -98,7 +102,7 @@ When finished, click **Save result for researcher** and send that file back. On 
 
 On a shared Node/SQLite service, reviewers open Study, click their name and continue. Progress synchronizes automatically. Normal hosted screens hide file sending/import controls; offline transfer remains under Study options → Advanced. Browser refresh/close reuses a valid server session without another code prompt. Service restart or session expiry may require the code again; saved answers remain.
 
-No public/remote hosting has been configured or deployed. Localhost defaults to local file transfer with persistent main Study storage; remote origins default to hosted transport, overridable with `STUDY_TRANSPORT`.
+Localhost defaults to local file transfer with persistent main Study storage; remote origins, including the live Railway service, use hosted transport, overridable with `STUDY_TRANSPORT`.
 
 ## Start over and history
 
@@ -125,30 +129,30 @@ npm.cmd test
 npm.cmd run build
 ```
 
-The real-source builder needs the adjacent course artifacts, including `combined_39_41_review.tar.gz`; a standalone clone uses the committed frozen files. On this machine, the verified Python runtime is:
+The real-source builder needs the original adjacent research archives, including `combined_39_41_review.tar.gz`; a standalone clone runs and tests using the committed frozen files. Do not rebuild or overwrite them as part of installation. Python 3.10+ supports the optional archive builder and audit tools:
 
 ```powershell
-$PythonExe = 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-& $PythonExe scripts/prepare_v2.py
-& $PythonExe -m unittest discover -s tests -p 'test_*.py' -v
-& $PythonExe scripts/audit_repository.py
+python -m unittest discover -s tests -p 'test_*.py' -v
+python scripts/audit_repository.py
+# Only with the original archives, when deliberately checking frozen provenance:
+python scripts/prepare_v2.py
 ```
 
-Another machine can use its Python 3.10+ executable. The builder refuses changed frozen files; use a new version for new data. It never imports GPU trainers, executes generated code or regenerates outputs.
+The builder refuses changed frozen files; use a new version for new data. It never imports GPU trainers, executes generated code or regenerates outputs.
 
 Browser QA (requires an existing Playwright module and Chrome executable):
 
 ```powershell
-node scripts/pilot_play_polish.mjs 'C:\Users\jacky\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\node_modules\playwright' 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+node scripts/pilot_play_polish.mjs '<absolute-path-to-playwright-module>' '<absolute-path-to-chrome-or-chromium>'
 ```
 
-This uses only ignored `qa/play-polish/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [PLAY_POLISH_VERIFICATION.md](PLAY_POLISH_VERIFICATION.md) for this update and [VERIFICATION.md](VERIFICATION.md) for historical checks. Production dependency audit has zero advisories; the inherited dev/test dependencies have three reported advisories, recorded in the implementation report, and have not undergone a forced major upgrade.
+This uses only ignored `qa/play-polish/fixture-*.sqlite` databases and clearly synthetic QA response fixtures. It does not start the actual study. See [PLAY_POLISH_VERIFICATION.md](PLAY_POLISH_VERIFICATION.md) and [VERIFICATION.md](VERIFICATION.md) for dated historical checks. Public-release preparation upgrades Vitest to the compatible patched 4.1.12 release; run `npm audit` to check current dependency advisories.
 
 ---
 
 # Historical V1 documentation
 
-The material below describes V1 only. V2's rules and commands above take precedence for the final study.
+The material below describes the historical V1 checkpoint only. Its verification and deployment statements are dated records; V2's rules, privacy boundaries and hosted commands above take precedence.
 
 # Human Code Evaluation
 
@@ -189,7 +193,7 @@ Keep the same host/port, browser profile and device for resume. A normal browser
 
 ## Static deployment preparation
 
-**Public deployment has not been approved or performed. Keep the GitHub repository private.** The prepared build works at a domain root or a subdirectory such as /demo/. Asset URLs respect Vite's relative base. Home/Play/Study/setup use #home, #play, #study and #research links, so direct navigation and refresh need no server-side SPA routing. Direct Play links still respect an active Study. Skip/content anchors do not change modes.
+At the V1 checkpoint, public deployment had not yet been performed. The prepared build works at a domain root or a subdirectory such as /demo/. Asset URLs respect Vite's relative base. Home/Play/Study/setup use #home, #play, #study and #research links, so direct navigation and refresh need no server-side SPA routing. Direct Play links still respect an active Study. Skip/content anchors do not change modes.
 
 To deploy later, with explicit approval, use npm ci, build command npm run build and output directory dist. Vercel or another HTTPS static host can serve those files; no functions/database/environment secrets are needed. A subdirectory URL should end with / or point to index.html. Use HTTPS in deployment; localhost is suitable for the current local tool. Opening index.html through file:// is unsupported.
 
@@ -286,7 +290,7 @@ First obtain verified real outputs. Create a new immutable two-candidate pool an
 - Report all four outcomes and explicit denominators. Evaluators/tasks repeated across pools are correlated; retain identifiers for analysis.
 - Confirm recruitment, workload, prior exposure, consent and applicable university requirements before collecting formal responses. Browser pilots use synthetic votes, not research findings.
 - Public static Play answer keys are fetched by the UI after voting but remain inspectable by a determined evaluator. Blinding assumes non-adversarial participants. A dedicated Study deployment can omit Play assets/navigation.
-- Keep this repository private. .gitignore excludes .env/credentials, responses, models/checkpoints, training artifacts, node_modules, dist, QA/browser profiles and IDE/cache files. Ignoring files does not remove previously committed secrets; the publication audit also scans reachable Git history.
+- Keep credentials and response data private. .gitignore excludes real .env/credentials, databases, responses, models/checkpoints, training artifacts, node_modules, dist, QA/browser profiles and IDE/cache files. Ignoring files does not remove previously committed secrets; the publication audit also scans reachable Git history.
 
 ## Verification and code map
 

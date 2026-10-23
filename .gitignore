@@ -10,6 +10,7 @@ participant-results/
 # Secrets and local credentials: no real .env files belong in this app.
 .env
 .env.*
+!.env.example
 *.env
 .npmrc
 credentials*.json
@@ -51,3 +52,19 @@ Thumbs.db
 evaluation-storage-recovery.json
 merged.json
 merged.csv
+
+# Operational Study databases and exported reviewer/research files, at any depth.
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.study.json
+*-result.json
+code-choice-*.json
+code-choice-*.csv
+v2-*-backup.json
+v2-unreadable-cache.json
+human-validation-*-backup.json
+play-v2-exploratory.json
